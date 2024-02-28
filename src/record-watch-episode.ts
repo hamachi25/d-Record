@@ -83,7 +83,7 @@ function sendInterval(
     timerId = setInterval(() => {
         // 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
         if (video &&
-            Date.now() - startTime > 0.5 * 60 * 1000 &&
+            Date.now() - startTime > 5 * 60 * 1000 &&
             video.currentTime - startVideoTime > 5 * 60
         ) {
             let mutation = `

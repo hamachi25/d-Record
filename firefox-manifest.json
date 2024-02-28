@@ -14,9 +14,8 @@
                 "https://animestore.docomo.ne.jp/animestore/ci_pc*",
                 "https://animestore.docomo.ne.jp/animestore/sc_d_pc*"
             ],
-            "js": [
-                "main.js"
-            ]
+            "js": ["main.js"],
+            "css": ["inject.css"]
         }
     ],
     "browser_action": {
