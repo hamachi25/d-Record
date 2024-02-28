@@ -1,0 +1,42 @@
+#button-container {
+    display: flex;
+    padding: 5px;
+}
+
+.input-style {
+    padding: 10px;
+    margin-right: 5px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #555;
+    outline: none;
+}
+
+.input-style:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+button {
+    color: #090909;
+    padding: 0.4em 1.7em;
+    font-size: 18px;
+    border-radius: 0.5em;
+    background: #e8e8e8;
+    border: 1px solid #e8e8e8;
+    transition: all .3s;
+    box-shadow: 2px 2px 12px #c5c5c5,
+        -6px -6px 12px #ffffff;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: #d7d7d7
+}
+
+button:active {
+    color: #666;
+    box-shadow: inset 4px 4px 12px #c5c5c5,
+        inset -4px -4px 12px #ffffff;
+}

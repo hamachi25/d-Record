@@ -1,0 +1,28 @@
+{
+    "manifest_version": 3,
+    "name": "d-Record",
+    "version": "1.0",
+    "description": "dアニメストアでAnnictの記録を操作できます",
+    "icons": {
+        "32": "icon/dreco32.png",
+        "48": "icon/dreco48.png",
+        "96": "icon/dreco96.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://animestore.docomo.ne.jp/animestore/ci_pc*",
+                "https://animestore.docomo.ne.jp/animestore/sc_d_pc*"
+            ],
+            "js": [
+                "main.js"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "options.html"
+    },
+    "permissions": [
+        "storage"
+    ]
+}
