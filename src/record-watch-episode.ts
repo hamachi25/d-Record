@@ -1,11 +1,27 @@
 import { query, remakeString } from './anime-data-scraper';
 import { fetchData } from "./fetch";
 
+interface EpisodeData {
+    id: number;
+    number: number;
+    numberText: string;
+    annictId: number;
+}
+
+interface AnimeData {
+    id: number;
+    title: string;
+    viewerStatusState: string;
+    episodes: {
+        nodes: EpisodeData[];
+    };
+}
+
 let notRecordArray: number[];
-let data: any;
-let dataEpisodes: any;
-let episodeIndex: any;
-let timerId: number | undefined;
+let data: AnimeData[];
+let dataEpisodes: EpisodeData[];
+let episodeIndex = -1;
+let timerId: number;
 let buttonState = true;
 const uploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAB4UlEQVRYhd3XPWgUQRjG8d9pkoOgouF6C0FJZbBLI1YWFlaWWqm12Nvai4WCxtJUkkKrIGIQYmERFExhYcBWEASNcMmdZ7FzMJns3n7EeOoDy+w8OzPvH953htnWYDAwTh0Ya/S/AWAiz+x2u1Xnn8E1LGCtyoR2u72j38qrgYoAs3iDQ/iOebyvC9A0BSexGoIL7SpO1V2oCcBsCHYs8Y/gdfi+rwD30cEXbARvI/RncG+/ARawhHNYD9566C/hUZ3F9lKE8Ban8Q5zVSakRZi7DSOdwFkcRkz6FJ/QD/1hexwXo3EtfMMrfMwLMArgOu5gOudbT1YLqS7gbo7/Azdk6duhohqYw4OC4GT7vo4/jYeydFUCuFzgDzVV0x/qSmoUpWAmev+KS9iKvA8F857JaiYGeoKjoZ+eHYUA/eh9Ey8KxqX6HJ5YmxFAP/lWmIK44g9isiJAqskwP2/dkQBVNZW0tbVXgF5ot8cFcBOLoW2kspOwTCvhaayxX8mqAAw0z/G2nMqvAhBvnVbD4Hnzd6W8qAZi6o7sprOVgJWpL9uencj7WRXgJa5GY+ZrBB6lldQoSsEinv+moEMt43Fqlt2IbuG87ELS2zWwXBOyC8kyblPxv+BP6p84B/5vgF8Yx2Xf3VYj3QAAAABJRU5ErkJggg==";
 const notUploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACzUlEQVRYhc2XTWsUMRjHf5nuTLq+oCe/QPUmWkFBpQfFShXfbaHqSajgR1C/gPQglCK9KQgiYq2sUhXfLoKC4KWCQrGevAjWi5RiZ7ObeJhsm01n2tnt4vpAmH2eTPL7J3mSzQhjDO20oK30/0FAIS0Yx3He9nuAIeA28DFPAyllnb+WGdgJvAUu2+euDGBRSlmSUh5Oq29WwA7gPVC0ftH6dSKklJ1ACTgNTEopj7dCwG4LW+/Fi8A7W1+DPwb6anqAc60QMApsAL4D0zY2bf11wIgz8j6n3QRwsRUCrgNjQA8wY2Mz1h8TQtyw8CMe/HwcxxW/M5F2EDWwC6ZIkvET0C2TFC8BRz34hTiOFSzfBanb0LEDQC/JlNeUCuAW8BmojagipYyANyQzAYDW+ptSagbYT7JTltlKAoaBKxl1X62AmgmShHPhKKW2AtdsGbbPOsvKgd4V4AB/XCcMwy6cabdwv81V4FBeAf2ePw/MOWXexkUYhgRBsMmBV5RS/ntZ/WYugZspP4HtwIITW5BSRlrrriCoG8OTarU6BJSt30myVFscP5cA5f2erVOXJNwjd+QkOTCotS47sbmUvuoszzkQAJEHnwAWj1Wt9W9gMI7jstc2Wo2x2jasMwt/CJxw4CilZlma9oYs90lo4ePASQf+w2b7VDPw3AIKhUIEPABOOeHJarXaDQwCl5oVkGcJREdHxz2ckQNPgQGbcOPNwiHHDIRhuNmDPwP6UxKupQKEhRMEgbt3nwNnG4CXgarfr2uZB5GFLwaMMR+UUqPGmJ6MNr5VSO4H7sUlzCMgjKJonxBLYu1W2wu8zAnPsl9+wF+CELgvhNjmwdfIXbQ7qwm4i/OHobUutwg+CwwAX/wKfwnGgTMkR+iLSqVyEzgIbCRZ00a+44Ttfw54BbxOfcsY45djxpiSMaYzpa7lJfVO+C+t7d+GbRfwF5thQx4tOp75AAAAAElFTkSuQmCC"
@@ -29,7 +45,7 @@ function uploadButtonEvent(uploadIconContainer: HTMLElement | null, uploadIconEl
                 // アップロードしないに切り替え
                 uploadIconElement.setAttribute("src", notUploadIcon);
                 uploadIconContainer.dataset.upload = "false";
-                clearInterval(timerId);
+                timerId && clearInterval(timerId);
 
                 // ストレージにセット
                 notRecordArray.push(Number(url[0]))
@@ -38,12 +54,12 @@ function uploadButtonEvent(uploadIconContainer: HTMLElement | null, uploadIconEl
                 // するに切り替え
                 uploadIconElement.setAttribute("src", uploadIcon);
                 uploadIconContainer.dataset.upload = "true";
-                sendInterval(uploadIconContainer, uploadIconElement, data, dataEpisodes, episodeIndex);
+                sendInterval(uploadIconContainer, uploadIconElement);
 
                 // ストレージから削除
-                chrome.storage.local.get("notRecordWork", function (result) {
+                chrome.storage.local.get("notRecordWork", result => {
                     notRecordArray = result.notRecordWork || [];
-                    notRecordArray = notRecordArray.filter(item => item != Number(url[0]))
+                    notRecordArray = notRecordArray.filter(item => item != Number(url[0]));
                     chrome.storage.local.set({ "notRecordWork": notRecordArray });
                 })
             }
@@ -64,14 +80,8 @@ function switchNotUploadIcon(uploadIconContainer: HTMLElement | null, uploadIcon
 
 
 // データ送信
-function sendInterval(
-    uploadIconContainer: HTMLElement | null,
-    uploadIconElement: HTMLElement | null,
-    data: any,
-    dataEpisodes: any,
-    episodeIndex: string | number
-) {
-    if (!buttonState) { clearInterval(timerId); return; }
+function sendInterval(uploadIconContainer: HTMLElement | null, uploadIconElement: HTMLElement | null) {
+    if (!buttonState) { timerId && clearInterval(timerId); return; }
     const video = document.querySelector("video")
     if (!video) {
         switchNotUploadIcon(uploadIconContainer, uploadIconElement);
@@ -87,28 +97,28 @@ function sendInterval(
             video.currentTime - startVideoTime > 5 * 60
         ) {
             let mutation = `
-                    mutation CreateRecord($episodeId: ID!) {
-                        createRecord (
-                            input: { episodeId: $episodeId }
-                        ) { clientMutationId }
-                `;
+                mutation CreateRecord($episodeId: ID!) {
+                    createRecord (
+                        input: { episodeId: $episodeId }
+                    ) { clientMutationId }
+            `;
             // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-            if (data[0].viewerStatusState != "WATCHING") {
+            if (data[0]?.viewerStatusState != "WATCHING") {
                 mutation += `
-                        updateStatus(
-                            input:{
-                                state: WATCHING,
-                                workId: "${data[0].id}"
-                            }
-                        ) { clientMutationId }
-                    `;
+                    updateStatus(
+                        input:{
+                            state: WATCHING,
+                            workId: "${data[0].id}"
+                        }
+                    ) { clientMutationId }
+                `;
             }
             const variables2 = { episodeId: dataEpisodes[episodeIndex].id };
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
             uploadIconElement?.setAttribute("src", completeUploadIcon);
             buttonState = false;
-            clearInterval(timerId);
+            timerId && clearInterval(timerId);
         }
     }, 30 * 1000);
 }
@@ -116,9 +126,7 @@ function sendInterval(
 
 // "第5話"のような話数から数字を取得する
 function remakeEpisode(episode: string) {
-    const numbers = episode
-        .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248))
-        .match(/\d+/g);
+    const numbers = episode.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248)).match(/\d+/g); // 全角を半角にして数値を取り出す
 
     if (numbers) {
         return Number(numbers[0]);
@@ -126,10 +134,7 @@ function remakeEpisode(episode: string) {
         const remakeWords = {
             "〇": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10
         };
-        const arrayKansuuji = [...episode]
-            .flatMap(s => s.match(new RegExp(Object.keys(remakeWords).join("|"))))
-            .filter(Boolean);
-
+        const arrayKansuuji = [...episode].flatMap(s => s.match(new RegExp(Object.keys(remakeWords).join("|")))).filter(Boolean); // flatMapで漢数字をアラビア数字に変換して、filterでundefinedを削除
         let temp: number = -1;
         if (arrayKansuuji.length > 0) {
             arrayKansuuji.forEach(kan => {
@@ -181,124 +186,111 @@ async function getAnimedata(year: string | number, title: string | null | undefi
 
 export function sendWathingAnime() {
     // 前の話数のボタンが残っていたら削除
-    if (document.getElementById("upload-icon-container")) {
-        document.getElementById("upload-icon-container")?.remove();
-        document.getElementById("upload-anime-title")?.remove();
-    }
+    document.getElementById("upload-icon-container")?.remove();
+    document.getElementById("upload-anime-title")?.remove();
 
     const url = location.href.match(/(?<=partId=)\d{5}/); // URLからworkIdを取得
-    if (!url) { return }
     document.querySelector(".buttonArea > .time")?.insertAdjacentHTML("afterend", uploadButtonElement);
     const uploadIconContainer = document.getElementById("upload-icon-container");
     const uploadIconElement = document.getElementById("upload-icon");
+    if (!url || !uploadIconContainer || !uploadIconElement) { return }
     uploadButtonEvent(uploadIconContainer, uploadIconElement, url);
 
     // ストレージから配列を取得し、該当しているか確認
-    chrome.storage.local.get("notRecordWork", function (result) {
+    chrome.storage.local.get("notRecordWork", async (result) => {
         notRecordArray = result.notRecordWork || [];
-        const sameNumber = notRecordArray.find((item: number) => item == Number(url[0]));
-        // ページ読み込み後すぐは、タイトルとエピソードが読み込まれていないので
-        setTimeout(async () => {
+        const sameNumber = notRecordArray.includes(Number(url[0]));
 
-            const title = document.querySelector(".backInfoTxt1")?.textContent;
-            const episode = document.querySelector(".backInfoTxt2")?.textContent;
-            if (!title || !episode) {
-                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
-                return;
-            }
+        const title = document.querySelector(".backInfoTxt1")?.textContent;
+        const episode = document.querySelector(".backInfoTxt2")?.textContent;
+        if (!title || !episode) {
+            switchNotUploadIcon(uploadIconContainer, uploadIconElement);
+            return;
+        }
 
-            // エピソードから数字を取り出す
-            let episodeNumber = remakeEpisode(episode)
-            if (!episodeNumber) {
-                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
-                return;
-            }
+        // エピソードから数字を取り出す
+        let episodeNumber = remakeEpisode(episode)
+        if (!episodeNumber || episodeNumber < 0) {
+            switchNotUploadIcon(uploadIconContainer, uploadIconElement);
+            return;
+        }
 
 
-            // dアニメストアから放送時期を取得
-            if (episodeNumber < 0) {
-                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
-                return;
-            }
-            const requestURL = "https://animestore.docomo.ne.jp/animestore/rest/v1/works?work_id=" + url[0];
-            const response = await fetch(requestURL);
-            const json = await response.json();
-            const year = Number(json[0].details.production_year);
+        // dアニメストアから放送時期を取得
+        const requestURL = "https://animestore.docomo.ne.jp/animestore/rest/v1/works?work_id=" + url[0];
+        const response = await fetch(requestURL);
+        const json = await response.json();
+        const year = Number(json[0].details.production_year);
 
 
-            // Annictからデータを取得
-            const json2 = await getAnimedata(year, title)
+        // Annictからデータを取得
+        const json2 = await getAnimedata(year, title)
 
 
-            if (data <= 0) {
-                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
-                return;
-            }
+        if (data.length <= 0) {
+            switchNotUploadIcon(uploadIconContainer, uploadIconElement);
+            return;
+        }
 
 
-            if (!sameNumber) {
-                // 右下に取得したアニメタイトルを表示 記録オフの場合は表示しない
-                const titleElement = document.querySelector("#upload-anime-title > span");
-                titleElement ? titleElement.textContent = data[0].title : "";
+        if (!sameNumber) {
+            // 右下に取得したアニメタイトルを表示 記録オフの場合は表示しない
+            const titleElement = document.querySelector("#upload-anime-title > span");
+            titleElement && (titleElement.textContent = data[0].title);
 
-                // 7秒後にタイトルを非表示
-                const titleContainerElement: HTMLElement | null = document.getElementById("upload-anime-title");
-                setTimeout(() => {
-                    titleContainerElement ? titleContainerElement.style.display = "none" : "";
-                }, 7000);
-            }
-            uploadIconContainer?.setAttribute("title", data[0].title) // ボタンにタイトル属性を追加
+            // 7秒後にタイトルを非表示
+            const titleContainerElement = document.getElementById("upload-anime-title");
+            titleContainerElement && setTimeout(() => { titleContainerElement.style.display = "none"; }, 7000);
+        }
+        uploadIconContainer.setAttribute("title", data[0].title); // ボタンにタイトル属性を追加
 
 
-            // 現在のエピソードに一致するindexを取得
-            let episodeIndex = -1;
-            dataEpisodes = data[0].episodes.nodes;
-            if (dataEpisodes[0].number) {
-                episodeIndex = dataEpisodes.findIndex((dataEpisode: { number: number; }) => dataEpisode.number == episodeNumber);
-            } else {
-                dataEpisodes.forEach((dataEpisode: any, i: number) => {
-                    if (remakeEpisode(dataEpisode.numberText) == episodeNumber) {
-                        episodeIndex = i;
-                    }
-                });
-            }
+        // 現在のエピソードに一致するindexを取得
+        dataEpisodes = data[0].episodes.nodes;
+        if (dataEpisodes[0].number) {
+            episodeIndex = dataEpisodes.findIndex((dataEpisode) => dataEpisode.number == episodeNumber);
+        } else {
+            dataEpisodes.forEach((dataEpisode, i) => {
+                if (remakeEpisode(dataEpisode.numberText) == episodeNumber) {
+                    episodeIndex = i;
+                }
+            });
+        }
 
 
-            // 視聴済みのエピソードの場合スキップ
-            const viewData = json2.data.viewer.libraryEntries.nodes;
-            let index;
-            loop:
-            for (const [i, dataEpisode] of dataEpisodes.entries()) {
-                for (const libraryEntry of viewData) {
-                    if (!libraryEntry.nextEpisode) { continue }
-                    if (dataEpisode.annictId == libraryEntry.nextEpisode.annictId) {
-                        index = i;
-                        break loop;
-                    }
+        // 視聴済みのエピソードの場合スキップ
+        const viewData = json2.data.viewer.libraryEntries.nodes;
+        let index = -1;
+        for (const [i, dataEpisode] of dataEpisodes.entries()) {
+            for (const libraryEntry of viewData) {
+                if (libraryEntry.nextEpisode && dataEpisode.annictId == libraryEntry.nextEpisode.annictId) {
+                    index = i;
+                    break;
                 }
             }
-            
-            if (episodeIndex < 0 || index > episodeIndex) {
+            if (index > 0) { break }
+        }
+
+        if (episodeIndex < 0 || index > episodeIndex) {
+            if (!sameNumber) {
                 // 記録オンの場合は、opacityを下げクリックできなくするだけ
-                if (!sameNumber) {
-                    buttonState = false;
-                    uploadIconElement ? uploadIconElement.style.opacity = "0.3" : "";
-                } else {
-                    // オフの場合はアイコンも変更
-                    switchNotUploadIcon(uploadIconContainer, uploadIconElement);
-                }
-                return;
-            }
-
-
-            buttonState = true; // 前の話数がfalseだと、そのままfalseになってしまうのでtrueを代入
-            // 記録オフにしている場合は実行しない
-            if (!sameNumber) {
-                sendInterval(uploadIconContainer, uploadIconElement, data, dataEpisodes, episodeIndex);
+                buttonState = false;
+                uploadIconElement.style.opacity = "0.3";
             } else {
-                uploadIconContainer ? uploadIconContainer.dataset.upload = "false" : "";
-                uploadIconElement?.setAttribute("src", notUploadIcon);
+                // オフの場合はアイコンも変更
+                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             }
-        }, 500);
+            return;
+        }
+
+
+        buttonState = true; // 前の話数がfalseだと、そのままfalseになってしまうのでtrueを代入
+        // 記録オフにしている場合は実行しない
+        if (!sameNumber) {
+            sendInterval(uploadIconContainer, uploadIconElement);
+        } else {
+            uploadIconContainer.dataset.upload = "false";
+            uploadIconElement.setAttribute("src", notUploadIcon);
+        }
     });
 }

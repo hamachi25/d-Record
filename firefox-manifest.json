@@ -1,12 +1,12 @@
 {
     "manifest_version": 2,
     "name": "d-Record",
-    "version": "1.0",
+    "version": "1.0.1",
     "description": "dアニメストアでAnnictの記録を操作できます",
     "icons": {
-        "32": "icon/dreco32.png",
-        "48": "icon/dreco48.png",
-        "96": "icon/dreco96.png"
+        "16": "icon/icon16.png",
+        "48": "icon/icon48.png",
+        "128": "icon/icon128.png"
     },
     "content_scripts": [
         {

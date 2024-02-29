@@ -1,22 +1,22 @@
-import { statusText, svgPath, svgPathD, statusToJp, changeStatusText } from './update-watch-status';
+import { statusText, svgPaths, svgPathD, convertStatusToJapanese, changeStatusText } from './update-watch-status';
 import { animeData } from './anime-data-scraper';
 import { fetchData } from './fetch';
 
 
 const statusArray = [
-    ["NO_STATE", svgPath[0], "未選択"],
-    ["WANNA_WATCH", svgPath[3], "見たい"],
-    ["WATCHING", svgPath[2], "見てる"],
-    ["WATCHED", svgPath[1], "見た"],
-    ["ON_HOLD", svgPath[4], "一時中断"],
-    ["STOP_WATCHING", svgPath[5], "視聴中止"]
+    ["NO_STATE", svgPaths[0], "未選択"],
+    ["WANNA_WATCH", svgPaths[3], "見たい"],
+    ["WATCHING", svgPaths[2], "見てる"],
+    ["WATCHED", svgPaths[1], "見た"],
+    ["ON_HOLD", svgPaths[4], "一時中断"],
+    ["STOP_WATCHING", svgPaths[5], "視聴中止"]
 ];
 
 
 // annictのドロップメニューを追加
 export function addDropMenu() {
     const currentStatus = animeData.viewerStatusState;
-    currentStatus ? statusToJp(currentStatus) : statusToJp("NO_STATE");
+    currentStatus ? convertStatusToJapanese(currentStatus) : convertStatusToJapanese("NO_STATE");
 
     let annictElement = `
         <div id="annict" class="btnAddMyList addMyList add listen" data-click="false">

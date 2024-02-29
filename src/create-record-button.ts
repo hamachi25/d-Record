@@ -1,5 +1,5 @@
 import { animeData, viewData } from './anime-data-scraper';
-import { changeStatusWatching } from './update-watch-status';
+import { changeStatusToWatching } from './update-watch-status';
 import { fetchData } from './fetch';
 
 const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
@@ -53,7 +53,7 @@ export async function createRecordButton() {
             `;
             const variables = { episodeId: dataEpisodes[i].id };
 
-            changeStatusWatching(mutation);
+            changeStatusToWatching(mutation);
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation, variables: variables }));
 
@@ -66,11 +66,11 @@ export async function createRecordButton() {
         const button = document.querySelectorAll('.record-button:last-of-type')[j];
         button.addEventListener('click', async () => {
             // その話数までのcreateRecordを作成してマージ
-            let mutation2 = "mutation{";
+            let mutation = "mutation{";
             const count = i - j;
 
             [...Array(j + 1)].forEach((_, k) => {
-                mutation2 += `
+                mutation += `
                     e${k}:createRecord(
                         input:{ episodeId:"${dataEpisodes[count + k].id}" }
                     ) { clientMutationId }
@@ -78,9 +78,9 @@ export async function createRecordButton() {
                 recordContainers[k].style.display = "none";
             });
 
-            changeStatusWatching(mutation2);
-            mutation2 += "}"
-            fetchData(JSON.stringify({ query: mutation2 }));
+            changeStatusToWatching(mutation);
+            mutation += "}"
+            fetchData(JSON.stringify({ query: mutation }));
         });
     }
 
@@ -93,21 +93,21 @@ export async function createRecordButton() {
     if (dataEpisodes.length == 0 || diff > 4) { return }
 
     let index;
-    loop:
     for (const [i, dataEpisode] of dataEpisodes.entries()) {
         for (const libraryEntry of viewData) {
             if (!libraryEntry.nextEpisode) { continue }
             if (dataEpisode.annictId == libraryEntry.nextEpisode.annictId) {
                 index = i;
-                break loop;
+                break;
             }
         }
+        if (index != undefined) { break }
     }
 
 
     // ボタン挿入
     for (const [i, insertTarget] of insertTargets.entries()) {
-        if (index && i < index) { continue }
+        if (index != undefined && i < index) { continue }
         insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
     }
 
@@ -115,14 +115,14 @@ export async function createRecordButton() {
     const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(".record-container");
     let j = 0;
     for (const [i, _] of insertTargets.entries()) {
-        if (index && i < index) { continue }
+        if (index != undefined && i < index) { continue }
         singleRecordButton(i, j);
         multiRecordButton(i, j);
         j++;
     }
 
-    // 視聴していなはじめのエピソードに赤枠をつける
-    if (index && insertTargets[index]) {
+    // 視聴した次のエピソードに赤枠をつける
+    if (index != undefined && insertTargets[index]) {
         const itemModule = insertTargets[index].closest<HTMLElement>(".itemModule.list");
         itemModule?.classList.add("next-episode-border");
     }
