@@ -1,5 +1,6 @@
 # d-Record
-![d-record](https://github.com/chimaha/d-Record/assets/107383950/30437a94-f669-41b2-94b0-694c42a42fb3)
+![d-Record](https://github.com/chimaha/d-Record/assets/107383950/f8ad150b-23f6-42da-8f00-c9d3b850df15)
+
 
 d-Recordは、dアニメストア上で視聴したアニメをAnnictに送信することができるブラウザ拡張機能です。  
 
