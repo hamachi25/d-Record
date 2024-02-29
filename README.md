@@ -4,14 +4,17 @@
 d-Recordは、dアニメストア上で視聴したアニメをAnnictに送信することができるブラウザ拡張機能です。  
 
 ## インストール
-AMO・Chromeウェブストアにて審査中  
+<a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" width="198" height="60" src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"></a>
 
-<br>
+
+拡張機能を使用するには、Annictのトークンが必要です。
+1. Annictの[アプリケーション設定](https://annict.com/settings/apps)から個人用アクセストークンを作成します。  
+2. スコープを「読み込み + 書き込み」に変更して登録します。  
+3. 作成したトークンをブラウザ右上のd-Recordアイコンから保存します。
+
 
 ## 機能
-
 ### 作品ページ  
-
 ![作品画面](https://github.com/chimaha/d-Record/assets/107383950/42725696-08a5-4f43-bcb9-134baf40ea59)
 
 - **作品ステータスを「見てる」や「見た」などのステータスに変更できる**  
@@ -20,29 +23,26 @@ AMO・Chromeウェブストアにて審査中
 - 記録すると自動的にステータスを「見てる」に変更する
 - 次に見るエピソードを赤枠で囲んでいるので、どこまで見たか簡単に確認できる
 
-<br>
-
 ### 再生ページ  
-
 ![再生画面](https://github.com/chimaha/d-Record/assets/107383950/3c35eccf-0aeb-4fd7-89f3-9d5e89427657)
 
 - **再生から5分経つと、自動的にAnnictに記録データを送信する**  
 - **右下のアップロードアイコンをオフにすることで、送信を停止できる**  
-オフにした場合その作品は、再度オンにするまで送信されない  
+  - オフにした場合その作品は、再度オンにするまで送信されない  
 - 再生開始から5秒間、右下にAnnictから取得したアニメタイトルが表示される（取得したアニメが正しいか確認できる）
-<br>
+
+
 
 ボタンの種類  
+
 ![ボタンの種類](https://github.com/chimaha/d-Record/assets/107383950/f05ab4ef-0e6f-46b8-bffa-5f8e12c31785)
 
-<br>
-<br>
+
 
 80%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。    
 また作品ページでは取得できているが、再生ページでは間違ったものを取得しているということもあります。  
 作品によっては対応できる可能性があるので、もしよろしければ報告してください。
 
-<br>
 
 ## ビルド  
 ```
@@ -53,7 +53,6 @@ pnpm run build
 FirefoxとChromeのmanifest.jsonが異なるので、pubicのmanifestを環境に合わせて置き換えてください。  
 切り分けてビルドするやり方がわかったら変えます。すみません...
 
-<br>
 
 ## クレジット  
 - [Shimba, Koji](https://github.com/shimbaco) - 視聴ステータスのSVGファイル、GraphQL APIを理解する上での手助け（ありがとうございます）
