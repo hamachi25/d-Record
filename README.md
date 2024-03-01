@@ -8,11 +8,11 @@
 <a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" width="191.8" height="58" src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"></a>
 <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/"><img alt="Firefox Browser ADD-ONS" width="172" height="60" src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"></a>
 
-
-拡張機能を使用するには、Annictのトークン作成する必要があります。
-1. Annictの[アプリケーション設定](https://annict.com/settings/apps)から個人用アクセストークンを作成します。  
-2. スコープを「読み込み + 書き込み」に変更して登録します。  
-3. 作成したトークンをブラウザ右上のd-Recordアイコンから保存します。
+> [!IMPORTANT]
+> 拡張機能を使用するには、Annictのトークン作成する必要があります。
+> 1. Annictの[アプリケーション設定](https://annict.com/settings/apps)から個人用アクセストークンを作成します。  
+> 2. スコープを「読み込み + 書き込み」に変更して登録します。  
+> 3. 作成したトークンをブラウザ右上のd-Recordアイコンから保存します。
 
 
 ## 機能
@@ -40,10 +40,9 @@
 ![ボタンの種類](https://github.com/chimaha/d-Record/assets/107383950/f05ab4ef-0e6f-46b8-bffa-5f8e12c31785)
 
 
-
-90%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。    
-また作品ページでは取得できているが、再生ページでは間違ったものを取得しているということもあります。  
-作品によっては対応できる可能性があるので、もしよろしければ報告お願いします。
+> [!NOTE]
+> 90%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。また作品ページでは取得できているが、再生ページでは間違ったものを取得しているということもあります。  
+> 作品によっては対応できる可能性があるので、もしよろしければご報告お願いします。
 
 
 ## ビルド  
