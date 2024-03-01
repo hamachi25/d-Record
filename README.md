@@ -2,13 +2,14 @@
 ![d-Record](https://github.com/chimaha/d-Record/assets/107383950/f8ad150b-23f6-42da-8f00-c9d3b850df15)
 
 
-d-Recordは、dアニメストア上で視聴したアニメを[Annict](https://annict.com/)に送信することができるブラウザ拡張機能です。  
+「d-Record」はdアニメストアで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。  
 
 ## インストール
-<a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" width="198" height="60" src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"></a>
+<a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" width="191.8" height="58" src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"></a>
+<a href="https://addons.mozilla.org/ja/firefox/addon/d-record/"><img alt="Firefox Browser ADD-ONS" width="172" height="60" src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"></a>
 
 
-拡張機能を使用するには、Annictのトークンが必要です。
+拡張機能を使用するには、Annictのトークン作成する必要があります。
 1. Annictの[アプリケーション設定](https://annict.com/settings/apps)から個人用アクセストークンを作成します。  
 2. スコープを「読み込み + 書き込み」に変更して登録します。  
 3. 作成したトークンをブラウザ右上のd-Recordアイコンから保存します。
@@ -40,9 +41,9 @@ d-Recordは、dアニメストア上で視聴したアニメを[Annict](https://
 
 
 
-80%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。    
+90%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。    
 また作品ページでは取得できているが、再生ページでは間違ったものを取得しているということもあります。  
-作品によっては対応できる可能性があるので、もしよろしければ報告してください。
+作品によっては対応できる可能性があるので、もしよろしければ報告お願いします。
 
 
 ## ビルド  
