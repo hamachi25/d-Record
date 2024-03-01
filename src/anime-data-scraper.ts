@@ -58,7 +58,7 @@ function getProductionYear(retry: boolean) {
             const year2 = matchText2[1];
             if (retry) {
                 // 再検索
-                // 前後3年で検索
+                // 前後3年で検索（3年はやりすぎなので保留）
                 // const seasons = ["winter", "spring", "summer", "autumn"];
                 // const result: string[] = [];
 
@@ -100,7 +100,7 @@ function remakeString(title: string | null | undefined) {
     const deleteArray = [
         "[\\[《（(【＜～-].+[-～＞】)）》\\]]$",
         "第?\\d{1,2}期$", "^映画", "^劇場版", "(TV|テレビ|劇場)(アニメーション|アニメ)",
-        "Ⅰ", "Ⅱ", "II", "Ⅲ", "III", "Ⅳ", "IV", "Ⅴ", "Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ", "X"
+        "Ⅰ", "Ⅱ", "II", "Ⅲ", "III", "Ⅳ", "IV", "Ⅴ", "Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ"
     ];
     const remakeWords = { "　": " ", "〈": "＜", "〉": "＞" };
 
@@ -188,7 +188,7 @@ async function getAnimeData() {
     } else {
         // 失敗したら再度実行
         // 単語を空白毎にわけて、3文字以上の単語で再検索
-        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
         const firstWord = remakeTitle?.replace(/OVA/, "").split(separateWord).find(title => title.length >= 3);
 
         const variables = {
