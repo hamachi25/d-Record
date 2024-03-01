@@ -20,12 +20,13 @@ export function addDropMenu() {
 
     let annictElement = `
         <div id="annict" class="btnAddMyList addMyList add listen" data-click="false">
-            <div title="${animeData.title}">
+            <div>
                 <svg class="dropdown-svg" xmlns="http://www.w3.org/2000/svg" viewBox="20 0 448 512" style ="width: 14px; height: 14px;">
                     <path d="${svgPathD}"></path>
                 </svg>
                 <span>${statusText}</span>
             </div>
+            <span id="hover-title">${animeData.title}</span>
             <ul class="dropdown-menu">
     `;
 
@@ -56,20 +57,13 @@ export function addDropMenu() {
     if (dropdownMenu && annict) {
         // メニューを表示
         annict.addEventListener("click", () => {
-            if (document.querySelector('#annict[data-click="false"]')) {
-                dropdownMenu.classList.add("show");
-                annict.dataset.click = "true"
-            } else {
-                dropdownMenu.classList.remove("show");
-                annict.dataset.click = "false"
-            }
+            dropdownMenu.classList.toggle("show");
         })
         // メニューを非表示
         document.addEventListener("click", e => {
             const target = e.target as HTMLElement
             if (!target.closest("#annict")) {
                 dropdownMenu.classList.remove("show");
-                annict.dataset.click = "false"
             }
         })
 
