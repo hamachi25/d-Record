@@ -92,7 +92,8 @@ function sendInterval(uploadIconContainer: HTMLElement | null, uploadIconElement
     const startVideoTime = video.currentTime
     timerId = setInterval(() => {
         // 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
-        if (video &&
+        if (
+            video &&
             Date.now() - startTime > 5 * 60 * 1000 &&
             video.currentTime - startVideoTime > 5 * 60
         ) {
@@ -134,15 +135,26 @@ function remakeEpisode(episode: string) {
         const remakeWords = {
             "〇": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10
         };
-        const arrayKansuuji = [...episode].flatMap(s => s.match(new RegExp(Object.keys(remakeWords).join("|")))).filter(Boolean); // flatMapで漢数字をアラビア数字に変換して、filterでundefinedを削除
+        // flatMapで漢数字をアラビア数字に変換して、filterでundefinedを削除
+        const arrayKansuuji = [...episode].flatMap(s => s.match(new RegExp(Object.keys(remakeWords).join("|")))).filter(Boolean);
         let temp: number = -1;
-        if (arrayKansuuji.length > 0) {
+        if (arrayKansuuji.length >= 1) {
             arrayKansuuji.forEach(kan => {
                 temp += remakeWords[kan as keyof typeof remakeWords];
             });
             return temp
+        } else {
+            // 前編、後編
+            const splitEpisode = episode.split(/ | |　/);
+            const episodeWord = splitEpisode[splitEpisode.length - 1];
+            if (episodeWord == "前編" || episodeWord == "前篇") {
+                return 1;
+            } else if (episodeWord == "後編" || episodeWord == "後篇") {
+                return 2;
+            }
         }
     }
+    return -1;
 }
 
 
@@ -207,7 +219,7 @@ export function sendWathingAnime() {
 
         // エピソードから数字を取り出す
         let episodeNumber = remakeEpisode(episode)
-        if (!episodeNumber || episodeNumber < 0) {
+        if (episodeNumber < 0) {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;
         }
@@ -257,6 +269,7 @@ export function sendWathingAnime() {
         if (dataEpisodes[0].number) {
             episodeIndex = dataEpisodes.findIndex((dataEpisode) => dataEpisode.number == episodeNumber);
         } else {
+            // numberがnullの時は、numberTextを使う
             dataEpisodes.forEach((dataEpisode, i) => {
                 if (remakeEpisode(dataEpisode.numberText) == episodeNumber) {
                     episodeIndex = i;

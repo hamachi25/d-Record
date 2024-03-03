@@ -212,10 +212,10 @@ async function getAnimeData() {
     const allAnimeData: any = json.data.searchWorks.nodes;
     viewData = json.data.viewer.libraryEntries.nodes;
     if (allAnimeData.length == 1) {
+        // 成功
         animeData = allAnimeData[0];
     } else if (allAnimeData.length >= 2) {
         // 成功
-        // setAnimeData(allAnimeData);
         animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
     } else {
         // 失敗したら再度実行
@@ -231,7 +231,6 @@ async function getAnimeData() {
         if (allAnimeData.length > 30) {
             return;
         } else if (allAnimeData.length > 0) {
-            // setAnimeData(allAnimeData);
             animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
         }
     }
