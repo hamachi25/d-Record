@@ -188,7 +188,7 @@ function removeWords(text: string, count: number) {
         case 3:
             return text.replace(/[\[［《（(【＜〈～－―-].+[-―－～〉＞】)）》］\]]|[｢「『」｣』]/g, "");
         case 4:
-            return text.replace(/第?\d{1,2}期|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, "");
+            return text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, "");
         case 5:
             return text.replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords]);
         default:
