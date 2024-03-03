@@ -52,18 +52,17 @@ function getProductionYear(retry: boolean) {
         const year2 = matchText2[1];
         if (retry) {
             // 再検索
-            // 前後3年で検索（3年はやりすぎなので保留）
-            // const seasons = ["winter", "spring", "summer", "autumn"];
-            // const result: string[] = [];
-            // const startYear = Number(year2) - 1;
-            // [...Array(3)].forEach((_, i) => {
-            //     seasons.forEach(season => {
-            //         result.push(`${startYear + i}-${season}`);
-            //     });
-            // })
-            createReturnSeason(year2);
-            returnSeason.push(`${Number(year2) - 1}-winter`);
-            return returnSeason;
+            // 前後3年で検索
+            const seasons = ["winter", "spring", "summer", "autumn"];
+            const result: string[] = [];
+            const startYear = Number(year2) - 1;
+            [...Array(3)].forEach((_, i) => {
+                seasons.forEach(season => {
+                    result.push(`${startYear + i}-${season}`);
+                });
+            })
+
+            return result;
         } else {
             createReturnSeason(year2);
             return returnSeason;
@@ -163,18 +162,33 @@ const query = `
 // 取得したアニメからタイトルが一致するものを探す
 // dアニとannictで異なりそうな箇所を徐々に消していく
 function findCorrectAnime(titleText: string, data: any[]) {
+    // removeWords()を行った回数が最もすくないアニメのindexを返す
+    let index = [];
+    let findTime = [];
     for (let i = 0; i < data.length; i++) {
         let annictTitle = data[i].title;
         let dTitle = titleText;
+        let added = false;
         for (let j = 1; j <= 5; j++) {
             annictTitle = removeWords(annictTitle, j);
             dTitle = removeWords(dTitle, j);
-            if (annictTitle === dTitle) {
-                return i;
+            if (annictTitle === dTitle && !added) {
+                added = true;
+                index.push(i)
+                findTime.push(j)
             }
         }
     }
-    return -1;
+    if (index.length >= 1) {
+        return index[findTime.indexOf(Math.min(...findTime))];
+    }
+
+
+    // 見つからなかった場合
+    // 取得したアニメでエピソード差が小さいもののインデックスを出力
+    const episodeCounts = document.querySelectorAll("a[id].clearfix").length;
+    const arrayDiff = data.map((eachAnimeData: any) => Math.abs(episodeCounts - eachAnimeData.episodesCount));
+    return arrayDiff.indexOf(Math.min(...arrayDiff));
 }
 function removeWords(text: string, count: number) {
     const remakeWords = {
@@ -182,11 +196,11 @@ function removeWords(text: string, count: number) {
     };
     switch (count) {
         case 1:
-            return text.replace(/　| |\u00A0/g, "");
+            return text.replace(/　| |\u00A0/g, "").replace("OriginalVideoAnimation", "OVA");
         case 2:
             return text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248));
         case 3:
-            return text.replace(/[\[［《（(【＜〈～－―-].+[-―－～〉＞】)）》］\]]|[｢「『」｣』]/g, "");
+            return text.replace(/[\[［《【＜〈～－―-].+[-―－～〉＞】》］\]]|[（(｢「『」｣』)）]/g, "");
         case 4:
             return text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, "");
         case 5:
