@@ -16,6 +16,11 @@ function getProductionYear(retry: boolean) {
     const matchText = yearText?.match(yearPattern);
     const matchText2 = yearText2?.match(yearPattern2);
 
+    let returnSeason: string[] = [];
+    function createReturnSeason(year: string) {
+        returnSeason = [`${year}-winter`, `${year}-spring`, `${year}-summer`, `${year}-autumn`, `${Number(year) + 1}-winter`];
+    }
+
     if (yearText && matchText) {
         // 2024年春の場合
         const seasonTranslation = {
@@ -31,59 +36,44 @@ function getProductionYear(retry: boolean) {
             if (retry) {
                 // 再検索
                 // 年がズレてる場合があるので冬は前後1年足す
-                return [
-                    `${Number(matchText[1]) - 1}-winter`,
-                    `${matchText[1]}-winter`,
-                    `${matchText[1]}-spring`,
-                    `${matchText[1]}-summer`,
-                    `${matchText[1]}-autumn`,
-                    `${Number(matchText[1]) + 1}-winter`
-                ];
+                createReturnSeason(matchText[1]);
+                returnSeason.push(`${Number(matchText[1]) - 1}-winter`);
+                return returnSeason;
             } else if (matchText[1] > year2) {
-                return [
-                    `${year2}-winter`,
-                    `${year2}-spring`,
-                    `${year2}-summer`,
-                    `${year2}-autumn`,
-                    `${Number(year2) + 1}-winter`
-                ];
+                createReturnSeason(year2);
+                return returnSeason;
             }
         }
 
         const season = matchText[2] as keyof typeof seasonTranslation;
         return `${matchText[1]}-${seasonTranslation[season]}`;
-    } else {
+    } else if (yearText2 && matchText2) {
         // 製作年：2024年の場合
-        if (yearText2 && matchText2) {
-            const year2 = matchText2[1];
-            if (retry) {
-                // 再検索
-                // 前後3年で検索（3年はやりすぎなので保留）
-                // const seasons = ["winter", "spring", "summer", "autumn"];
-                // const result: string[] = [];
-
-                // const startYear = Number(year2) - 1;
-                // [...Array(3)].forEach((_, i) => {
-                //     seasons.forEach(season => {
-                //         result.push(`${startYear + i}-${season}`);
-                //     });
-                // })
-                return [
-                    `${Number(year2) - 1}-winter`,
-                    `${year2}-winter`,
-                    `${year2}-spring`,
-                    `${year2}-summer`,
-                    `${year2}-autumn`,
-                    `${Number(year2) + 1}-winter`
-                ];
-            }
-            return [
-                `${year2}-winter`,
-                `${year2}-spring`,
-                `${year2}-summer`,
-                `${year2}-autumn`,
-                `${Number(year2) + 1}-winter`
-            ];
+        const year2 = matchText2[1];
+        if (retry) {
+            // 再検索
+            // 前後3年で検索（3年はやりすぎなので保留）
+            // const seasons = ["winter", "spring", "summer", "autumn"];
+            // const result: string[] = [];
+            // const startYear = Number(year2) - 1;
+            // [...Array(3)].forEach((_, i) => {
+            //     seasons.forEach(season => {
+            //         result.push(`${startYear + i}-${season}`);
+            //     });
+            // })
+            createReturnSeason(year2);
+            returnSeason.push(`${Number(year2) - 1}-winter`);
+            return returnSeason;
+        } else {
+            createReturnSeason(year2);
+            return returnSeason;
+        }
+    } else {
+        // 2つともない場合、キャスト欄から年を取得
+        const yearText = document.querySelector(".castContainer > p:nth-of-type(3)")?.lastChild?.textContent?.replace(/\n|年/g, "");
+        if (yearText && !isNaN(Number(yearText))) {
+            createReturnSeason(yearText);
+            return returnSeason;
         }
     }
 }
@@ -94,31 +84,41 @@ function getProductionYear(retry: boolean) {
 danime-save-annict-2
 https://github.com/TomoTom0/danime-save-annict-2/blob/105851c64900b4994eb095f0f1bd83e755cb5f1d/src/scripts/index.js#L447-L463
 */
-function remakeString(title: string | null | undefined) {
+function remakeString(title: string | null | undefined, retry: boolean) {
     if (!title) return "";
 
-    const deleteArray = [
-        "[\\[《（(【＜～-].+[-～＞】)）》\\]]$",
-        "第?\\d{1,2}期$", "^映画", "^劇場版", "(TV|テレビ|劇場)(アニメーション|アニメ)",
-        "Ⅰ", "Ⅱ", "II", "Ⅲ", "III", "Ⅳ", "IV", "Ⅴ", "Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ"
-    ];
-    const remakeWords = { "　": " ", "〈": "＜", "〉": "＞" };
+    if (!retry) {
+        const deleteArray = [
+            "[\\[《（(【＜〈～-].+[-～〉＞】)）》\\]]$",
+            "第?\\d{1,2}期$", "^映画", "^劇場版", "(TV|テレビ|劇場)(アニメーション|アニメ)", "^アニメ",
+            "Ⅰ", "Ⅱ", "II", "Ⅲ", "III", "Ⅳ", "IV", "Ⅴ", "Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ"
+        ];
+        // ノーブレークスペースをスペースに置き換える
+        const remakeWords = { "　": " ", "\u00A0": " " };
 
-    const titleRegex = /^(TV|テレビ|劇場|オリジナル)?\s?(アニメーション|アニメ)\s?[｢「『]/;
-    const match = title.match(titleRegex);
-    let trimmedTitle = title;
-    if (match && match.index != undefined) {
-        const index = match.index + match[0].length;
-        trimmedTitle = trimmedTitle.substring(index).replace(/[」｣』]/, " ");
+        const titleRegex = /^(TV|テレビ|劇場|オリジナル)?\s?(アニメーション|アニメ)\s?[｢「『]/;
+        const match = title.match(titleRegex);
+        let trimmedTitle = title;
+        if (match && match.index != undefined) {
+            const index = match.index + match[0].length;
+            trimmedTitle = trimmedTitle.substring(index).replace(/[」｣』]/, " ");
+        }
+
+        return trimmedTitle
+            .replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248))
+            .replace(new RegExp(deleteArray.join("|"), "g"), "")
+            .replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords])
+            .trim();
+    } else {
+        // 単語をわけて、3文字以上の単語で再検索
+        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+        return title
+            .replace(/OVA/, "")
+            .split(separateWord)
+            .find(title => title.length >= 3);
     }
-
-    return trimmedTitle
-        .replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248))
-        .replace(new RegExp(deleteArray.join("|"), "g"), "")
-        .replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords])
-        .replace(/\u00A0/g, " ") // ノーブレークスペースをスペースに置き換える
-        .trim();
 }
+
 
 const query = `
     query SearchWorks($titles: [String!], $seasons: [String!]) {
@@ -159,20 +159,48 @@ const query = `
     }
 `;
 
-function setAnimeData(json: any, allAnimeData: any) {
-    // 取得したアニメでエピソード差が小さいもののインデックスを出力
-    const episodeCounts = document.querySelectorAll("a[id].clearfix").length;
-    const arrayDiff = allAnimeData.map((eachAnimeData: any) => Math.abs(episodeCounts - eachAnimeData.episodesCount));
-    const minIndex = arrayDiff.indexOf(Math.min(...arrayDiff));
 
-    animeData = allAnimeData[minIndex];
-    viewData = json.data.viewer.libraryEntries.nodes;
+// 取得したアニメからタイトルが一致するものを探す
+// dアニとannictで異なりそうな箇所を徐々に消していく
+function findCorrectAnime(titleText: string, data: any[]) {
+    for (let i = 0; i < data.length; i++) {
+        let annictTitle = data[i].title;
+        let dTitle = titleText;
+        for (let j = 1; j <= 5; j++) {
+            annictTitle = removeWords(annictTitle, j);
+            dTitle = removeWords(dTitle, j);
+            if (annictTitle === dTitle) {
+                return i;
+            }
+        }
+    }
+    return -1;
 }
+function removeWords(text: string, count: number) {
+    const remakeWords = {
+        "Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III", "Ⅳ": "IV", "Ⅴ": "V", "Ⅵ": "VI", "Ⅶ": "VII", "Ⅷ": "VIII", "Ⅸ": "IX", "Ⅹ": "X"
+    };
+    switch (count) {
+        case 1:
+            return text.replace(/　| |\u00A0/g, "");
+        case 2:
+            return text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248));
+        case 3:
+            return text.replace(/[\[［《（(【＜〈～－―-].+[-―－～〉＞】)）》］\]]|[｢「『」｣』]/g, "");
+        case 4:
+            return text.replace(/第?\d{1,2}期|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, "");
+        case 5:
+            return text.replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords]);
+        default:
+            return text;
+    }
+}
+
 
 // アニメデータを取得
 async function getAnimeData() {
     const yearValue = getProductionYear(false);
-    const remakeTitle = remakeString(titleText);
+    const remakeTitle = remakeString(titleText, false);
 
     const variables = {
         titles: remakeTitle,
@@ -182,30 +210,31 @@ async function getAnimeData() {
     const json = await response.json();
 
     const allAnimeData: any = json.data.searchWorks.nodes;
-    if (allAnimeData.length > 0) {
+    viewData = json.data.viewer.libraryEntries.nodes;
+    if (allAnimeData.length == 1) {
+        animeData = allAnimeData[0];
+    } else if (allAnimeData.length >= 2) {
         // 成功
-        setAnimeData(json, allAnimeData);
+        // setAnimeData(allAnimeData);
+        animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
     } else {
         // 失敗したら再度実行
-        // 単語を空白毎にわけて、3文字以上の単語で再検索
-        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
-        const firstWord = remakeTitle?.replace(/OVA/, "").split(separateWord).find(title => title.length >= 3);
-
         const variables = {
-            titles: firstWord,
+            titles: remakeString(remakeTitle, true),
             seasons: getProductionYear(true)
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json = await response.json();
         const allAnimeData: any = json.data.searchWorks.nodes;
 
-        // 20以上の場合は、ありふれた単語である可能性が高いため諦める
-        if (allAnimeData.length > 20) {
+        // 30以上の場合は、ありふれた単語である可能性が高いため諦める
+        if (allAnimeData.length > 30) {
             return;
         } else if (allAnimeData.length > 0) {
-            setAnimeData(json, allAnimeData);
+            // setAnimeData(allAnimeData);
+            animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
         }
     }
 }
 
-export { query, animeData, viewData, remakeString, getAnimeData };
+export { query, animeData, viewData, findCorrectAnime, remakeString, getAnimeData };

@@ -1,4 +1,4 @@
-import { query, remakeString } from './anime-data-scraper';
+import { query, remakeString, findCorrectAnime } from './anime-data-scraper';
 import { fetchData } from "./fetch";
 
 interface EpisodeData {
@@ -152,7 +152,7 @@ async function getAnimedata(year: string | number, title: string | null | undefi
     if (year) {
         season = [year + "-winter", year + "-spring", year + "-summer", year + "-autumn"];
     }
-    const remakeTitle = remakeString(title)
+    const remakeTitle = remakeString(title, false);
     const variables = {
         titles: remakeTitle,
         seasons: season
@@ -164,16 +164,12 @@ async function getAnimedata(year: string | number, title: string | null | undefi
 
     // 失敗したら再度実行
     if (data.length <= 0) {
-        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
-        const firstWord = remakeTitle?.replace(/OVA/, "")
-            .split(separateWord)
-            .find(title => title.length >= 3);
         if (year) {
             season?.push((Number(year) - 1) + "-winter");
             season?.push((Number(year) + 1) + "-winter");
         }
         const variables = {
-            titles: firstWord,
+            titles: remakeString(remakeTitle, true),
             seasons: season
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
@@ -189,10 +185,11 @@ export function sendWathingAnime() {
     document.getElementById("upload-icon-container")?.remove();
     document.getElementById("upload-anime-title")?.remove();
 
-    const url = location.href.match(/(?<=partId=)\d{5}/); // URLからworkIdを取得
     document.querySelector(".buttonArea > .time")?.insertAdjacentHTML("afterend", uploadButtonElement);
+
     const uploadIconContainer = document.getElementById("upload-icon-container");
     const uploadIconElement = document.getElementById("upload-icon");
+    const url = location.href.match(/(?<=partId=)\d{5}/); // URLからworkIdを取得
     if (!url || !uploadIconContainer || !uploadIconElement) { return }
     uploadButtonEvent(uploadIconContainer, uploadIconElement, url);
 
@@ -225,28 +222,38 @@ export function sendWathingAnime() {
 
         // Annictからデータを取得
         const json2 = await getAnimedata(year, title)
-
-
         if (data.length <= 0) {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;
         }
 
 
+        // 取得したアニメからタイトルが一致するものを探す
+        let animeIndex: number = 0;
+        if (data.length >= 2) {
+            animeIndex = findCorrectAnime(title, data)
+            // 見つからなかった場合
+            if (animeIndex == -1) {
+                switchNotUploadIcon(uploadIconContainer, uploadIconElement);
+                return;
+            }
+        }
+
+
         if (!sameNumber) {
-            // 右下に取得したアニメタイトルを表示 記録オフの場合は表示しない
+            // 右下に取得したアニメタイトルを表示
             const titleElement = document.querySelector("#upload-anime-title > span");
-            titleElement && (titleElement.textContent = data[0].title);
+            titleElement && (titleElement.textContent = data[animeIndex].title);
 
             // 7秒後にタイトルを非表示
             const titleContainerElement = document.getElementById("upload-anime-title");
             titleContainerElement && setTimeout(() => { titleContainerElement.style.display = "none"; }, 7000);
         }
-        uploadIconContainer.setAttribute("title", data[0].title); // ボタンにタイトル属性を追加
+        uploadIconContainer.setAttribute("title", data[animeIndex].title); // ボタンにタイトル属性を追加
 
 
         // 現在のエピソードに一致するindexを取得
-        dataEpisodes = data[0].episodes.nodes;
+        dataEpisodes = data[animeIndex].episodes.nodes;
         if (dataEpisodes[0].number) {
             episodeIndex = dataEpisodes.findIndex((dataEpisode) => dataEpisode.number == episodeNumber);
         } else {
