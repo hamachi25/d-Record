@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "d-Record",
     "version": "1.0.1",
-    "description": "dアニメストアでAnnictの記録を操作できます",
+    "description": "dアニメストアで見たアニメを記録することができます。自動もしくは手動で視聴したことをAnnictに送信して記録します。",
     "icons": {
         "16": "icon/icon16.png",
         "48": "icon/icon48.png",
