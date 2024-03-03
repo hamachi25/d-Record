@@ -174,8 +174,8 @@ function findCorrectAnime(titleText: string, data: any[]) {
             dTitle = removeWords(dTitle, j);
             if (annictTitle === dTitle && !added) {
                 added = true;
-                index.push(i)
-                findTime.push(j)
+                index.push(i);
+                findTime.push(j);
             }
         }
     }
