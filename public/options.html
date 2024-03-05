@@ -12,6 +12,27 @@
         <input placeholder="Tokenを入力" class="input-style" id="input_token" type="textbox">
         <button id="save_button">保存</button>
     </div>
+    <div class="setting-container" title="アニメを見たことをAnnictに送信するタイミングを選択してください">
+        <p class="setting-title">視聴データ送信のタイミング</p>
+        <label>
+            <input type="radio" name="send-timing" value="not-send">自動送信しない
+        </label>
+        <label>
+            <input type="radio" name="send-timing" value="after-start">再生開始から5分後
+        </label>
+        <label>
+            <input type="radio" name="send-timing" value="after-end">動画終了時
+        </label>
+    </div>
+    <div class="setting-container">
+        <p class="setting-title">UIの変更</p>
+        <label>
+            <input id="next-episode-line" type="checkbox">作品ページの赤い枠線を非表示
+        </label>
+        <label>
+            <input id="record-button" type="checkbox">作品ページの記録ボタンを非表示
+        </label>
+    </div>
 
     <script src="options.js"></script>
 

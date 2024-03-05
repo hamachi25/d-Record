@@ -1,3 +1,7 @@
+body {
+    width: 330px;
+}
+
 #button-container {
     display: flex;
     padding: 5px;
@@ -15,19 +19,16 @@
 
 .input-style:focus {
     border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 button {
     color: #090909;
     padding: 0.4em 1.7em;
     font-size: 18px;
-    border-radius: 0.5em;
+    border-radius: 5px;
     background: #e8e8e8;
     border: 1px solid #e8e8e8;
-    transition: all .3s;
-    box-shadow: 2px 2px 12px #c5c5c5,
-        -6px -6px 12px #ffffff;
+    transition: all .2s;
     white-space: nowrap;
 }
 
@@ -36,7 +37,38 @@ button:hover {
 }
 
 button:active {
-    color: #666;
-    box-shadow: inset 4px 4px 12px #c5c5c5,
-        inset -4px -4px 12px #ffffff;
+    background: #515151;
+    color: white;
+}
+
+.setting-container {
+    padding: 1em;
+    margin-top: 1em;
+    border-radius: 10px;
+    background-color: #e8e8e8;
+    user-select: none;
+}
+
+.setting-title {
+    width: fit-content;
+    margin: auto;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+label:not(:last-of-type) {
+    margin-bottom: .5em;
+}
+
+label>input {
+    width: 20px;
+    height: 20px;
+    margin: 0 1em 0;
 }

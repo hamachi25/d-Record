@@ -1,5 +1,6 @@
 import { query, remakeString, findCorrectAnime } from './anime-data-scraper';
 import { fetchData } from "./fetch";
+import { settingData } from './get-local-storage';
 
 interface EpisodeData {
     id: number;
@@ -45,7 +46,12 @@ function uploadButtonEvent(uploadIconContainer: HTMLElement | null, uploadIconEl
                 // アップロードしないに切り替え
                 uploadIconElement.setAttribute("src", notUploadIcon);
                 uploadIconContainer.dataset.upload = "false";
-                timerId && clearInterval(timerId);
+                // タイマーもしくはイベントを削除
+                if (!settingData.sendTiming || settingData.sendTiming == "after-start") {
+                    timerId && clearInterval(timerId);
+                } else if (settingData.sendTiming == "after-end") {
+                    document.querySelector("video")?.removeEventListener("ended", sendRecord)
+                }
 
                 // ストレージにセット
                 notRecordArray.push(Number(url[0]))
@@ -79,6 +85,32 @@ function switchNotUploadIcon(uploadIconContainer: HTMLElement | null, uploadIcon
 }
 
 
+function sendRecord() {
+    const uploadIconElement = document.getElementById("upload-icon");
+    let mutation = `
+        mutation CreateRecord($episodeId: ID!) {
+            createRecord (
+                input: { episodeId: $episodeId }
+            ) { clientMutationId }
+    `;
+    // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
+    if (data[0]?.viewerStatusState != "WATCHING") {
+        mutation += `
+            updateStatus(
+                input:{
+                    state: WATCHING,
+                    workId: "${data[0].id}"
+                }
+            ) { clientMutationId }
+        `;
+    }
+    const variables2 = { episodeId: dataEpisodes[episodeIndex].id };
+    mutation += "}";
+    fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
+    uploadIconElement?.setAttribute("src", completeUploadIcon);
+    buttonState = false;
+}
+
 // データ送信
 function sendInterval(uploadIconContainer: HTMLElement | null, uploadIconElement: HTMLElement | null) {
     if (!buttonState) { timerId && clearInterval(timerId); return; }
@@ -88,40 +120,23 @@ function sendInterval(uploadIconContainer: HTMLElement | null, uploadIconElement
         return;
     }
 
-    let startTime = Date.now();
-    const startVideoTime = video.currentTime
-    timerId = setInterval(() => {
-        // 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
-        if (
-            video &&
-            Date.now() - startTime > 5 * 60 * 1000 &&
-            video.currentTime - startVideoTime > 5 * 60
-        ) {
-            let mutation = `
-                mutation CreateRecord($episodeId: ID!) {
-                    createRecord (
-                        input: { episodeId: $episodeId }
-                    ) { clientMutationId }
-            `;
-            // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-            if (data[0]?.viewerStatusState != "WATCHING") {
-                mutation += `
-                    updateStatus(
-                        input:{
-                            state: WATCHING,
-                            workId: "${data[0].id}"
-                        }
-                    ) { clientMutationId }
-                `;
+    if (!settingData.sendTiming || settingData.sendTiming == "after-start") {
+        let startTime = Date.now();
+        const startVideoTime = video.currentTime
+        timerId = setInterval(() => {
+            // 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
+            if (
+                video &&
+                Date.now() - startTime > 5 * 60 * 1000 &&
+                video.currentTime - startVideoTime > 5 * 60
+            ) {
+                sendRecord();
+                timerId && clearInterval(timerId);
             }
-            const variables2 = { episodeId: dataEpisodes[episodeIndex].id };
-            mutation += "}";
-            fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
-            uploadIconElement?.setAttribute("src", completeUploadIcon);
-            buttonState = false;
-            timerId && clearInterval(timerId);
-        }
-    }, 30 * 1000);
+        }, 30 * 1000);
+    } else if (settingData.sendTiming == "after-end") {
+        video.addEventListener("ended", sendRecord)
+    }
 }
 
 
@@ -193,9 +208,12 @@ async function getAnimedata(year: string | number, title: string | null | undefi
 
 
 export function sendWathingAnime() {
+    if (settingData.sendTiming && settingData.sendTiming == "not-send") { return } //自動送信しない設定
+
     // 前の話数のボタンが残っていたら削除
     document.getElementById("upload-icon-container")?.remove();
     document.getElementById("upload-anime-title")?.remove();
+    document.querySelector("video")?.removeEventListener("ended", sendRecord); // 前のイベントを削除
 
     document.querySelector(".buttonArea > .time")?.insertAdjacentHTML("afterend", uploadButtonElement);
 
@@ -223,7 +241,6 @@ export function sendWathingAnime() {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;
         }
-
 
         // dアニメストアから放送時期を取得
         const requestURL = "https://animestore.docomo.ne.jp/animestore/rest/v1/works?work_id=" + url[0];

@@ -1,6 +1,7 @@
 import { animeData, viewData } from './anime-data-scraper';
 import { changeStatusToWatching } from './update-watch-status';
 import { fetchData } from './fetch';
+import { settingData } from './get-local-storage';
 
 const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
 
@@ -84,7 +85,7 @@ export async function createRecordButton() {
         });
     }
 
-    
+
     /*
     動画の要素と取得したエピソード数の差が、4以上だったら実行しない
     Annict側で1期2期が別れている可能性などがある　例：水星の魔女
@@ -104,26 +105,29 @@ export async function createRecordButton() {
         if (index != undefined) { break }
     }
 
-
-    // ボタン挿入
-    for (const [i, insertTarget] of insertTargets.entries()) {
-        if (index != undefined && i < index) { continue }
-        insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
-    }
-
-    // イベント追加
     const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(".record-container");
-    let j = 0;
-    for (const [i, _] of insertTargets.entries()) {
-        if (index != undefined && i < index) { continue }
-        singleRecordButton(i, j);
-        multiRecordButton(i, j);
-        j++;
+    if (!settingData || !settingData.recordButton) {
+        // ボタン挿入
+        for (const [i, insertTarget] of insertTargets.entries()) {
+            if (index != undefined && i < index) { continue }
+            insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
+        }
+
+        // イベント追加
+        let j = 0;
+        for (const [i, _] of insertTargets.entries()) {
+            if (index != undefined && i < index) { continue }
+            singleRecordButton(i, j);
+            multiRecordButton(i, j);
+            j++;
+        }
     }
 
-    // 視聴した次のエピソードに赤枠をつける
-    if (index != undefined && insertTargets[index]) {
-        const itemModule = insertTargets[index].closest<HTMLElement>(".itemModule.list");
-        itemModule?.classList.add("next-episode-border");
+    if (!settingData || !settingData.nextEpisodeLine) {
+        // 視聴した次のエピソードに赤枠をつける
+        if (index != undefined && insertTargets[index]) {
+            const itemModule = insertTargets[index].closest<HTMLElement>(".itemModule.list");
+            itemModule?.classList.add("next-episode-border");
+        }
     }
 }
