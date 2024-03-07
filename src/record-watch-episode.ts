@@ -269,7 +269,7 @@ export function sendWathingAnime() {
         }
 
 
-        if (!notRecordEpisode) {
+        if (!notRecordEpisode && !settingData.animeTitle) {
             // 右下に取得したアニメタイトルを表示
             const titleElement = document.querySelector("#upload-anime-title > span");
             titleElement && (titleElement.textContent = data[animeIndex].title);

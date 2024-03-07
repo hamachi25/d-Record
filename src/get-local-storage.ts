@@ -5,11 +5,12 @@ interface LocalData {
     sendTiming?: string;
     nextEpisodeLine?: boolean;
     recordButton?: boolean;
+    animeTitle?: boolean;
 }
 
 export async function getSettings(): Promise<void> {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.get(["Token", "sendTiming", "nextEpisodeLine", "recordButton"], (result: LocalData) => {
+        chrome.storage.local.get(["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"], (result: LocalData) => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
             } else {

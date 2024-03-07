@@ -1,8 +1,9 @@
 const sendTimingElements = document.getElementsByName("send-timing");
 const nextEpisodeLineElement = document.getElementById("next-episode-line");
 const recordButtonElement = document.getElementById("record-button");
+const animeTitleElement = document.getElementById("anime-title");
 function loadSettings() {
-    chrome.storage.local.get(["Token", "sendTiming", "nextEpisodeLine", "recordButton"], items => {
+    chrome.storage.local.get(["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"], items => {
         const token = items.Token;
         token && (document.getElementById("input_token").value = token);
 
@@ -21,6 +22,8 @@ function loadSettings() {
         nextEpisodeLine && (nextEpisodeLineElement.checked = nextEpisodeLine);
         const recordButton = items.recordButton;
         recordButton && (recordButtonElement.checked = recordButton);
+        const animeTitle = items.animeTitle;
+        animeTitle && (animeTitleElement.checked = animeTitle);
     });
 }
 document.addEventListener("DOMContentLoaded", loadSettings);
@@ -36,6 +39,9 @@ nextEpisodeLineElement.addEventListener("change", e => {
 })
 recordButtonElement.addEventListener("change", e => {
     chrome.storage.local.set({ "recordButton": e.target.checked });
+})
+animeTitleElement.addEventListener("change", e => {
+    chrome.storage.local.set({ "animeTitle": e.target.checked });
 })
 
 function saveToken() {
