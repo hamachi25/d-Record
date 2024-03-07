@@ -30,8 +30,7 @@ function getProductionYear(retry: boolean) {
             "冬": "winter"
         };
 
-        // "2024年春"と"製作年：2023年"の年が違う場合
-        if (yearText2 && matchText2) {
+        if (matchText2) {
             const year2 = matchText2[1];
             if (retry) {
                 // 再検索
@@ -39,7 +38,9 @@ function getProductionYear(retry: boolean) {
                 createReturnSeason(matchText[1]);
                 returnSeason.push(`${Number(matchText[1]) - 1}-winter`);
                 return returnSeason;
-            } else if (matchText[1] > year2) {
+            } else if (matchText[1] > year2 || document.querySelectorAll("a[id].clearfix").length > 20) {
+                // "2024年春"と"製作年：2023年"の年が違う場合
+                // 2クール以上ある場合、放送時期が異なっていることがある
                 createReturnSeason(year2);
                 return returnSeason;
             }
