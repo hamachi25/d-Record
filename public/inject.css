@@ -161,8 +161,8 @@ li:not(:last-child)>.dropdown-item:hover {
 #upload-icon {
     position: absolute;
     top: 50%;
-    transform:
-        translate(-50%, -50%);
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: .6;
 }
 
@@ -173,7 +173,8 @@ li:not(:last-child)>.dropdown-item:hover {
 
 #upload-anime-title>span {
     display: table-cell;
-    color: #a0a09f;
+    color: #ffffff;
+    opacity: 0.6;
     font-weight: 700;
     vertical-align: middle;
 }

@@ -24,9 +24,9 @@ let dataEpisodes: EpisodeData[];
 let episodeIndex = -1;
 let timerId: number;
 let buttonState = true;
-const uploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAB4UlEQVRYhd3XPWgUQRjG8d9pkoOgouF6C0FJZbBLI1YWFlaWWqm12Nvai4WCxtJUkkKrIGIQYmERFExhYcBWEASNcMmdZ7FzMJns3n7EeOoDy+w8OzPvH953htnWYDAwTh0Ya/S/AWAiz+x2u1Xnn8E1LGCtyoR2u72j38qrgYoAs3iDQ/iOebyvC9A0BSexGoIL7SpO1V2oCcBsCHYs8Y/gdfi+rwD30cEXbARvI/RncG+/ARawhHNYD9566C/hUZ3F9lKE8Ban8Q5zVSakRZi7DSOdwFkcRkz6FJ/QD/1hexwXo3EtfMMrfMwLMArgOu5gOudbT1YLqS7gbo7/Azdk6duhohqYw4OC4GT7vo4/jYeydFUCuFzgDzVV0x/qSmoUpWAmev+KS9iKvA8F857JaiYGeoKjoZ+eHYUA/eh9Ey8KxqX6HJ5YmxFAP/lWmIK44g9isiJAqskwP2/dkQBVNZW0tbVXgF5ot8cFcBOLoW2kspOwTCvhaayxX8mqAAw0z/G2nMqvAhBvnVbD4Hnzd6W8qAZi6o7sprOVgJWpL9uencj7WRXgJa5GY+ZrBB6lldQoSsEinv+moEMt43Fqlt2IbuG87ELS2zWwXBOyC8kyblPxv+BP6p84B/5vgF8Yx2Xf3VYj3QAAAABJRU5ErkJggg==";
-const notUploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAACzUlEQVRYhc2XTWsUMRjHf5nuTLq+oCe/QPUmWkFBpQfFShXfbaHqSajgR1C/gPQglCK9KQgiYq2sUhXfLoKC4KWCQrGevAjWi5RiZ7ObeJhsm01n2tnt4vpAmH2eTPL7J3mSzQhjDO20oK30/0FAIS0Yx3He9nuAIeA28DFPAyllnb+WGdgJvAUu2+euDGBRSlmSUh5Oq29WwA7gPVC0ftH6dSKklJ1ACTgNTEopj7dCwG4LW+/Fi8A7W1+DPwb6anqAc60QMApsAL4D0zY2bf11wIgz8j6n3QRwsRUCrgNjQA8wY2Mz1h8TQtyw8CMe/HwcxxW/M5F2EDWwC6ZIkvET0C2TFC8BRz34hTiOFSzfBanb0LEDQC/JlNeUCuAW8BmojagipYyANyQzAYDW+ptSagbYT7JTltlKAoaBKxl1X62AmgmShHPhKKW2AtdsGbbPOsvKgd4V4AB/XCcMwy6cabdwv81V4FBeAf2ePw/MOWXexkUYhgRBsMmBV5RS/ntZ/WYugZspP4HtwIITW5BSRlrrriCoG8OTarU6BJSt30myVFscP5cA5f2erVOXJNwjd+QkOTCotS47sbmUvuoszzkQAJEHnwAWj1Wt9W9gMI7jstc2Wo2x2jasMwt/CJxw4CilZlma9oYs90lo4ePASQf+w2b7VDPw3AIKhUIEPABOOeHJarXaDQwCl5oVkGcJREdHxz2ckQNPgQGbcOPNwiHHDIRhuNmDPwP6UxKupQKEhRMEgbt3nwNnG4CXgarfr2uZB5GFLwaMMR+UUqPGmJ6MNr5VSO4H7sUlzCMgjKJonxBLYu1W2wu8zAnPsl9+wF+CELgvhNjmwdfIXbQ7qwm4i/OHobUutwg+CwwAX/wKfwnGgTMkR+iLSqVyEzgIbCRZ00a+44Ttfw54BbxOfcsY45djxpiSMaYzpa7lJfVO+C+t7d+GbRfwF5thQx4tOp75AAAAAElFTkSuQmCC"
-const completeUploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAADKElEQVRYhe2XT4gURxTGf9XTNQ/XP6isiYgQ1iyRPYgigeAlmAVDEAwhp4TESxINOQiBgAfxKnhQlBwUgkJAspvTHowkeFEhWSEe3ATjwRxEwUPIsgfR3aSmarpy6B6sqene6XEgm0MeDM37ql5/X897r/q18t6zkpasKPt/QUBaBhpj6sbvBj4BLgC36wSISJevymqgpoAJ4BawBngK7AF+G1TA86bgFWC2IKe4zgLblyEeF5HrwJZhBUwUZBsifB1ws1iPyTcBPwB7gZ+AsWEEnAdGgQXgfoHdL/yNwLmIfAT4DhgvoDHg62EEXABmyJ/mboHdLfwZ4GJA3gCmgdeC+Hng444zTBEC/ALsBH4FdsWLInIO+CyAloBJ4OcOUNqGgb0MvA6sBUKll4GHQLvwO9eXgLcBtNb7gANBTBt4PyTvJ+AQcBYYKVlz5LUQ237gyyRJSJLu7Lbb7W+dc5frtOG4iMwppb6qIIe870vxJEnQWsfkOOc+IE/XsgI2k7fLLq01SqkKHpplYJIk22LyLMtwznXcg3FMnIJpinZRStFsNrHWPs2y7B2gFey7F99IRLYCh0PMez9nrR0D1hdQfHb0/AOfAg9CQGu9WkQ2Az8Gvz+juAbwPd2n3B2l1BvAYoC1iSwW8Duwx3u/EGAKuCQiX8TBgchtwI4AegTsN8YsFeI61tPzZUX4h7X2SpZlIaaAUyJyRkTCwmhqrUmSZG2APS7IH1UJ7icA733LWkskAuBzYEpEmgBpmm6K2q0FvGuMuVOHHPocRNZa0jRdbDQaqwP4PeAFEbkCvBjqBj4yxlyrSw413gXOuSfAUbrzNwmcjrYeM8Z8Mwh5LQEAxpizwId0t2JYC+eNMScHJa8rwAPWGDNFfjzHlTwPHKmItSX7awkIWyd80oOR/zfwqjGmp78r4ntqrqoIQ9Wj5JNOq9VqjWit/1JKrQIya+29LMuq8t4mP7JHA6ynraoEXOfZ0JCSD5x47zudgXMu8d73vFz62I0YqBpIFHAV2DcgwXJ2FXhr0LH8OPAm+UDiejb2txR4UpCfgJrfBf+mrfin2f8C/gH53/xXKAeTEgAAAABJRU5ErkJggg==";
+const uploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABJ0lEQVRYhe2XsW3DMBBFn4IM4FGUCaz0LjKC07pKNuAIHkEj2Bs4G2iEuEtpd+kuDQMTMo/WUbYIB/kAIepE3j3pTiRYiQgl9VA0+hUAFr7lS0Ry20pOWuX6yQ2+lHMtpwKIBc+GsAavg2DfCkRt8Wktwpm/HoE2sG+D/sHi0ArQAc9ADXz17E/+2afF4aMR4ADsEnBmaV/AARJp7QCfrTLXRUcrxZHS2o9xgc152/rC3NFF2C++2NsfLQ6H1MAHp7xvSOe6Axrgxd83wHwswA4tfzrEL6S7BHD3u2FRgE7pm2RdiEJtgNegPzkADFuYkrrrGvgbAENqoMG2EPXnJlVJ/Fxwq8NC1TdoKTBtKGOkAbwB+yvG2QPvsQdaCiZT8b/gH6A4wA9MTTwvPMgvWAAAAABJRU5ErkJggg==";
+const notUploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABv0lEQVRYhdWXMU7DMBSGvyIOkBvAyEZgYS0MiAEJNiQWMneh3CDcoNygDDCHka2cgHZjLBuIpRULTI/Btmocp42TlIpfsho9P/v/+/L7WWmJCKvE2krZGxBwrEd1iEjV0ZEZOlX3qUqeSB7JXwnwkZcVEdcVEFtkXwUiciQiEolIZuWkZi7UhJH+nQJ9K/5gPU+cNTEwBE58G4YKGAL7etM3J76j58ZWPAEGwIazz8A8rAcKmNiLPeJs9IBLJza1RAHFFUgB8Yx+CZH3OtclfwfaQPYrWmC2eejpnNRjqrsFa3NcoR5wzWejC5wH7lfKA0/M3llG/l0DnALbTuwbePHEgwUMUJ6YB5dkhHrf3UUC6lxGWwXxG9QxdfuBF6HH0CAFzpzYFPWP+yEbhQqINIHb1T6AQ/z+aExAjDKh29WegQNKltxFWQ8k+FvqNbBblRzKVeAI2HNipqVmuewlCHDJR6hzP65LDuHH8BZ1vhshB38FugW5j5q4aN6H9qKElsy+CyLUFXoRQBCKlhswFYhQLp/bNpcB44HYQ/7ZIM8rcOWbMBXYtGKVWmpVGA9s6tGm+MpdqoCV4d9/nNbGD5zxXDUg8eVTAAAAAElFTkSuQmCC";
+const completeUploadIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABuElEQVRYhe2XMVLCQBSGPxx7OYJjY0k8AdjryBFSU+EJjDfAG0Bnp94AbgClHXR2ko7uWWQzLC+7ySZkcJzxn9kJ83bz/i9vHxvoiAi/qbNfdW8B4M6M5hKRpmMke42a5mlqHktR8akAXOZVEJGIbM2a+TEAkWW280BEJeYiIkt7vm4Tds01BaZW/MP6vFXr58CFL2FdgCVwC0TAl4rfmLl1ifkKGNgJz2sCbE1SH1yu3LxnxVIg5rBC3gokgDjGNAByCnwrc4BXBZnJ0TCDki4XEZmYtYkVS0xsUnFvobH1FkyAfsnT6ebTuqoqj1ZIDyzY7/s7rjJmGgP3KvYJXNcBWFKsQJesJ8oUAQ8q9myuT2U36iYcAy8q1iOrQBe/tPmMamgnQA6h1Q+AsM3jEHMfgE+6EqljzaKOOeB9F5RpKSJDdb7n8a7Kk6g1Ba+QCszU0/aAN9xH7MEpF6IQgLVJ7io5Jj5sYh4KANnX0wWRmvi6iXkdABtipcx9B1OQOuL+WW4H7ZMw1yXZ63hXkX/A4cHWaQLQpgoAvi3wNVzr8gGMgU2LPhvg0TXh24KT6c//NfsHOFo/yRXSAr05KLUAAAAASUVORK5CYII=";
 
 const uploadButtonElement = `
     <div id="upload-anime-title" data-upload="true">
@@ -226,7 +226,7 @@ export function sendWathingAnime() {
     // ストレージから配列を取得し、該当しているか確認
     chrome.storage.local.get("notRecordWork", async (result) => {
         notRecordArray = result.notRecordWork || [];
-        const sameNumber = notRecordArray.includes(Number(url[0]));
+        const notRecordEpisode = notRecordArray.includes(Number(url[0]));
 
         const title = document.querySelector(".backInfoTxt1")?.textContent;
         const episode = document.querySelector(".backInfoTxt2")?.textContent;
@@ -269,7 +269,7 @@ export function sendWathingAnime() {
         }
 
 
-        if (!sameNumber) {
+        if (!notRecordEpisode) {
             // 右下に取得したアニメタイトルを表示
             const titleElement = document.querySelector("#upload-anime-title > span");
             titleElement && (titleElement.textContent = data[animeIndex].title);
@@ -309,12 +309,13 @@ export function sendWathingAnime() {
         }
 
         if (episodeIndex < 0 || index > episodeIndex) {
-            if (!sameNumber) {
-                // 記録オンの場合は、opacityを下げクリックできなくするだけ
+            if (!notRecordEpisode) {
+                // 記録する場合は、opacityを下げクリックできなくするだけ
+                uploadIconElement.setAttribute("src", completeUploadIcon);
                 buttonState = false;
                 uploadIconElement.style.opacity = "0.3";
             } else {
-                // オフの場合はアイコンも変更
+                // 記録しない場合はアイコンも変更
                 switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             }
             return;
@@ -323,7 +324,7 @@ export function sendWathingAnime() {
 
         buttonState = true; // 前の話数がfalseだと、そのままfalseになってしまうのでtrueを代入
         // 記録オフにしている場合は実行しない
-        if (!sameNumber) {
+        if (!notRecordEpisode) {
             sendInterval(uploadIconContainer, uploadIconElement);
         } else {
             uploadIconContainer.dataset.upload = "false";

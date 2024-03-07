@@ -1,5 +1,5 @@
 {
-    "manifest_version": 3,
+    "manifest_version": 2,
     "name": "d-Record",
     "version": "1.1.0",
     "description": "dアニメストアで見たアニメを記録することができます。自動もしくは手動で視聴したことをAnnictに送信して記録します。",
@@ -18,10 +18,11 @@
             "css": ["inject.css"]
         }
     ],
-    "action": {
+    "browser_action": {
         "default_popup": "options.html"
     },
     "permissions": [
-        "storage"
+        "storage",
+        "*://*/*"
     ]
 }
