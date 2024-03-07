@@ -36,7 +36,7 @@
 &nbsp;
 
 **ボタンの種類**  
-![ボタンの種類](https://github.com/chimaha/d-Record/assets/107383950/f05ab4ef-0e6f-46b8-bffa-5f8e12c31785)  
+![ボタンの種類](https://github.com/hamachi25/d-Record/assets/107383950/a85205e2-8ada-4590-9882-cb613375c7fd)  
 
 **設定項目**  
 ![設定](https://github.com/hamachi25/d-Record/assets/107383950/42f17ce8-102a-45bb-b206-2811c15a58a1)  
@@ -45,7 +45,7 @@
 &nbsp;
 
 > [!NOTE]
-> 95%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを表示している場合があります。また作品ページでは取得できているが、再生ページでは間違ったものを取得しているということもあります。  
+> 95%程度は正しいアニメをAnncitから取得できていますが、一部間違ったアニメや間違ったクールのものを取得している場合があります。
 > 作品によっては対応できる可能性があるので、もしよろしければご報告お願いします。
 > https://github.com/hamachi25/d-Record/issues/1
 
