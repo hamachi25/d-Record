@@ -142,11 +142,7 @@ li:not(:last-child)>.dropdown-item:hover {
 }
 
 .next-episode-border {
-    margin-bottom: 6px !important;
-}
-
-.next-episode-border>section>a.clearfix {
-    border: 2px solid rgb(248, 90, 114) !important;
+    outline: 2px solid rgb(248, 90, 114);
 }
 
 /* 再生画面 */
