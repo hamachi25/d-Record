@@ -20,7 +20,7 @@ export function addDropMenu() {
 
     let annictElement = `
         <div id="annict" class="btnAddMyList addMyList add listen" data-click="false">
-            <div>
+            <div id="annict-button">
                 <svg class="dropdown-svg" xmlns="http://www.w3.org/2000/svg" viewBox="20 0 448 512" style ="width: 14px; height: 14px;">
                     <path d="${svgPathD}"></path>
                 </svg>
@@ -62,7 +62,7 @@ export function addDropMenu() {
         // メニューを非表示
         document.addEventListener("click", e => {
             const target = e.target as HTMLElement
-            if (!target.closest("#annict")) {
+            if (!target.closest("#annict-button")) {
                 dropdownMenu.classList.remove("show");
             }
         })
