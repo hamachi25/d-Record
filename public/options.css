@@ -28,12 +28,12 @@ button {
     border-radius: 5px;
     background: #e8e8e8;
     border: 1px solid #e8e8e8;
-    transition: all .2s;
+    transition: all 0.2s;
     white-space: nowrap;
 }
 
 button:hover {
-    background: #d7d7d7
+    background: #d7d7d7;
 }
 
 button:active {
@@ -64,10 +64,10 @@ label {
 }
 
 label:not(:last-of-type) {
-    margin-bottom: .5em;
+    margin-bottom: 0.5em;
 }
 
-label>input {
+label > input {
     width: 20px;
     height: 20px;
     margin: 0 1em 0;

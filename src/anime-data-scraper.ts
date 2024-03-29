@@ -11,23 +11,31 @@ function getProductionYear(retry: boolean) {
     const yearPattern2 = /^製作年：(\d{4})年$/; // 製作年：2024年
 
     const tagElements = Array.from(document.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
-    const yearText = tagElements.find(elem => elem.textContent?.match(yearPattern))?.textContent;
-    const yearText2 = tagElements.find(elem => elem.textContent?.match(yearPattern2))?.textContent;
+    const yearText = tagElements.find((elem) => elem.textContent?.match(yearPattern))?.textContent;
+    const yearText2 = tagElements.find((elem) =>
+        elem.textContent?.match(yearPattern2)
+    )?.textContent;
     const matchText = yearText?.match(yearPattern);
     const matchText2 = yearText2?.match(yearPattern2);
 
     let returnSeason: string[] = [];
     function createReturnSeason(year: string) {
-        returnSeason = [`${year}-winter`, `${year}-spring`, `${year}-summer`, `${year}-autumn`, `${Number(year) + 1}-winter`];
+        returnSeason = [
+            `${year}-winter`,
+            `${year}-spring`,
+            `${year}-summer`,
+            `${year}-autumn`,
+            `${Number(year) + 1}-winter`,
+        ];
     }
 
     if (yearText && matchText) {
         // 2024年春の場合
         const seasonTranslation = {
-            "春": "spring",
-            "夏": "summer",
-            "秋": "autumn",
-            "冬": "winter"
+            春: "spring",
+            夏: "summer",
+            秋: "autumn",
+            冬: "winter",
         };
 
         if (matchText2) {
@@ -38,7 +46,10 @@ function getProductionYear(retry: boolean) {
                 createReturnSeason(matchText[1]);
                 returnSeason.push(`${Number(matchText[1]) - 1}-winter`);
                 return returnSeason;
-            } else if (matchText[1] > year2 || document.querySelectorAll("a[id].clearfix").length > 20) {
+            } else if (
+                matchText[1] > year2 ||
+                document.querySelectorAll("a[id].clearfix").length > 20
+            ) {
                 // "2024年春"と"製作年：2023年"の年が違う場合
                 // 2クール以上ある場合、放送時期が異なっていることがある
                 createReturnSeason(year2);
@@ -58,10 +69,10 @@ function getProductionYear(retry: boolean) {
             const result: string[] = [];
             const startYear = Number(year2) - 1;
             [...Array(3)].forEach((_, i) => {
-                seasons.forEach(season => {
+                seasons.forEach((season) => {
                     result.push(`${startYear + i}-${season}`);
                 });
-            })
+            });
 
             return result;
         } else {
@@ -70,14 +81,15 @@ function getProductionYear(retry: boolean) {
         }
     } else {
         // 2つともない場合、キャスト欄から年を取得
-        const yearText = document.querySelector(".castContainer > p:nth-of-type(3)")?.lastChild?.textContent?.replace(/\n|年/g, "");
+        const yearText = document
+            .querySelector(".castContainer > p:nth-of-type(3)")
+            ?.lastChild?.textContent?.replace(/\n|年/g, "");
         if (yearText && !isNaN(Number(yearText))) {
             createReturnSeason(yearText);
             return returnSeason;
         }
     }
 }
-
 
 /*
 タイトルを検索用に整える
@@ -90,8 +102,27 @@ function remakeString(title: string | null | undefined, retry: boolean) {
     if (!retry) {
         const deleteArray = [
             "[\\[《（(【＜〈～-].+[-～〉＞】)）》\\]]$",
-            "第?\\d{1,2}期$", "^映画", "^劇場版", "(TV|テレビ|劇場)(アニメーション|アニメ)", "^アニメ",
-            "Ⅰ", "Ⅱ", "II", "Ⅲ", "III", "Ⅳ", "IV", "Ⅴ", "Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ"
+            "第?\\d{1,2}期$",
+            "^映画",
+            "^劇場版",
+            "(TV|テレビ|劇場)(アニメーション|アニメ)",
+            "^アニメ",
+            "Ⅰ",
+            "Ⅱ",
+            "II",
+            "Ⅲ",
+            "III",
+            "Ⅳ",
+            "IV",
+            "Ⅴ",
+            "Ⅵ",
+            "Ⅶ",
+            "VII",
+            "Ⅷ",
+            "VIII",
+            "Ⅸ",
+            "IX",
+            "Ⅹ",
         ];
         // ノーブレークスペースをスペースに置き換える
         const remakeWords = { "　": " ", "\u00A0": " " };
@@ -105,9 +136,12 @@ function remakeString(title: string | null | undefined, retry: boolean) {
         }
 
         return trimmedTitle
-            .replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248))
+            .replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
             .replace(new RegExp(deleteArray.join("|"), "g"), "")
-            .replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords])
+            .replace(
+                new RegExp(Object.keys(remakeWords).join("|"), "g"),
+                (match) => remakeWords[match as keyof typeof remakeWords]
+            )
             .trim();
     } else {
         // 単語をわけて、3文字以上の単語で再検索
@@ -115,10 +149,9 @@ function remakeString(title: string | null | undefined, retry: boolean) {
         return title
             .replace(/OVA/, "")
             .split(separateWord)
-            .find(title => title.length >= 3);
+            .find((title) => title.length >= 3);
     }
 }
-
 
 const query = `
     query SearchWorks($titles: [String!], $seasons: [String!]) {
@@ -159,7 +192,6 @@ const query = `
     }
 `;
 
-
 // 取得したアニメからタイトルが一致するものを探す
 // dアニとannictで異なりそうな箇所を徐々に消していく
 function findCorrectAnime(titleText: string, data: any[]) {
@@ -184,33 +216,53 @@ function findCorrectAnime(titleText: string, data: any[]) {
         return index[findTime.indexOf(Math.min(...findTime))];
     }
 
-
     // 見つからなかった場合
     // 取得したアニメでエピソード差が小さいもののインデックスを出力
     const episodeCounts = document.querySelectorAll("a[id].clearfix").length;
-    const arrayDiff = data.map((eachAnimeData: any) => Math.abs(episodeCounts - eachAnimeData.episodesCount));
+    const arrayDiff = data.map((eachAnimeData: any) =>
+        Math.abs(episodeCounts - eachAnimeData.episodesCount)
+    );
     return arrayDiff.indexOf(Math.min(...arrayDiff));
 }
 function removeWords(text: string, count: number) {
     const remakeWords = {
-        "Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III", "Ⅳ": "IV", "Ⅴ": "V", "Ⅵ": "VI", "Ⅶ": "VII", "Ⅷ": "VIII", "Ⅸ": "IX", "Ⅹ": "X"
+        Ⅰ: "I",
+        Ⅱ: "II",
+        Ⅲ: "III",
+        Ⅳ: "IV",
+        Ⅴ: "V",
+        Ⅵ: "VI",
+        Ⅶ: "VII",
+        Ⅷ: "VIII",
+        Ⅸ: "IX",
+        Ⅹ: "X",
     };
     switch (count) {
         case 1:
             return text.replace(/　| |\u00A0/g, "").replace("OriginalVideoAnimation", "OVA");
         case 2:
-            return text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248));
+            return text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, (s) =>
+                String.fromCharCode(s.charCodeAt(0) - 65248)
+            );
         case 3:
-            return text.replace(/[\[［《【＜〈～－―-].+[-―－～〉＞】》］\]]|[（(｢「『」｣』)）]/g, "");
+            return text.replace(
+                /[\[［《【＜〈～－―-].+[-―－～〉＞】》］\]]|[（(｢「『」｣』)）]/g,
+                ""
+            );
         case 4:
-            return text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, "");
+            return text.replace(
+                /第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g,
+                ""
+            );
         case 5:
-            return text.replace(new RegExp(Object.keys(remakeWords).join("|"), "g"), match => remakeWords[match as keyof typeof remakeWords]);
+            return text.replace(
+                new RegExp(Object.keys(remakeWords).join("|"), "g"),
+                (match) => remakeWords[match as keyof typeof remakeWords]
+            );
         default:
             return text;
     }
 }
-
 
 // アニメデータを取得
 async function getAnimeData() {
@@ -219,7 +271,7 @@ async function getAnimeData() {
 
     const variables = {
         titles: remakeTitle,
-        seasons: yearValue
+        seasons: yearValue,
     };
     const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
     const json = await response.json();
@@ -236,7 +288,7 @@ async function getAnimeData() {
         // 失敗したら再度実行
         const variables = {
             titles: remakeString(remakeTitle, true),
-            seasons: getProductionYear(true)
+            seasons: getProductionYear(true),
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json = await response.json();

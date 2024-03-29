@@ -1,11 +1,10 @@
-import { animeData, getAnimeData } from './anime-data-scraper';
-import { addDropMenu } from './create-drop-menu';
-import { createRecordButton } from './create-record-button';
-import { sendWathingAnime } from './record-watch-episode';
-import { getSettings } from './get-local-storage';
+import { animeData, getAnimeData } from "./anime-data-scraper";
+import { addDropMenu } from "./create-drop-menu";
+import { createRecordButton } from "./create-record-button";
+import { sendWathingAnime } from "./record-watch-episode";
+import { getSettings } from "./get-local-storage";
 
-
-const path = window.location.pathname.replace('/animestore/', '');
+const path = window.location.pathname.replace("/animestore/", "");
 async function main() {
     await getSettings();
     if (path == "ci_pc") {
@@ -30,7 +29,7 @@ async function main() {
         if (videoWrapper) {
             observer.observe(videoWrapper, {
                 childList: true,
-                subtree: true
+                subtree: true,
             });
         }
     }

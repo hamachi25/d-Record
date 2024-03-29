@@ -10,13 +10,16 @@ interface LocalData {
 
 export async function getSettings(): Promise<void> {
     return new Promise((resolve, reject) => {
-        chrome.storage.local.get(["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"], (result: LocalData) => {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-            } else {
-                settingData = result;
-                resolve();
+        chrome.storage.local.get(
+            ["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"],
+            (result: LocalData) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    settingData = result;
+                    resolve();
+                }
             }
-        });
-    })
+        );
+    });
 }

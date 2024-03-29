@@ -1,7 +1,12 @@
-import { statusText, svgPaths, svgPathD, convertStatusToJapanese, changeStatusText } from './update-watch-status';
-import { animeData } from './anime-data-scraper';
-import { fetchData } from './fetch';
-
+import {
+    statusText,
+    svgPaths,
+    svgPathD,
+    convertStatusToJapanese,
+    changeStatusText,
+} from "./update-watch-status";
+import { animeData } from "./anime-data-scraper";
+import { fetchData } from "./fetch";
 
 const statusArray = [
     ["NO_STATE", svgPaths[0], "未選択"],
@@ -9,9 +14,8 @@ const statusArray = [
     ["WATCHING", svgPaths[2], "見てる"],
     ["WATCHED", svgPaths[1], "見た"],
     ["ON_HOLD", svgPaths[4], "一時中断"],
-    ["STOP_WATCHING", svgPaths[5], "視聴中止"]
+    ["STOP_WATCHING", svgPaths[5], "視聴中止"],
 ];
-
 
 // annictのドロップメニューを追加
 export function addDropMenu() {
@@ -30,7 +34,7 @@ export function addDropMenu() {
             <ul class="dropdown-menu">
     `;
 
-    statusArray.forEach(status => {
+    statusArray.forEach((status) => {
         annictElement += `
             <li>
                 <button class="dropdown-item status-state" data-status-kind="${status[0]}">
@@ -50,7 +54,9 @@ export function addDropMenu() {
         </ul>
         </div>
     `;
-    document.querySelector(".btnArea > .btnAddMyList[data-workid]")?.insertAdjacentHTML('afterend', annictElement);
+    document
+        .querySelector(".btnArea > .btnAddMyList[data-workid]")
+        ?.insertAdjacentHTML("afterend", annictElement);
 
     const dropdownMenu: HTMLElement | null = document.querySelector(".dropdown-menu");
     const annict = document.getElementById("annict");
@@ -58,18 +64,18 @@ export function addDropMenu() {
         // メニューを表示
         annict.addEventListener("click", () => {
             dropdownMenu.classList.toggle("show");
-        })
+        });
         // メニューを非表示
-        document.addEventListener("click", e => {
-            const target = e.target as HTMLElement
+        document.addEventListener("click", (e) => {
+            const target = e.target as HTMLElement;
             if (!target.closest("#annict-button")) {
                 dropdownMenu.classList.remove("show");
             }
-        })
+        });
 
         // ステータスを変更するクリックイベント
         const statusElements: NodeListOf<HTMLElement> = document.querySelectorAll(".status-state");
-        statusElements.forEach(statusElement => {
+        statusElements.forEach((statusElement) => {
             statusElement.addEventListener("click", async () => {
                 const mutation = `
                     mutation UpdateStatus($state: StatusState!, $workId: ID!) {
@@ -80,7 +86,7 @@ export function addDropMenu() {
                 `;
                 const variables = {
                     state: statusElement.dataset.statusKind,
-                    workId: animeData.id
+                    workId: animeData.id,
                 };
 
                 fetchData(JSON.stringify({ query: mutation, variables: variables }));

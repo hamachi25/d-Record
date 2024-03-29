@@ -1,7 +1,7 @@
-import { animeData, viewData } from './anime-data-scraper';
-import { changeStatusToWatching } from './update-watch-status';
-import { fetchData } from './fetch';
-import { settingData } from './get-local-storage';
+import { animeData, viewData } from "./anime-data-scraper";
+import { changeStatusToWatching } from "./update-watch-status";
+import { fetchData } from "./fetch";
+import { settingData } from "./get-local-storage";
 
 const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
 
@@ -37,15 +37,14 @@ const recordButtonElement = `
     </div>
 `;
 
-
 // 記録ボタンを作成
 export async function createRecordButton() {
     const dataEpisodes: any[] = animeData.episodes.nodes;
 
     // "記録"クリックイベント
     function singleRecordButton(i: number, j: number) {
-        const button = document.querySelectorAll('.record-button:first-of-type')[j];
-        button.addEventListener('click', async () => {
+        const button = document.querySelectorAll(".record-button:first-of-type")[j];
+        button.addEventListener("click", async () => {
             let mutation = `
                 mutation CreateRecord($episodeId: ID!) {
                     createRecord (
@@ -64,8 +63,8 @@ export async function createRecordButton() {
 
     // "ここまで記録"クリックイベント
     function multiRecordButton(i: number, j: number) {
-        const button = document.querySelectorAll('.record-button:last-of-type')[j];
-        button.addEventListener('click', async () => {
+        const button = document.querySelectorAll(".record-button:last-of-type")[j];
+        button.addEventListener("click", async () => {
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
             const count = i - j;
@@ -80,43 +79,43 @@ export async function createRecordButton() {
             });
 
             changeStatusToWatching(mutation);
-            mutation += "}"
+            mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
         });
     }
-
 
     /*
     動画の要素と取得したエピソード数の差が、4以上だったら実行しない
     Annict側で1期2期が別れている可能性などがある　例：水星の魔女
     */
     const diff = Math.abs(insertTargets.length - animeData.episodesCount);
-    if (dataEpisodes.length == 0 || diff > 4) { return }
+    if (dataEpisodes.length == 0 || diff > 4) return;
 
     let index;
     for (const [i, dataEpisode] of dataEpisodes.entries()) {
         for (const libraryEntry of viewData) {
-            if (!libraryEntry.nextEpisode) { continue }
+            if (!libraryEntry.nextEpisode) continue;
             if (dataEpisode.annictId == libraryEntry.nextEpisode.annictId) {
                 index = i;
                 break;
             }
         }
-        if (index != undefined) { break }
+        if (index != undefined) break;
     }
 
-    const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(".record-container");
+    const recordContainers: NodeListOf<HTMLElement> =
+        document.querySelectorAll(".record-container");
     if (!settingData || !settingData.recordButton) {
         // ボタン挿入
         for (const [i, insertTarget] of insertTargets.entries()) {
-            if (index != undefined && i < index) { continue }
+            if (index != undefined && i < index) continue;
             insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
         }
 
         // イベント追加
         let j = 0;
         for (const [i, _] of insertTargets.entries()) {
-            if (index != undefined && i < index) { continue }
+            if (index != undefined && i < index) continue;
             singleRecordButton(i, j);
             multiRecordButton(i, j);
             j++;

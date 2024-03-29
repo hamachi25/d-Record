@@ -1,27 +1,26 @@
-import { settingData } from './get-local-storage';
+import { settingData } from "./get-local-storage";
 
-const endpoint = 'https://api.annict.com/graphql';
+const endpoint = "https://api.annict.com/graphql";
 export async function fetchData(query: string): Promise<Response> {
     if (settingData.Token) {
         try {
             const response = await fetch(endpoint, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${settingData.Token}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${settingData.Token}`,
                 },
-                body: query
+                body: query,
             });
             if (!response.ok) {
-                throw new Error('ネットワークエラー');
+                throw new Error("ネットワークエラー");
             }
             return response;
         } catch (error) {
-            console.error('ネットワークリクエストエラー:', error);
+            console.error("ネットワークリクエストエラー:", error);
             throw error;
         }
     } else {
-        throw new Error('トークンがありません');
+        throw new Error("トークンがありません");
     }
 }
-
