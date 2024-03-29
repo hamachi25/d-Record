@@ -55,8 +55,8 @@ export function addDropMenu() {
         </div>
     `;
     document
-        .querySelector(".btnArea > .btnAddMyList[data-workid]")
-        ?.insertAdjacentHTML("afterend", annictElement);
+        .querySelector(".btnArea > .btnConcerned[data-workid]")
+        ?.insertAdjacentHTML("beforebegin", annictElement);
 
     const dropdownMenu: HTMLElement | null = document.querySelector(".dropdown-menu");
     const annict = document.getElementById("annict");
