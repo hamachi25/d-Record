@@ -308,7 +308,7 @@ export function sendWathingAnime() {
             if (index > 0) { break }
         }
 
-        if (episodeIndex < 0 || index > episodeIndex) {
+        if (index != -1 || index > episodeIndex) {
             if (!notRecordEpisode) {
                 // 記録する場合は、opacityを下げクリックできなくするだけ
                 uploadIconElement.setAttribute("src", completeUploadIcon);
