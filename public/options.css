@@ -1,74 +1,86 @@
 body {
-    width: 330px;
-}
-
-#button-container {
-    display: flex;
-    padding: 5px;
-}
-
-.input-style {
-    padding: 10px;
-    margin-right: 5px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    color: #555;
-    outline: none;
-}
-
-.input-style:focus {
-    border-color: #007bff;
-}
-
-button {
-    color: #090909;
-    padding: 0.4em 1.7em;
-    font-size: 18px;
-    border-radius: 5px;
-    background: #e8e8e8;
-    border: 1px solid #e8e8e8;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-button:hover {
-    background: #d7d7d7;
-}
-
-button:active {
-    background: #515151;
-    color: white;
-}
-
-.setting-container {
-    padding: 1em;
-    margin-top: 1em;
-    border-radius: 10px;
-    background-color: #e8e8e8;
+    width: 20rem;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    padding: 1rem;
     user-select: none;
 }
 
-.setting-title {
-    width: fit-content;
+/* トークン */
+.token-container {
+    padding: 0 0.5rem 1rem 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+.token-container > span {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+.token-container > input {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
+.token-container > div {
+    display: flex;
+}
+.token-container > div > span {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: green;
+}
+.token-container > div > a {
+    display: inline-flex;
+    position: relative;
+    height: fit-content;
+    margin-left: auto;
+    top: 0.25rem;
+    right: 0.25rem;
+    color: rgb(59 130 246);
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+.token-container > div > a > svg {
+    stroke: #4b5563;
+    width: 0.625rem;
+    height: 0.625rem;
     margin: auto;
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 1em;
 }
 
-label {
+/* 視聴データの送信タイミング・UIの変更 */
+.radio-checkbox-container {
+    padding: 1rem 0.5rem;
+}
+.send-timing-container {
+    border-bottom: 2px solid #e5e7eb;
+}
+.ui-container {
+    padding-bottom: 0;
+}
+.radio-checkbox-container > p {
+    font-weight: 600;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    margin: 0;
+}
+.radio-checkbox-container > div {
+    margin-top: 0.5rem;
+}
+.radio-checkbox-container label {
     display: flex;
     align-items: center;
-    font-size: 16px;
+    margin-bottom: 0.25rem;
 }
-
-label:not(:last-of-type) {
-    margin-bottom: 0.5em;
-}
-
-label > input {
-    width: 20px;
-    height: 20px;
-    margin: 0 1em 0;
+.radio-checkbox-container input {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.75rem;
 }

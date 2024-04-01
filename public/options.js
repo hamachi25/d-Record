@@ -1,18 +1,19 @@
-const sendTimingElements = document.getElementsByName("send-timing");
+const tokenElement = document.querySelector(".token-container > input");
+const sendTimingElements = document.querySelectorAll(".send-timing-container input");
 const nextEpisodeLineElement = document.getElementById("next-episode-line");
 const recordButtonElement = document.getElementById("record-button");
 const animeTitleElement = document.getElementById("anime-title");
+
+// ローカルストレージから設定を取得
 function loadSettings() {
     chrome.storage.local.get(
         ["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"],
         (items) => {
-            const token = items.Token;
-            token && (document.getElementById("input_token").value = token);
+            items.Token && (tokenElement.value = items.Token);
 
-            const sendTiming = items.sendTiming;
-            if (sendTiming) {
+            if (items.sendTiming) {
                 Array.from(sendTimingElements).forEach((element) => {
-                    if (element.value == sendTiming) {
+                    if (element.value == items.sendTiming) {
                         element.checked = true;
                     }
                 });
@@ -20,17 +21,20 @@ function loadSettings() {
                 sendTimingElements[1].checked = true;
             }
 
-            const nextEpisodeLine = items.nextEpisodeLine;
-            nextEpisodeLine && (nextEpisodeLineElement.checked = nextEpisodeLine);
-            const recordButton = items.recordButton;
-            recordButton && (recordButtonElement.checked = recordButton);
-            const animeTitle = items.animeTitle;
-            animeTitle && (animeTitleElement.checked = animeTitle);
+            items.nextEpisodeLine && (nextEpisodeLineElement.checked = items.nextEpisodeLine);
+            items.recordButton && (recordButtonElement.checked = items.recordButton);
+            items.animeTitle && (animeTitleElement.checked = items.animeTitle);
         }
     );
 }
 document.addEventListener("DOMContentLoaded", loadSettings);
 
+// ローカルストレージに保存するイベント
+tokenElement.addEventListener("change", () => {
+    const message = tokenElement.value.trim();
+    chrome.storage.local.set({ Token: message });
+    document.querySelector(".token-container > div > span").textContent = "保存しました";
+});
 Array.from(sendTimingElements).forEach((element) => {
     element.addEventListener("change", (e) => {
         chrome.storage.local.set({ sendTiming: e.target.value });
@@ -46,16 +50,9 @@ animeTitleElement.addEventListener("change", (e) => {
     chrome.storage.local.set({ animeTitle: e.target.checked });
 });
 
-function saveToken() {
-    const message = document.getElementById("input_token").value.trim();
-    chrome.storage.local.set({ Token: message });
-}
-function saveMsg() {
-    if (!document.getElementById("save-msg")) {
-        const insertElement = '<p id="save-msg">保存しました！</p>';
-        document.getElementById("button-container").insertAdjacentHTML("afterend", insertElement);
-    }
-}
-
-document.getElementById("save_button").addEventListener("click", saveToken);
-document.getElementById("save_button").addEventListener("click", saveMsg);
+// 「トークンの取得方法」を新規タブで開く
+document.querySelector(".token-container > div > a").addEventListener("click", () => {
+    chrome.tabs.create({
+        url: "https://developers.annict.com/docs/authentication/personal-access-token",
+    });
+});
