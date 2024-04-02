@@ -39,7 +39,7 @@
 ![ボタンの種類](https://github.com/hamachi25/d-Record/assets/107383950/a85205e2-8ada-4590-9882-cb613375c7fd)  
 
 **設定項目**  
-![設定](https://github.com/hamachi25/d-Record/assets/107383950/42f17ce8-102a-45bb-b206-2811c15a58a1)  
+![設定](https://github.com/hamachi25/d-Record/assets/107383950/74675a2e-1976-49d3-9cb4-21e6e21bea1d)  
 
 
 &nbsp;
@@ -53,7 +53,7 @@
 ## ビルド  
 ```
 pnpm i --frozen-lockfile
-pnpm install -D @types/chrome
+pnpm i -D @types/chrome
 pnpm run build
 ```
 FirefoxとChromeのmanifest.jsonが異なるので、pubicのmanifestを環境に合わせて置き換えてください。  
