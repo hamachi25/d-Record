@@ -16,19 +16,19 @@
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M22 2.00001L11.75 12.25"
-                            stroke-width="1.5"
+                            stroke-width="3"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                         ></path>
                         <path
                             d="M21.9998 6.49999L21.9998 1.99999L17.0568 1.99999"
-                            stroke-width="1.5"
+                            stroke-width="3"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                         ></path>
                         <path
                             d="M11 2H4C2.89543 2 2 2.89543 2 4V20C2 21.1046 2.89543 22 4 22H20C21.1046 22 22 21.1046 22 20V12.75"
-                            stroke-width="1.5"
+                            stroke-width="3"
                             stroke-linecap="round"
                             stroke-linejoin="round"
                         ></path>
@@ -39,12 +39,18 @@
         <div class="radio-checkbox-container send-timing-container">
             <p>視聴データの送信タイミング</p>
             <div>
-                <label> <input type="radio" value="not-send" />自動送信しない</label>
-                <label><input type="radio" value="after-start" />再生開始から5分後</label>
-                <label> <input type="radio" value="after-end" />動画終了時 </label>
+                <label>
+                    <input type="radio" name="send-timing" value="not-send" />自動送信しない
+                </label>
+                <label>
+                    <input type="radio" name="send-timing" value="after-start" />再生開始から5分後
+                </label>
+                <label>
+                    <input type="radio" name="send-timing" value="after-end" />動画終了時
+                </label>
             </div>
         </div>
-        <div class="radio-checkbox-container ui-container">
+        <div class="radio-checkbox-container">
             <p>UIの変更</p>
             <div>
                 <label>

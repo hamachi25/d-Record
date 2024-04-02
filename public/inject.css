@@ -28,7 +28,7 @@
 .dropdown-menu {
     position: absolute;
     width: 100%;
-    inset: 0px auto auto 0px;
+    top: 45px;
     z-index: 1000;
     display: none;
     min-width: 10rem;
@@ -42,7 +42,6 @@
     background-clip: padding-box;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: 0.3rem;
-    transform: translate(0px, 45px);
 }
 
 li:last-child > .dropdown-item {
@@ -74,6 +73,10 @@ li:not(:last-child) > .dropdown-item:hover {
 
 .dropdown-item > svg {
     margin-right: 1rem !important;
+}
+
+.dropdown-menu > li:nth-of-type(3) svg {
+    margin-left: 0.1em;
 }
 
 .dropdown-svg {

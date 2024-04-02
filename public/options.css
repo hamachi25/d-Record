@@ -3,13 +3,19 @@ body {
     margin: 0;
     font-size: 1rem;
     line-height: 1.5rem;
-    padding: 1rem;
+    padding: 0 1rem;
     user-select: none;
+}
+@media (prefers-color-scheme: dark) {
+    body {
+        color: rgb(209 213 219);
+        background-color: #0b0b0b;
+    }
 }
 
 /* トークン */
 .token-container {
-    padding: 0 0.5rem 1rem 0.5rem;
+    padding: 1rem 0.5rem;
     border-bottom: 2px solid #e5e7eb;
 }
 .token-container > span {
@@ -26,6 +32,9 @@ body {
     font-family: inherit;
     font-size: 100%;
     line-height: inherit;
+}
+.token-container > input:focus {
+    outline: 2px solid#007bff;
 }
 .token-container > div {
     display: flex;
@@ -48,11 +57,24 @@ body {
     font-size: 0.75rem;
     line-height: 1rem;
 }
-.token-container > div > a > svg {
+.token-container svg {
     stroke: #4b5563;
-    width: 0.625rem;
-    height: 0.625rem;
+    width: 0.8rem;
+    height: 0.8rem;
     margin: auto;
+}
+@media (prefers-color-scheme: dark) {
+    .token-container {
+        border-bottom: 2px solid gray !important;
+    }
+    .token-container > input {
+        color: rgb(209 213 219);
+        background-color: #303030;
+        border-color: transparent !important;
+    }
+    .token-container svg {
+        stroke: #d1d5db !important;
+    }
 }
 
 /* 視聴データの送信タイミング・UIの変更 */
@@ -61,9 +83,6 @@ body {
 }
 .send-timing-container {
     border-bottom: 2px solid #e5e7eb;
-}
-.ui-container {
-    padding-bottom: 0;
 }
 .radio-checkbox-container > p {
     font-weight: 600;
@@ -83,4 +102,9 @@ body {
     width: 1rem;
     height: 1rem;
     margin-right: 0.75rem;
+}
+@media (prefers-color-scheme: dark) {
+    .send-timing-container {
+        border-bottom: 2px solid gray !important;
+    }
 }
