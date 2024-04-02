@@ -56,6 +56,10 @@ body {
     color: rgb(59 130 246);
     font-size: 0.75rem;
     line-height: 1rem;
+    text-decoration: none;
+}
+.token-container > div > a:hover {
+    text-decoration: underline;
 }
 .token-container svg {
     stroke: #4b5563;
