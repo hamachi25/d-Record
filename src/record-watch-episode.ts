@@ -188,7 +188,7 @@ function remakeEpisode(episode: string) {
             // 前編、後編
             const splitEpisode = episode.split(/ | |　/);
             const episodeWord = splitEpisode[splitEpisode.length - 1];
-            if (episodeWord == "前編" || episodeWord == "前篇") {
+            if (episodeWord == "前編" || episodeWord == "前篇" || episodeWord == "本編") {
                 return 1;
             } else if (episodeWord == "後編" || episodeWord == "後篇") {
                 return 2;
@@ -313,7 +313,7 @@ export function sendWathingAnime() {
 
         // 現在のエピソードに一致するindexを取得
         dataEpisodes = data[animeIndex].episodes.nodes;
-        if (dataEpisodes[0].number) {
+        if (dataEpisodes[0] && dataEpisodes[0].number) {
             episodeIndex = dataEpisodes.findIndex(
                 (dataEpisode) => dataEpisode.number == episodeNumber
             );
