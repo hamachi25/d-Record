@@ -1,26 +1,11 @@
 import { query, remakeString, findCorrectAnime } from "./anime-data-scraper";
 import { fetchData } from "./fetch";
 import { settingData } from "./get-local-storage";
-
-interface EpisodeData {
-    id: number;
-    number: number;
-    numberText: string;
-    annictId: number;
-}
-
-interface AnimeData {
-    id: number;
-    title: string;
-    viewerStatusState: string;
-    episodes: {
-        nodes: EpisodeData[];
-    };
-}
+import { Work, Episode } from "./types";
 
 let notRecordArray: number[];
-let data: AnimeData[];
-let dataEpisodes: EpisodeData[];
+let data: Work[];
+let dataEpisodes: Episode[];
 let episodeIndex = -1;
 let timerId: number;
 let buttonState = true;

@@ -2,6 +2,7 @@ import { animeData, viewData } from "./anime-data-scraper";
 import { changeStatusToWatching } from "./update-watch-status";
 import { fetchData } from "./fetch";
 import { settingData } from "./get-local-storage";
+import { Episode } from "./types";
 
 const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
 
@@ -39,7 +40,7 @@ const recordButtonElement = `
 
 // 記録ボタンを作成
 export async function createRecordButton() {
-    const dataEpisodes: any[] = animeData.episodes.nodes;
+    const dataEpisodes: Episode[] = animeData.episodes.nodes;
 
     // "記録"クリックイベント
     function singleRecordButton(i: number, j: number) {

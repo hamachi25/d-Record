@@ -1,7 +1,8 @@
 import { fetchData } from "./fetch";
+import { Work, NextEpisode } from "./types";
 
-let animeData: any; // 取得したアニメデータ
-let viewData: any; // 視聴データ
+let animeData: Work; // 取得したアニメデータ
+let viewData: NextEpisode[]; // 視聴データ
 
 const titleText = document.querySelector(".titleWrap > h1")?.firstChild?.textContent ?? "";
 
@@ -194,7 +195,7 @@ const query = `
 
 // 取得したアニメからタイトルが一致するものを探す
 // dアニとannictで異なりそうな箇所を徐々に消していく
-function findCorrectAnime(titleText: string, data: any[]) {
+function findCorrectAnime(titleText: string, data: Work[]) {
     // removeWords()を行った回数が最もすくないアニメのindexを返す
     let index = [];
     let findTime = [];
@@ -219,7 +220,7 @@ function findCorrectAnime(titleText: string, data: any[]) {
     // 見つからなかった場合
     // 取得したアニメでエピソード差が小さいもののインデックスを出力
     const episodeCounts = document.querySelectorAll("a[id].clearfix").length;
-    const arrayDiff = data.map((eachAnimeData: any) =>
+    const arrayDiff = data.map((eachAnimeData: Work) =>
         Math.abs(episodeCounts - eachAnimeData.episodesCount)
     );
     return arrayDiff.indexOf(Math.min(...arrayDiff));
@@ -276,7 +277,7 @@ async function getAnimeData() {
     const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
     const json = await response.json();
 
-    const allAnimeData: any = json.data.searchWorks.nodes;
+    const allAnimeData: Work[] = json.data.searchWorks.nodes;
     viewData = json.data.viewer.libraryEntries.nodes;
     if (allAnimeData.length == 1) {
         // 成功
@@ -292,7 +293,7 @@ async function getAnimeData() {
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json = await response.json();
-        const allAnimeData: any = json.data.searchWorks.nodes;
+        const allAnimeData: Work[] = json.data.searchWorks.nodes;
 
         // 30以上の場合は、ありふれた単語である可能性が高いため諦める
         if (allAnimeData.length > 30) {
