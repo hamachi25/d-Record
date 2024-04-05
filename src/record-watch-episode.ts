@@ -2,6 +2,7 @@ import { query, remakeString, findCorrectAnime } from "./anime-data-scraper";
 import { fetchData } from "./fetch";
 import { settingData } from "./get-local-storage";
 import { Work, Episode } from "./types";
+import { getProductionYear } from "./anime-data-scraper";
 
 let notRecordArray: number[];
 let data: Work[];
@@ -183,16 +184,33 @@ function remakeEpisode(episode: string) {
     return -1;
 }
 
-// Annictからデータを取得
-async function getAnimedata(year: string | number, title: string | null | undefined) {
-    let season: string[] = [];
-    if (year) {
-        season = [year + "-winter", year + "-spring", year + "-summer", year + "-autumn"];
+// dアニメストアから放送時期を取得
+async function getAnimeYear(url: string[], retry: boolean) {
+    const requestURL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=" + url[0];
+    let html;
+    try {
+        const response = await fetch(requestURL);
+        if (!response.ok) {
+            throw new Error("ネットワークエラー");
+        }
+        html = await response.text();
+    } catch (error) {
+        console.error(error);
     }
+
+    if (html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        return getProductionYear(doc, retry);
+    }
+}
+
+// Annictからデータを取得
+async function getAnimedata(url: RegExpMatchArray, title: string) {
     const remakeTitle = remakeString(title, false);
     const variables = {
         titles: remakeTitle,
-        seasons: season,
+        seasons: await getAnimeYear(url, false),
     };
 
     const response2 = await fetchData(JSON.stringify({ query: query, variables: variables }));
@@ -201,13 +219,9 @@ async function getAnimedata(year: string | number, title: string | null | undefi
 
     // 失敗したら再度実行
     if (data.length <= 0) {
-        if (year) {
-            season?.push(Number(year) - 1 + "-winter");
-            season?.push(Number(year) + 1 + "-winter");
-        }
         const variables = {
             titles: remakeString(remakeTitle, true),
-            seasons: season,
+            seasons: await getAnimeYear(url, true),
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json3 = await response.json();
@@ -257,15 +271,8 @@ export function sendWathingAnime() {
             return;
         }
 
-        // dアニメストアから放送時期を取得
-        const requestURL =
-            "https://animestore.docomo.ne.jp/animestore/rest/v1/works?work_id=" + url[0];
-        const response = await fetch(requestURL);
-        const json = await response.json();
-        const year = Number(json[0].details.production_year);
-
         // Annictからデータを取得
-        const json2 = await getAnimedata(year, title);
+        const json2 = await getAnimedata(url, title);
         if (data.length <= 0) {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;

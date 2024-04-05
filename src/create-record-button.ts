@@ -127,7 +127,7 @@ export async function createRecordButton() {
         // 視聴した次のエピソードに赤枠をつける
         if (index != undefined && insertTargets[index]) {
             const itemModule = insertTargets[index].closest<HTMLElement>(".itemModule.list");
-            itemModule?.classList.add("next-episode-border");
+            itemModule && itemModule.classList.add("next-episode-border");
         }
     }
 }

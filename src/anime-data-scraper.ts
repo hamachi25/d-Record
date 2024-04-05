@@ -7,11 +7,11 @@ let viewData: NextEpisode[]; // 視聴データ
 const titleText = document.querySelector(".titleWrap > h1")?.firstChild?.textContent ?? "";
 
 // リクエストに送る季節を取得
-function getProductionYear(retry: boolean) {
+export function getProductionYear(doc: Document, retry: boolean) {
     const yearPattern = /^(\d{4})年([春夏秋冬])$/; // 2024年春
     const yearPattern2 = /^製作年：(\d{4})年$/; // 製作年：2024年
 
-    const tagElements = Array.from(document.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
+    const tagElements = Array.from(doc.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
     const yearText = tagElements.find((elem) => elem.textContent?.match(yearPattern))?.textContent;
     const yearText2 = tagElements.find((elem) =>
         elem.textContent?.match(yearPattern2)
@@ -267,7 +267,7 @@ function removeWords(text: string, count: number) {
 
 // アニメデータを取得
 async function getAnimeData() {
-    const yearValue = getProductionYear(false);
+    const yearValue = getProductionYear(document, false);
     const remakeTitle = remakeString(titleText, false);
 
     const variables = {
@@ -289,7 +289,7 @@ async function getAnimeData() {
         // 失敗したら再度実行
         const variables = {
             titles: remakeString(remakeTitle, true),
-            seasons: getProductionYear(true),
+            seasons: getProductionYear(document, true),
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json = await response.json();
