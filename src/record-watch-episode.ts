@@ -184,8 +184,16 @@ function remakeEpisode(episode: string) {
     return -1;
 }
 
-// dアニメストアから放送時期を取得
-async function getAnimeYear(url: string[], retry: boolean) {
+// 作品ページのhtmlから放送時期を取得
+async function getAnimeYear(html: string, retry: boolean) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    return getProductionYear(doc, retry);
+}
+
+// Annictからデータを取得
+async function getAnimedata(url: RegExpMatchArray, title: string) {
+    // dアニメストアから作品ページのhtmlを取得
     const requestURL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=" + url[0];
     let html;
     try {
@@ -197,20 +205,12 @@ async function getAnimeYear(url: string[], retry: boolean) {
     } catch (error) {
         console.error(error);
     }
+    if (!html) return;
 
-    if (html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        return getProductionYear(doc, retry);
-    }
-}
-
-// Annictからデータを取得
-async function getAnimedata(url: RegExpMatchArray, title: string) {
     const remakeTitle = remakeString(title, false);
     const variables = {
         titles: remakeTitle,
-        seasons: await getAnimeYear(url, false),
+        seasons: await getAnimeYear(html, false),
     };
 
     const response2 = await fetchData(JSON.stringify({ query: query, variables: variables }));
@@ -221,7 +221,7 @@ async function getAnimedata(url: RegExpMatchArray, title: string) {
     if (data.length <= 0) {
         const variables = {
             titles: remakeString(remakeTitle, true),
-            seasons: await getAnimeYear(url, true),
+            seasons: await getAnimeYear(html, true),
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
         const json3 = await response.json();
