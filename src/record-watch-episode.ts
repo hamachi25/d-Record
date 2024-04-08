@@ -324,19 +324,20 @@ export function sendWathingAnime() {
         }
 
         // 視聴済みのエピソードの場合スキップ
+        // viewer > libraryEntriesの中で何番目か取得
         const viewData = json2.data.viewer.libraryEntries.nodes;
+        let viewIndex;
+        for (const [i, libraryEntry] of viewData.entries()) {
+            if (libraryEntry.work.annictId == data[animeIndex].annictId) {
+                viewIndex = i;
+                break;
+            }
+        }
+        // nextEpisodeが何話目か
         let index = -1;
         for (const [i, dataEpisode] of dataEpisodes.entries()) {
-            for (const libraryEntry of viewData) {
-                if (
-                    libraryEntry.nextEpisode &&
-                    dataEpisode.annictId == libraryEntry.nextEpisode.annictId
-                ) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index > 0) {
+            if (viewIndex && dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId) {
+                index = i;
                 break;
             }
         }

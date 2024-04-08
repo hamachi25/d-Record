@@ -18,6 +18,9 @@ export interface Work {
 }
 
 export interface NextEpisode {
+    work: {
+        annictId: string;
+    };
     nextEpisode: {
         annictId: string;
     };

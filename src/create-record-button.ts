@@ -99,16 +99,22 @@ export async function createRecordButton() {
     const diff = Math.abs(insertTargets.length - animeData.episodesCount);
     if (dataEpisodes.length == 0 || diff > 4) return;
 
-    let index; // nextEpisodeが何話目か
-    for (const [i, dataEpisode] of dataEpisodes.entries()) {
-        for (const libraryEntry of viewData) {
-            if (!libraryEntry.nextEpisode) continue;
-            if (dataEpisode.annictId == libraryEntry.nextEpisode.annictId) {
-                index = i;
-                break;
-            }
+    // 視聴済みのエピソードの場合スキップ
+    // viewer > libraryEntriesの中で何番目か取得
+    let viewIndex;
+    for (const [i, libraryEntry] of viewData.entries()) {
+        if (libraryEntry.work.annictId == animeData.annictId) {
+            viewIndex = i;
+            break;
         }
-        if (index != undefined) break;
+    }
+    // nextEpisodeが何話目か
+    let index;
+    for (const [i, dataEpisode] of dataEpisodes.entries()) {
+        if (viewIndex && dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId) {
+            index = i;
+            break;
+        }
     }
 
     // 放送中に次のエピソードが登録されていない時の処理

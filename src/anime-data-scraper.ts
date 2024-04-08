@@ -185,6 +185,9 @@ const query = `
                 seasons: $seasons
             ) {
                 nodes {
+                    work {
+                        annictId
+                    }
                     nextEpisode {
                         annictId
                     }
