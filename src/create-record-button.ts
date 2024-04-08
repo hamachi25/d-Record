@@ -46,17 +46,20 @@ export async function createRecordButton() {
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
         button.addEventListener("click", async () => {
+            const recordContainers: NodeListOf<HTMLElement> =
+                document.querySelectorAll(".record-container");
+
             let mutation = `
-                mutation CreateRecord($episodeId: ID!) {
+                mutation {
                     createRecord (
-                        input: { episodeId: $episodeId }
+                        input: { episodeId:"${dataEpisodes[i].id}" }
                     ) { clientMutationId }
             `;
-            const variables = { episodeId: dataEpisodes[i].id };
 
-            changeStatusToWatching(mutation);
+            // ステータスを"見たい"に変更
+            mutation = changeStatusToWatching(mutation);
             mutation += "}";
-            fetchData(JSON.stringify({ query: mutation, variables: variables }));
+            fetchData(JSON.stringify({ query: mutation }));
 
             recordContainers[j].style.display = "none"; // ボタンを非表示
         });
@@ -66,6 +69,9 @@ export async function createRecordButton() {
     function multiRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:last-of-type")[j];
         button.addEventListener("click", async () => {
+            const recordContainers: NodeListOf<HTMLElement> =
+                document.querySelectorAll(".record-container");
+
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
             const count = i - j;
@@ -79,6 +85,7 @@ export async function createRecordButton() {
                 recordContainers[k].style.display = "none";
             });
 
+            // ステータスを"見たい"に変更
             changeStatusToWatching(mutation);
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));

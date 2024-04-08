@@ -59,15 +59,17 @@ function changeStatusText(status: string | undefined) {
 // ステータスが"見てる"ではない場合は、見てるに変更
 function changeStatusToWatching(mutation: string) {
     if (animeData.viewerStatusState != "WATCHING") {
-        mutation += `
+        changeStatusText("WATCHING");
+        return (mutation += `
             updateStatus(
                 input:{
                     state: WATCHING,
                     workId: "${animeData.id}"
                 }
             ) { clientMutationId }
-        `;
-        changeStatusText("WATCHING");
+        `);
+    } else {
+        return mutation;
     }
 }
 
