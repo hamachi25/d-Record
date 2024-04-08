@@ -334,7 +334,7 @@ export function sendWathingAnime() {
             }
         }
         // nextEpisodeが何話目か
-        let index = -1;
+        let index;
         for (const [i, dataEpisode] of dataEpisodes.entries()) {
             if (viewIndex && dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId) {
                 index = i;
@@ -347,7 +347,7 @@ export function sendWathingAnime() {
         const titleElement = doc.querySelector(".titleWrap > h1");
         const regex = new RegExp("（全\\d+話）");
         if (
-            index == -1 && // nextEpisodeがない
+            index == undefined && // nextEpisodeがない
             titleElement &&
             titleElement.textContent &&
             !regex.test(titleElement.textContent) && // アニメが放送中
@@ -362,7 +362,7 @@ export function sendWathingAnime() {
 
         // 現在のエピソードが記録済みの場合
         if (
-            index != -1 &&
+            index != undefined &&
             index > episodeIndex &&
             dataEpisodes[episodeIndex].viewerRecordsCount != 0
         ) {
