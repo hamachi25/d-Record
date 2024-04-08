@@ -129,14 +129,16 @@ export async function createRecordButton() {
     if (!settingData || !settingData.recordButton) {
         // ボタン挿入
         for (const [i, insertTarget] of insertTargets.entries()) {
-            if (index != undefined && i < index) continue;
+            if (index != undefined && i < index && dataEpisodes[i].viewerRecordsCount != 0)
+                continue;
             insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
         }
 
         // イベント追加
         let j = 0;
         for (const [i, _] of insertTargets.entries()) {
-            if (index != undefined && i < index) continue;
+            if (index != undefined && i < index && dataEpisodes[i].viewerRecordsCount != 0)
+                continue;
             singleRecordButton(i, j);
             multiRecordButton(i, j);
             j++;

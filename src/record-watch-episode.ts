@@ -360,7 +360,11 @@ export function sendWathingAnime() {
         }
 
         // 現在のエピソードが記録済みの場合
-        if (index != -1 && index > episodeIndex) {
+        if (
+            index != -1 &&
+            index > episodeIndex &&
+            dataEpisodes[episodeIndex].viewerRecordsCount != 0
+        ) {
             if (!notRecordEpisode) {
                 // 記録する場合は、opacityを下げクリックできなくするだけ
                 uploadIconElement.setAttribute("src", completeUploadIcon);
