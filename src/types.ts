@@ -3,6 +3,7 @@ export interface Episode {
     numberText: string;
     id: string;
     annictId: string;
+    viewerRecordsCount: number;
 }
 
 export interface Work {

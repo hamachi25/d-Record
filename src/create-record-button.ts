@@ -111,8 +111,21 @@ export async function createRecordButton() {
         if (index != undefined) break;
     }
 
-    const recordContainers: NodeListOf<HTMLElement> =
-        document.querySelectorAll(".record-container");
+    // 放送中に次のエピソードが登録されていない時の処理
+    // 登録されていないと、すべてのエピソードにボタンが表示されてしまう
+    const titleElement = document.querySelector(".titleWrap > h1");
+    const regex = new RegExp("（全\\d+話）");
+    if (
+        index == undefined && // nextEpisodeがない
+        titleElement &&
+        titleElement.textContent &&
+        !regex.test(titleElement.textContent) && // アニメが放送中
+        animeData.viewerStatusState == "WATCHING" && // ステータスが「見てる」
+        dataEpisodes[0].viewerRecordsCount == 1 //１話を１回しか見ていない
+    ) {
+        return;
+    }
+
     if (!settingData || !settingData.recordButton) {
         // ボタン挿入
         for (const [i, insertTarget] of insertTargets.entries()) {

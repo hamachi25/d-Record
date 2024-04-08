@@ -175,6 +175,7 @@ const query = `
                         numberText
                         id
                         annictId
+                        viewerRecordsCount
                     }
                 }
             }

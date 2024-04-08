@@ -186,26 +186,30 @@ function remakeEpisode(episode: string) {
 }
 
 // 作品ページのhtmlから放送時期を取得
+let doc: Document;
 async function getAnimeYear(html: string, retry: boolean) {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+    doc = parser.parseFromString(html, "text/html");
     return getProductionYear(doc, retry);
 }
 
-// Annictからデータを取得
-async function getAnimedata(url: RegExpMatchArray, title: string) {
-    // dアニメストアから作品ページのhtmlを取得
+export async function getDataFromDanime(url: RegExpMatchArray) {
     const requestURL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=" + url[0];
-    let html;
     try {
         const response = await fetch(requestURL);
         if (!response.ok) {
             throw new Error("ネットワークエラー");
         }
-        html = await response.text();
+        return await response.text();
     } catch (error) {
         console.error(error);
     }
+}
+
+// Annictからデータを取得
+async function getAnimedata(url: RegExpMatchArray, title: string) {
+    // dアニメストアから作品ページのhtmlを取得
+    const html = await getDataFromDanime(url);
     if (!html) return;
 
     const remakeTitle = remakeString(title, false);
@@ -337,6 +341,25 @@ export function sendWathingAnime() {
             }
         }
 
+        // 放送中に次のエピソードが登録されていない時の処理
+        // 視聴済みに設定する
+        const titleElement = doc.querySelector(".titleWrap > h1");
+        const regex = new RegExp("（全\\d+話）");
+        if (
+            index == -1 && // nextEpisodeがない
+            titleElement &&
+            titleElement.textContent &&
+            !regex.test(titleElement.textContent) && // アニメが放送中
+            data[animeIndex].viewerStatusState == "WATCHING" && // ステータスが「見てる」
+            dataEpisodes[0].viewerRecordsCount == 1 //１話を１回しか見ていない
+        ) {
+            uploadIconElement.setAttribute("src", completeUploadIcon);
+            buttonState = false;
+            uploadIconElement.style.opacity = "0.3";
+            return;
+        }
+
+        // 現在のエピソードが記録済みの場合
         if (index != -1 && index > episodeIndex) {
             if (!notRecordEpisode) {
                 // 記録する場合は、opacityを下げクリックできなくするだけ
@@ -351,10 +374,12 @@ export function sendWathingAnime() {
         }
 
         buttonState = true; // 前の話数がfalseだと、そのままfalseになってしまうのでtrueを代入
-        // 記録オフにしている場合は実行しない
+
         if (!notRecordEpisode) {
+            // 記録する
             sendInterval(uploadIconContainer, uploadIconElement);
         } else {
+            // 記録しない場合
             uploadIconContainer.dataset.upload = "false";
             uploadIconElement.setAttribute("src", notUploadIcon);
         }
