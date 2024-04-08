@@ -101,6 +101,7 @@ function sendRecord() {
     mutation += "}";
     fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
     uploadIconElement?.setAttribute("src", completeUploadIcon);
+    document.querySelector("video")?.removeEventListener("ended", sendRecord);
     buttonState = false;
 }
 
