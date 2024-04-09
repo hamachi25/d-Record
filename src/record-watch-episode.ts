@@ -313,6 +313,12 @@ export function sendWathingAnime() {
             }
         }
 
+        // エピソード数が0の場合はスキップ
+        if (data[animeIndex].episodesCount == 0) {
+            switchNotUploadIcon(uploadIconContainer, uploadIconElement);
+            return;
+        }
+
         if (!notRecordEpisode && !settingData.animeTitle) {
             // 右下に取得したアニメタイトルを表示
             const titleElement = document.querySelector("#upload-anime-title > span");
@@ -333,13 +339,15 @@ export function sendWathingAnime() {
             episodeIndex = dataEpisodes.findIndex(
                 (dataEpisode) => dataEpisode.number == episodeNumber
             );
-        } else {
+        } else if (dataEpisodes[0] && dataEpisodes[0].numberText) {
             // numberがnullの時は、numberTextを使う
             dataEpisodes.forEach((dataEpisode, i) => {
                 if (remakeEpisode(dataEpisode.numberText) == episodeNumber) {
                     episodeIndex = i;
                 }
             });
+        } else if (dataEpisodes.length === 1) {
+            episodeIndex = 0;
         }
 
         // 視聴済みのエピソードの場合スキップ

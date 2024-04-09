@@ -38,8 +38,6 @@ const recordButtonElement = `
 
 // 記録ボタンを作成
 export async function createRecordButton() {
-    const dataEpisodes: Episode[] = animeData.episodes.nodes;
-
     // "記録"クリックイベント
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
@@ -117,6 +115,7 @@ export async function createRecordButton() {
         });
     }
 
+    const dataEpisodes: Episode[] = animeData.episodes.nodes;
     /*
     動画の要素と取得したエピソード数の差が、4以上だったら実行しない
     Annict側で1期2期が別れている可能性などがある　例：水星の魔女
@@ -147,6 +146,11 @@ export async function createRecordButton() {
         }
     }
 
+    // 1話しかない場合はindexを0にする
+    if (index === undefined && dataEpisodes.length === 1) {
+        index = 0;
+    }
+
     // 放送中に次のエピソードが登録されていない時の処理
     // 登録されていないと、すべてのエピソードにボタンが表示されてしまう
     const titleElement = document.querySelector(".titleWrap > h1");
@@ -166,7 +170,7 @@ export async function createRecordButton() {
     if (!settingData || !settingData.recordButton) {
         // ボタン挿入
         for (const [i, insertTarget] of insertTargets.entries()) {
-            if (index != undefined && i < index && dataEpisodes[i].viewerRecordsCount != 0)
+            if (index == undefined || (i < index && dataEpisodes[i].viewerRecordsCount != 0))
                 continue;
             insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
         }
@@ -174,7 +178,7 @@ export async function createRecordButton() {
         // イベント追加
         let j = 0;
         for (const [i, _] of insertTargets.entries()) {
-            if (index != undefined && i < index && dataEpisodes[i].viewerRecordsCount != 0)
+            if (index == undefined || (i < index && dataEpisodes[i].viewerRecordsCount != 0))
                 continue;
             singleRecordButton(i, j);
             multiRecordButton(i, j);
