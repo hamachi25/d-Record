@@ -4,8 +4,6 @@ import { fetchData } from "./fetch";
 import { settingData } from "./get-local-storage";
 import { Episode } from "./types";
 
-const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
-
 const recordButtonElement = `
     <div class="record-container">
         <button class="record-button">
@@ -46,21 +44,34 @@ export async function createRecordButton() {
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
         button.addEventListener("click", async () => {
-            const recordContainers: NodeListOf<HTMLElement> =
-                document.querySelectorAll(".record-container");
-
             let mutation = `
                 mutation {
                     createRecord (
                         input: { episodeId:"${dataEpisodes[i].id}" }
                     ) { clientMutationId }
             `;
-
-            // ステータスを"見たい"に変更
-            mutation = changeStatusToWatching(mutation);
+            // 最終話まで見ている場合は、ステータスを"見た"に変更
+            if (
+                !isAiring && // アニメが放送終了
+                j === document.querySelectorAll(".record-container").length - 1 // 最終話
+            ) {
+                mutation += `
+                    updateStatus(
+                        input:{
+                            state: WATCHED,
+                            workId: "${animeData.id}"
+                        }
+                    ) { clientMutationId }
+                `;
+            } else {
+                // ステータスを"見たい"に変更
+                mutation = changeStatusToWatching(mutation);
+            }
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
 
+            const recordContainers: NodeListOf<HTMLElement> =
+                document.querySelectorAll(".record-container");
             recordContainers[j].style.display = "none"; // ボタンを非表示
         });
     }
@@ -69,13 +80,12 @@ export async function createRecordButton() {
     function multiRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:last-of-type")[j];
         button.addEventListener("click", async () => {
-            const recordContainers: NodeListOf<HTMLElement> =
-                document.querySelectorAll(".record-container");
-
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
             const count = i - j;
 
+            const recordContainers: NodeListOf<HTMLElement> =
+                document.querySelectorAll(".record-container");
             [...Array(j + 1)].forEach((_, k) => {
                 mutation += `
                     e${k}:createRecord(
@@ -85,8 +95,23 @@ export async function createRecordButton() {
                 recordContainers[k].style.display = "none";
             });
 
-            // ステータスを"見たい"に変更
-            changeStatusToWatching(mutation);
+            // 最終話まで見ている場合は、ステータスを"見た"に変更
+            if (
+                !isAiring && // アニメが放送終了
+                j === document.querySelectorAll(".record-container").length - 1 // 最終話
+            ) {
+                mutation += `
+                    updateStatus(
+                        input:{
+                            state: WATCHED,
+                            workId: "${animeData.id}"
+                        }
+                    ) { clientMutationId }
+                `;
+            } else {
+                // ステータスを"見たい"に変更
+                mutation = changeStatusToWatching(mutation);
+            }
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
         });
@@ -96,6 +121,7 @@ export async function createRecordButton() {
     動画の要素と取得したエピソード数の差が、4以上だったら実行しない
     Annict側で1期2期が別れている可能性などがある　例：水星の魔女
     */
+    const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
     const diff = Math.abs(insertTargets.length - animeData.episodesCount);
     if (dataEpisodes.length == 0 || diff > 4) return;
 
@@ -125,11 +151,12 @@ export async function createRecordButton() {
     // 登録されていないと、すべてのエピソードにボタンが表示されてしまう
     const titleElement = document.querySelector(".titleWrap > h1");
     const regex = new RegExp("（全\\d+話）");
+    const isAiring = !regex.test(titleElement?.textContent || ""); // アニメが放送中
     if (
         index == undefined && // nextEpisodeがない
         titleElement &&
         titleElement.textContent &&
-        !regex.test(titleElement.textContent) && // アニメが放送中
+        isAiring && // アニメが放送中
         animeData.viewerStatusState == "WATCHING" && // ステータスが「見てる」
         dataEpisodes[0].viewerRecordsCount == 1 //１話を１回しか見ていない
     ) {

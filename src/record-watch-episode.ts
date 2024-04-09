@@ -8,8 +8,10 @@ let notRecordArray: number[];
 let data: Work[];
 let dataEpisodes: Episode[];
 let episodeIndex = -1;
+let animeIndex = 0;
 let timerId: number;
 let buttonState = true;
+
 const uploadIcon =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABJ0lEQVRYhe2XsW3DMBBFn4IM4FGUCaz0LjKC07pKNuAIHkEj2Bs4G2iEuEtpd+kuDQMTMo/WUbYIB/kAIepE3j3pTiRYiQgl9VA0+hUAFr7lS0Ry20pOWuX6yQ2+lHMtpwKIBc+GsAavg2DfCkRt8Wktwpm/HoE2sG+D/sHi0ArQAc9ADXz17E/+2afF4aMR4ADsEnBmaV/AARJp7QCfrTLXRUcrxZHS2o9xgc152/rC3NFF2C++2NsfLQ6H1MAHp7xvSOe6Axrgxd83wHwswA4tfzrEL6S7BHD3u2FRgE7pm2RdiEJtgNegPzkADFuYkrrrGvgbAENqoMG2EPXnJlVJ/Fxwq8NC1TdoKTBtKGOkAbwB+yvG2QPvsQdaCiZT8b/gH6A4wA9MTTwvPMgvWAAAAABJRU5ErkJggg==";
 const notUploadIcon =
@@ -79,27 +81,43 @@ function switchNotUploadIcon(
 }
 
 function sendRecord() {
-    const uploadIconElement = document.getElementById("upload-icon");
     let mutation = `
         mutation CreateRecord($episodeId: ID!) {
             createRecord (
                 input: { episodeId: $episodeId }
             ) { clientMutationId }
     `;
-    // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-    if (data[0]?.viewerStatusState != "WATCHING") {
+    const titleElement = doc.querySelector(".titleWrap > h1");
+    const regex = new RegExp("（全\\d+話）");
+    // 最終話だった場合、"見た"に変更
+    if (
+        regex.test(titleElement?.textContent || "") && // アニメが放送終了
+        episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number // 最終話
+    ) {
         mutation += `
-            updateStatus(
-                input:{
-                    state: WATCHING,
-                    workId: "${data[0].id}"
-                }
-            ) { clientMutationId }
-        `;
+                updateStatus(
+                    input:{
+                        state: WATCHED,
+                        workId: "${data[animeIndex].id}"
+                    }
+                ) { clientMutationId }
+            `;
+    } else if (data[animeIndex]?.viewerStatusState != "WATCHING") {
+        // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
+        mutation += `
+                updateStatus(
+                    input:{
+                        state: WATCHING,
+                        workId: "${data[animeIndex].id}"
+                    }
+                ) { clientMutationId }
+            `;
     }
     const variables2 = { episodeId: dataEpisodes[episodeIndex].id };
     mutation += "}";
     fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
+
+    const uploadIconElement = document.getElementById("upload-icon");
     uploadIconElement?.setAttribute("src", completeUploadIcon);
     document.querySelector("video")?.removeEventListener("ended", sendRecord);
     buttonState = false;
@@ -193,8 +211,8 @@ async function getAnimeYear(html: string, retry: boolean) {
     return getProductionYear(doc, retry);
 }
 
-export async function getDataFromDanime(url: RegExpMatchArray) {
-    const requestURL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=" + url[0];
+async function getDataFromDanime(url: number) {
+    const requestURL = "https://animestore.docomo.ne.jp/animestore/ci_pc?workId=" + url;
     try {
         const response = await fetch(requestURL);
         if (!response.ok) {
@@ -207,7 +225,7 @@ export async function getDataFromDanime(url: RegExpMatchArray) {
 }
 
 // Annictからデータを取得
-async function getAnimedata(url: RegExpMatchArray, title: string) {
+async function getAnimedata(url: number, title: string) {
     // dアニメストアから作品ページのhtmlを取得
     const html = await getDataFromDanime(url);
     if (!html) return;
@@ -218,9 +236,9 @@ async function getAnimedata(url: RegExpMatchArray, title: string) {
         seasons: await getAnimeYear(html, false),
     };
 
-    const response2 = await fetchData(JSON.stringify({ query: query, variables: variables }));
-    const json2 = await response2.json();
-    data = json2.data.searchWorks.nodes;
+    const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+    const json = await response.json();
+    data = json.data.searchWorks.nodes;
 
     // 失敗したら再度実行
     if (data.length <= 0) {
@@ -229,10 +247,11 @@ async function getAnimedata(url: RegExpMatchArray, title: string) {
             seasons: await getAnimeYear(html, true),
         };
         const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
-        const json3 = await response.json();
-        data = json3.data.searchWorks.nodes;
+        const json = await response.json();
+        data = json.data.searchWorks.nodes;
+        return json.data.viewer.libraryEntries.nodes;
     }
-    return json2;
+    return json.data.viewer.libraryEntries.nodes;
 }
 
 export function sendWathingAnime() {
@@ -251,7 +270,7 @@ export function sendWathingAnime() {
 
     const uploadIconContainer = document.getElementById("upload-icon-container");
     const uploadIconElement = document.getElementById("upload-icon");
-    const url = location.href.match(/(?<=partId=)\d{5}/); // URLからworkIdを取得
+    const url = location.href.match(/(?<=partId=)\d+/); // URLからworkIdを取得
     if (!url || !uploadIconContainer || !uploadIconElement) {
         return;
     }
@@ -277,14 +296,14 @@ export function sendWathingAnime() {
         }
 
         // Annictからデータを取得
-        const json2 = await getAnimedata(url, title);
+        const workId = Number(url[0].substring(0, 5));
+        const viewData = await getAnimedata(workId, title);
         if (data.length <= 0) {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;
         }
 
         // 取得したアニメからタイトルが一致するものを探す
-        let animeIndex: number = 0;
         if (data.length >= 2) {
             animeIndex = findCorrectAnime(title, data);
             // 見つからなかった場合
@@ -325,7 +344,6 @@ export function sendWathingAnime() {
 
         // 視聴済みのエピソードの場合スキップ
         // viewer > libraryEntriesの中で何番目か取得
-        const viewData = json2.data.viewer.libraryEntries.nodes;
         let viewIndex;
         for (const [i, libraryEntry] of viewData.entries()) {
             if (libraryEntry.work.annictId == data[animeIndex].annictId) {

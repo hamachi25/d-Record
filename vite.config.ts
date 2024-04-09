@@ -10,5 +10,6 @@ export default defineConfig({
                 entryFileNames: "main.js",
             },
         },
+        // minify: false,
     },
 });
