@@ -126,6 +126,7 @@ export async function createRecordButton() {
 
     // 視聴済みのエピソードの場合スキップ
     // viewer > libraryEntriesの中で何番目か取得
+    let index;
     let viewIndex;
     for (const [i, libraryEntry] of viewData.entries()) {
         if (libraryEntry.work.annictId == animeData.annictId) {
@@ -134,21 +135,15 @@ export async function createRecordButton() {
         }
     }
     // nextEpisodeが何話目か
-    let index;
     for (const [i, dataEpisode] of dataEpisodes.entries()) {
         if (
-            viewIndex &&
+            viewIndex !== undefined &&
             viewData[viewIndex].nextEpisode &&
             dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId
         ) {
             index = i;
             break;
         }
-    }
-
-    // 1話しかない場合はindexを0にする
-    if (index === undefined && dataEpisodes.length === 1) {
-        index = 0;
     }
 
     // 放送中に次のエピソードが登録されていない時の処理
@@ -165,6 +160,11 @@ export async function createRecordButton() {
         dataEpisodes[0].viewerRecordsCount == 1 //１話を１回しか見ていない
     ) {
         return;
+    }
+
+    // nextEpisodeがない・1話しかない場合はindexを0にする
+    if (index === undefined || dataEpisodes.length === 1) {
+        index = 0;
     }
 
     if (!settingData || !settingData.recordButton) {

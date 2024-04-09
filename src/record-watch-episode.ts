@@ -363,7 +363,7 @@ export function sendWathingAnime() {
         let index;
         for (const [i, dataEpisode] of dataEpisodes.entries()) {
             if (
-                viewIndex &&
+                viewIndex !== undefined &&
                 viewData[viewIndex].nextEpisode &&
                 dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId
             ) {
@@ -388,6 +388,11 @@ export function sendWathingAnime() {
             buttonState = false;
             uploadIconElement.style.opacity = "0.3";
             return;
+        }
+
+        // nextEpisodeがない・1話しかない場合はindexを0にする
+        if (index === undefined || dataEpisodes.length === 1) {
+            index = 0;
         }
 
         // 現在のエピソードが記録済みの場合
