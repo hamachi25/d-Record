@@ -111,7 +111,11 @@ export async function createRecordButton() {
     // nextEpisodeが何話目か
     let index;
     for (const [i, dataEpisode] of dataEpisodes.entries()) {
-        if (viewIndex && dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId) {
+        if (
+            viewIndex &&
+            viewData[viewIndex].nextEpisode &&
+            dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId
+        ) {
             index = i;
             break;
         }
