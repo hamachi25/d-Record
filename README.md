@@ -47,7 +47,7 @@
 ### 作品ページに赤いボタンが表示されない
 
 作品が取得できていません。  
-これは d アニメストアと Annict の作品タイトルが異なっていることが原因です。  
+これは dアニメストアと Annict の作品タイトルが異なっていることが原因です。  
 作品によっては対応できますので、見つけたらご報告いただければ幸いです。 https://github.com/hamachi25/d-Record/issues/1  
 
 ### 間違った作品・シーズンが取得されている
@@ -61,14 +61,12 @@ d-Record は話数ごとに視聴しているか確認しているのではな�
 **つまり 1 話を視聴せずにそれ以降の話数を見ても 、1 話以降は視聴していないという表示になります。**  
 これは d アニメストアでの表示上であって、Annict では視聴したことにはなっています。  
 
-作品ページのメモアイコンから「ここまで記録」をクリックしてそれまでの話数を視聴済みに変更することで解決できます。  
+解決するには、作品ページで「ここまで記録」をクリックしてそれまでの話数を視聴済みに変更することで解決できます。  
 
-### 放送中の作品で最新話を見ると、すべての話数を視聴していないことになる
+### １話から見てるのに途中の話数から視聴済みにならない
 
-d-Record はまだ視聴していないエピソードの最初の話数を確認して、どこまで視聴したかを取得しています。  
-もし Annict 上で最新話の次の話数が登録されていないと、視聴していない最初の話数が取得できません。これによってすべての話数を視聴していないという判定になってしまいます。  
-
-Annict 上のデータが更新されると正常に動作するようになります。  
+途中の話数に3.5話のような総集編が挟まっているためです。  
+解決するには、Annictでその話数を視聴済みに変更するしかありません。
 
 
 ## ビルド  
@@ -82,7 +80,7 @@ FirefoxとChromeのmanifest.jsonが異なるので、pubicのmanifestを環境�
 
 
 ## クレジット  
-- [Shimba, Koji](https://github.com/shimbaco) - 視聴ステータスのSVGファイル、GraphQL APIを理解する上での手助け（ありがとうございます）
-- [TomoTom0](https://github.com/TomoTom0) - dアニ上での作品タイトルの取得方法や検索精度向上のためのコード（[danime-save-annict-2より](https://github.com/TomoTom0/danime-save-annict-2)）
-- [プリン](https://github.com/kazu3jp) - トークンの保存、視聴ステータスのUIに関するコード（[danictより](https://github.com/kazu3jp/danict)）
-- [家守カホウ](https://twitter.com/y_kahou) - URLからページごとに実行するためのコード（[dアニメストア便利化より](https://greasyfork.org/ja/scripts/414008)）
+- [Shimba, Koji](https://github.com/shimbaco) - 視聴ステータスのSVGファイル、GraphQL APIを理解する上での手助け
+- [TomoTom0](https://github.com/TomoTom0) - dアニ上での作品タイトルの取得方法や検索精度向上のためのコード（[danime-save-annict-2](https://github.com/TomoTom0/danime-save-annict-2)）
+- [プリン](https://github.com/kazu3jp) - トークンの保存、視聴ステータスのUIに関するコード（[danict](https://github.com/kazu3jp/danict)）
+- [家守カホウ](https://twitter.com/y_kahou) - URLからページごとに実行するためのコード（[dアニメストア便利化](https://greasyfork.org/ja/scripts/414008)）
