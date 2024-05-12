@@ -1,7 +1,7 @@
 import { animeData } from "./anime-data-scraper";
 
-let statusText = "";
-let svgPathD = "";
+export let statusText = "";
+export let svgPathD = "";
 
 // annictメニューのsvg
 const noStateD =
@@ -15,10 +15,10 @@ const holdD =
     "M144 479H48c-26.5 0-48-21.5-48-48V79c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48v352c0 26.5-21.5 48-48 48zm304-48V79c0-26.5-21.5-48-48-48h-96c-26.5 0-48 21.5-48 48v352c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48z";
 const stopWatchingD =
     "M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z";
-const svgPaths = [noStateD, watchedD, watchingD, wannaWatchD, holdD, stopWatchingD];
+export const svgPaths = [noStateD, watchedD, watchingD, wannaWatchD, holdD, stopWatchingD];
 
 // ステータスを日本語に変換
-function convertStatusToJapanese(status: string | undefined) {
+export function convertStatusToJapanese(status: string | undefined) {
     switch (status) {
         case "NO_STATE":
             statusText = "未選択";
@@ -47,7 +47,7 @@ function convertStatusToJapanese(status: string | undefined) {
 }
 
 // 視聴ステータスを変更する
-function changeStatusText(status: string | undefined) {
+export function changeStatusText(status: string | undefined) {
     convertStatusToJapanese(status);
     const label = document.querySelector("#annict > div > span");
     if (label) {
@@ -57,7 +57,7 @@ function changeStatusText(status: string | undefined) {
 }
 
 // ステータスが"見てる"ではない場合は、見てるに変更
-function changeStatusToWatching(mutation: string) {
+export function changeStatusToWatching(mutation: string) {
     if (animeData.viewerStatusState != "WATCHING") {
         changeStatusText("WATCHING");
         return (mutation += `
@@ -72,12 +72,3 @@ function changeStatusToWatching(mutation: string) {
         return mutation;
     }
 }
-
-export {
-    statusText,
-    svgPaths,
-    svgPathD,
-    convertStatusToJapanese,
-    changeStatusText,
-    changeStatusToWatching,
-};

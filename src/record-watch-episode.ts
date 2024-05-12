@@ -81,41 +81,44 @@ function switchNotUploadIcon(
 }
 
 function sendRecord() {
-    let mutation = `
-        mutation CreateRecord($episodeId: ID!) {
-            createRecord (
-                input: { episodeId: $episodeId }
-            ) { clientMutationId }
-    `;
     const titleElement = doc.querySelector(".titleWrap > h1");
     const regex = new RegExp("（全\\d+話）");
+
+    let mutation = "mutation{";
+    // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
+    if (data[animeIndex]?.viewerStatusState != "WATCHING") {
+        mutation += `
+            updateStatus(
+                input:{
+                    state: WATCHING,
+                    workId: "${data[animeIndex].id}"
+                }
+            ) { clientMutationId }
+        `;
+    }
+    mutation += `
+        createRecord (
+            input: { episodeId:"${dataEpisodes[episodeIndex].id}"}
+        ) { clientMutationId }
+    `;
     // 最終話だった場合、"見た"に変更
     if (
         regex.test(titleElement?.textContent || "") && // アニメが放送終了
         episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number // 最終話
     ) {
         mutation += `
-                updateStatus(
-                    input:{
-                        state: WATCHED,
-                        workId: "${data[animeIndex].id}"
-                    }
-                ) { clientMutationId }
-            `;
-    } else if (data[animeIndex]?.viewerStatusState != "WATCHING") {
-        // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-        mutation += `
-                updateStatus(
-                    input:{
-                        state: WATCHING,
-                        workId: "${data[animeIndex].id}"
-                    }
-                ) { clientMutationId }
-            `;
+            updateStatus(
+                input:{
+                    state: WATCHED,
+                    workId: "${data[animeIndex].id}"
+                }
+            ) { clientMutationId }
+        `;
     }
-    const variables2 = { episodeId: dataEpisodes[episodeIndex].id };
+
     mutation += "}";
-    fetchData(JSON.stringify({ query: mutation, variables: variables2 }));
+    console.log(mutation);
+    fetchData(JSON.stringify({ query: mutation }));
 
     const uploadIconElement = document.getElementById("upload-icon");
     uploadIconElement?.setAttribute("src", completeUploadIcon);
@@ -255,9 +258,7 @@ async function getAnimedata(url: number, title: string) {
 }
 
 export function sendWathingAnime() {
-    if (settingData.sendTiming && settingData.sendTiming == "not-send") {
-        return;
-    } //自動送信しない設定
+    if (settingData.sendTiming && settingData.sendTiming == "not-send") return; // 自動送信しない設定の場合
 
     // 前の話数のボタンが残っていたら削除
     document.getElementById("upload-icon-container")?.remove();
@@ -271,12 +272,10 @@ export function sendWathingAnime() {
     const uploadIconContainer = document.getElementById("upload-icon-container");
     const uploadIconElement = document.getElementById("upload-icon");
     const url = location.href.match(/(?<=partId=)\d+/); // URLからworkIdを取得
-    if (!url || !uploadIconContainer || !uploadIconElement) {
-        return;
-    }
+    if (!url || !uploadIconContainer || !uploadIconElement) return;
     uploadButtonEvent(uploadIconContainer, uploadIconElement, url);
 
-    // ストレージから配列を取得し、該当しているか確認
+    // ストレージから配列を取得し、notRecordWorkに該当しているか確認
     chrome.storage.local.get("notRecordWork", async (result) => {
         notRecordArray = result.notRecordWork || [];
         const notRecordEpisode = notRecordArray.includes(Number(url[0]));
@@ -361,14 +360,12 @@ export function sendWathingAnime() {
         }
         // nextEpisodeが何話目か
         let index;
-        for (const [i, dataEpisode] of dataEpisodes.entries()) {
-            if (
-                viewIndex !== undefined &&
-                viewData[viewIndex].nextEpisode &&
-                dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId
-            ) {
-                index = i;
-                break;
+        if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
+            for (const [i, dataEpisode] of dataEpisodes.entries()) {
+                if (dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId) {
+                    index = i;
+                    break;
+                }
             }
         }
 
@@ -377,7 +374,7 @@ export function sendWathingAnime() {
         const titleElement = doc.querySelector(".titleWrap > h1");
         const regex = new RegExp("（全\\d+話）");
         if (
-            index == undefined && // nextEpisodeがない
+            index === undefined && // nextEpisodeがない
             titleElement &&
             titleElement.textContent &&
             !regex.test(titleElement.textContent) && // アニメが放送中
@@ -391,13 +388,11 @@ export function sendWathingAnime() {
         }
 
         // nextEpisodeがない・1話しかない場合はindexを0にする
-        if (index === undefined || dataEpisodes.length === 1) {
-            index = 0;
-        }
+        if (index === undefined || dataEpisodes.length === 1) index = 0;
 
         // 現在のエピソードが記録済みの場合
         if (
-            index != undefined &&
+            index !== undefined &&
             index > episodeIndex &&
             dataEpisodes[episodeIndex].viewerRecordsCount != 0
         ) {

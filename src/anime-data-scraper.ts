@@ -1,16 +1,35 @@
 import { fetchData } from "./fetch";
 import { Work, NextEpisode } from "./types";
 
-let animeData: Work; // 取得したアニメデータ
-let viewData: NextEpisode[]; // 視聴データ
+export let animeData: Work; // 取得したアニメデータ
+export let viewData: NextEpisode[]; // 視聴データ
 
 const titleText = document.querySelector(".titleWrap > h1")?.firstChild?.textContent ?? "";
 
-// リクエストに送る季節を取得
-export function getProductionYear(doc: Document, retry: boolean) {
-    const yearPattern = /^(\d{4})年([春夏秋冬])$/; // 2024年春
-    const yearPattern2 = /^製作年：(\d{4})年$/; // 製作年：2024年
+/******************************************************************************/
 
+/* リクエストに送る季節を取得 */
+
+const yearPattern = /^(\d{4})年([春夏秋冬])$/; // 2024年春
+const yearPattern2 = /^製作年：(\d{4})年$/; // 製作年：2024年
+const seasonTranslation = {
+    春: "spring",
+    夏: "summer",
+    秋: "autumn",
+    冬: "winter",
+};
+
+function createReturnSeason(year: string) {
+    return [
+        `${year}-winter`,
+        `${year}-spring`,
+        `${year}-summer`,
+        `${year}-autumn`,
+        `${Number(year) + 1}-winter`,
+    ];
+}
+
+export function getProductionYear(doc: Document, retry: boolean) {
     const tagElements = Array.from(doc.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
     const yearText = tagElements.find((elem) => elem.textContent?.match(yearPattern))?.textContent;
     const yearText2 = tagElements.find((elem) =>
@@ -20,40 +39,26 @@ export function getProductionYear(doc: Document, retry: boolean) {
     const matchText2 = yearText2?.match(yearPattern2);
 
     let returnSeason: string[] = [];
-    function createReturnSeason(year: string) {
-        returnSeason = [
-            `${year}-winter`,
-            `${year}-spring`,
-            `${year}-summer`,
-            `${year}-autumn`,
-            `${Number(year) + 1}-winter`,
-        ];
-    }
-
     if (yearText && matchText) {
         // 2024年春の場合
-        const seasonTranslation = {
-            春: "spring",
-            夏: "summer",
-            秋: "autumn",
-            冬: "winter",
-        };
 
         if (matchText2) {
             const year2 = matchText2[1];
-            if (retry) {
+            if (!retry) {
+                if (
+                    matchText[1] > year2 ||
+                    document.querySelectorAll("a[id].clearfix").length > 20
+                ) {
+                    // "2024年春"と"製作年：2023年"の年が違う場合
+                    // 2クール以上ある場合、放送時期が異なっていることがある
+                    returnSeason = createReturnSeason(year2);
+                    return returnSeason;
+                }
+            } else {
                 // 再検索
                 // 年がズレてる場合があるので冬は前後1年足す
-                createReturnSeason(matchText[1]);
+                returnSeason = createReturnSeason(matchText[1]);
                 returnSeason.push(`${Number(matchText[1]) - 1}-winter`);
-                return returnSeason;
-            } else if (
-                matchText[1] > year2 ||
-                document.querySelectorAll("a[id].clearfix").length > 20
-            ) {
-                // "2024年春"と"製作年：2023年"の年が違う場合
-                // 2クール以上ある場合、放送時期が異なっていることがある
-                createReturnSeason(year2);
                 return returnSeason;
             }
         }
@@ -63,7 +68,10 @@ export function getProductionYear(doc: Document, retry: boolean) {
     } else if (yearText2 && matchText2) {
         // 製作年：2024年の場合
         const year2 = matchText2[1];
-        if (retry) {
+        if (!retry) {
+            returnSeason = createReturnSeason(year2);
+            return returnSeason;
+        } else {
             // 再検索
             // 前後3年で検索
             const seasons = ["winter", "spring", "summer", "autumn"];
@@ -74,30 +82,28 @@ export function getProductionYear(doc: Document, retry: boolean) {
                     result.push(`${startYear + i}-${season}`);
                 });
             });
-
             return result;
-        } else {
-            createReturnSeason(year2);
-            return returnSeason;
         }
     } else {
-        // 2つともない場合、キャスト欄から年を取得
+        // 制作年が記載されていない場合、キャスト欄から年を取得
         const yearText = document
             .querySelector(".castContainer > p:nth-of-type(3)")
             ?.lastChild?.textContent?.replace(/\n|年/g, "");
         if (yearText && !isNaN(Number(yearText))) {
-            createReturnSeason(yearText);
+            returnSeason = createReturnSeason(yearText);
             return returnSeason;
         }
     }
 }
+
+/******************************************************************************/
 
 /*
 タイトルを検索用に整える
 danime-save-annict-2
 https://github.com/TomoTom0/danime-save-annict-2/blob/105851c64900b4994eb095f0f1bd83e755cb5f1d/src/scripts/index.js#L447-L463
 */
-function remakeString(title: string | null | undefined, retry: boolean) {
+export function remakeString(title: string | null | undefined, retry: boolean) {
     if (!title) return "";
 
     if (!retry) {
@@ -154,7 +160,9 @@ function remakeString(title: string | null | undefined, retry: boolean) {
     }
 }
 
-const query = `
+/******************************************************************************/
+
+export const query = `
     query SearchWorks($titles: [String!], $seasons: [String!]) {
         searchWorks(
             titles: $titles,
@@ -197,9 +205,10 @@ const query = `
     }
 `;
 
+/******************************************************************************/
+
 // 取得したアニメからタイトルが一致するものを探す
-// dアニとannictで異なりそうな箇所を徐々に消していく
-function findCorrectAnime(titleText: string, data: Work[]) {
+export function findCorrectAnime(titleText: string, data: Work[]) {
     // removeWords()を行った回数が最もすくないアニメのindexを返す
     let index = [];
     let findTime = [];
@@ -229,6 +238,8 @@ function findCorrectAnime(titleText: string, data: Work[]) {
     );
     return arrayDiff.indexOf(Math.min(...arrayDiff));
 }
+
+// dアニとannictで異なりそうな箇所を徐々に消していく
 function removeWords(text: string, count: number) {
     const remakeWords = {
         Ⅰ: "I",
@@ -269,8 +280,10 @@ function removeWords(text: string, count: number) {
     }
 }
 
+/******************************************************************************/
+
 // アニメデータを取得
-async function getAnimeData() {
+export async function getAnimeData() {
     const yearValue = getProductionYear(document, false);
     const remakeTitle = remakeString(titleText, false);
 
@@ -290,7 +303,7 @@ async function getAnimeData() {
         // 成功
         animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
     } else {
-        // 失敗したら再度実行
+        // 失敗なので再度実行
         const variables = {
             titles: remakeString(remakeTitle, true),
             seasons: getProductionYear(document, true),
@@ -307,5 +320,3 @@ async function getAnimeData() {
         }
     }
 }
-
-export { query, animeData, viewData, findCorrectAnime, remakeString, getAnimeData };

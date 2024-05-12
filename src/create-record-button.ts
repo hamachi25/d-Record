@@ -42,12 +42,17 @@ export async function createRecordButton() {
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
         button.addEventListener("click", async () => {
-            let mutation = `
-                mutation {
-                    createRecord (
-                        input: { episodeId:"${dataEpisodes[i].id}" }
-                    ) { clientMutationId }
+            let mutation = "mutation{";
+
+            // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
+            mutation = changeStatusToWatching(mutation);
+
+            mutation += `
+                createRecord (
+                    input: { episodeId:"${dataEpisodes[i].id}"}
+                ) { clientMutationId }
             `;
+
             // 最終話まで見ている場合は、ステータスを"見た"に変更
             if (
                 !isAiring && // アニメが放送終了
@@ -61,10 +66,8 @@ export async function createRecordButton() {
                         }
                     ) { clientMutationId }
                 `;
-            } else {
-                // ステータスを"見たい"に変更
-                mutation = changeStatusToWatching(mutation);
             }
+
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
 
@@ -80,8 +83,11 @@ export async function createRecordButton() {
         button.addEventListener("click", async () => {
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
-            const count = i - j;
 
+            // ステータスを"見たい"に変更
+            mutation = changeStatusToWatching(mutation);
+
+            const count = i - j;
             const recordContainers: NodeListOf<HTMLElement> =
                 document.querySelectorAll(".record-container");
             [...Array(j + 1)].forEach((_, k) => {
@@ -106,10 +112,8 @@ export async function createRecordButton() {
                         }
                     ) { clientMutationId }
                 `;
-            } else {
-                // ステータスを"見たい"に変更
-                mutation = changeStatusToWatching(mutation);
             }
+
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
         });
