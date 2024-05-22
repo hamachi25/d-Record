@@ -86,7 +86,14 @@ function sendRecord() {
 
     let mutation = "mutation{";
     // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-    if (data[animeIndex]?.viewerStatusState != "WATCHING") {
+    if (
+        data[animeIndex]?.viewerStatusState !== "WATCHING" &&
+        !(
+            titleElement?.textContent &&
+            regex.test(titleElement.textContent) &&
+            episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number
+        )
+    ) {
         mutation += `
             updateStatus(
                 input:{
@@ -103,7 +110,8 @@ function sendRecord() {
     `;
     // 最終話だった場合、"見た"に変更
     if (
-        regex.test(titleElement?.textContent || "") && // アニメが放送終了
+        titleElement?.textContent &&
+        regex.test(titleElement.textContent) && // アニメが放送終了
         episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number // 最終話
     ) {
         mutation += `

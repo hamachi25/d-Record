@@ -42,10 +42,13 @@ export async function createRecordButton() {
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
         button.addEventListener("click", async () => {
+            const recordContainer = document.querySelectorAll(".record-container");
             let mutation = "mutation{";
 
             // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-            mutation = changeStatusToWatching(mutation);
+            if (!(!isAiring && j === recordContainer.length - 1)) {
+                mutation = changeStatusToWatching(mutation);
+            }
 
             mutation += `
                 createRecord (
@@ -56,7 +59,7 @@ export async function createRecordButton() {
             // 最終話まで見ている場合は、ステータスを"見た"に変更
             if (
                 !isAiring && // アニメが放送終了
-                j === document.querySelectorAll(".record-container").length - 1 // 最終話
+                j === recordContainer.length - 1 // 最終話
             ) {
                 mutation += `
                     updateStatus(
@@ -81,11 +84,14 @@ export async function createRecordButton() {
     function multiRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:last-of-type")[j];
         button.addEventListener("click", async () => {
+            const recordContainer = document.querySelectorAll(".record-container");
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
 
             // ステータスを"見たい"に変更
-            mutation = changeStatusToWatching(mutation);
+            if (!(!isAiring && j === recordContainer.length - 1)) {
+                mutation = changeStatusToWatching(mutation);
+            }
 
             const count = i - j;
             const recordContainers: NodeListOf<HTMLElement> =
@@ -102,7 +108,7 @@ export async function createRecordButton() {
             // 最終話まで見ている場合は、ステータスを"見た"に変更
             if (
                 !isAiring && // アニメが放送終了
-                j === document.querySelectorAll(".record-container").length - 1 // 最終話
+                j === recordContainer.length - 1 // 最終話
             ) {
                 mutation += `
                     updateStatus(
