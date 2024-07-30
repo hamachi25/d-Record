@@ -108,7 +108,8 @@ export async function createRecordButton() {
             // 最終話まで見ている場合は、ステータスを"見た"に変更
             if (
                 !isAiring && // アニメが放送終了
-                j === recordContainer.length - 1 // 最終話
+                j === recordContainer.length - 1 && // 最終話
+                (settingData.autoChangeStatus == undefined || settingData.autoChangeStatus) // 設定
             ) {
                 mutation += `
                     updateStatus(

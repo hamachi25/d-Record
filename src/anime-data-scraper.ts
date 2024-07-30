@@ -152,7 +152,8 @@ export function remakeString(title: string | null | undefined, retry: boolean) {
             .trim();
     } else {
         // 単語をわけて、3文字以上の単語で再検索
-        const separateWord = /\s+|;|:|・|‐|―|－|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+        const separateWord =
+            /\s+|;|:|・|‐|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
         return title
             .replace(/OVA/, "")
             .split(separateWord)

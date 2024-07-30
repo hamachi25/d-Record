@@ -3,11 +3,12 @@ const sendTimingElements = document.querySelectorAll(".send-timing-container inp
 const nextEpisodeLineElement = document.getElementById("next-episode-line");
 const recordButtonElement = document.getElementById("record-button");
 const animeTitleElement = document.getElementById("anime-title");
+const AutoChangeStatusElement = document.getElementById("auto-change-status");
 
 // ローカルストレージから設定を取得
 function loadSettings() {
     chrome.storage.local.get(
-        ["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle"],
+        ["Token", "sendTiming", "nextEpisodeLine", "recordButton", "animeTitle", "autoChangeStatus"],
         (items) => {
             items.Token && (tokenElement.value = items.Token);
 
@@ -24,6 +25,11 @@ function loadSettings() {
             items.nextEpisodeLine && (nextEpisodeLineElement.checked = items.nextEpisodeLine);
             items.recordButton && (recordButtonElement.checked = items.recordButton);
             items.animeTitle && (animeTitleElement.checked = items.animeTitle);
+            if (items.autoChangeStatus !== undefined) {
+                AutoChangeStatusElement.checked = items.autoChangeStatus;
+            } else {
+                AutoChangeStatusElement.checked = true;
+            }
         }
     );
 }
@@ -48,6 +54,9 @@ recordButtonElement.addEventListener("change", (e) => {
 });
 animeTitleElement.addEventListener("change", (e) => {
     chrome.storage.local.set({ animeTitle: e.target.checked });
+});
+AutoChangeStatusElement.addEventListener("change", (e) => {
+    chrome.storage.local.set({ autoChangeStatus: e.target.checked });
 });
 
 // 「トークンの取得方法」を新規タブで開く

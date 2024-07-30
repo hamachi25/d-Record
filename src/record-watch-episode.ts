@@ -7,8 +7,9 @@ import { getProductionYear } from "./anime-data-scraper";
 let notRecordArray: number[];
 let data: Work[];
 let dataEpisodes: Episode[];
-let episodeIndex = -1;
 let animeIndex = 0;
+let episodeIndex = -1; // 現在のエピソードの話数(numbertextから取得する)
+let dataEpisodesIndex = -1; // 取得したエピソードの中で何番目か(indexから)
 let timerId: number;
 let buttonState = true;
 
@@ -92,7 +93,7 @@ function sendRecord() {
             titleElement?.textContent &&
             regex.test(titleElement.textContent) &&
             episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number
-        )
+        ) //最終回だった場合はステータスを変更しない
     ) {
         mutation += `
             updateStatus(
@@ -105,14 +106,15 @@ function sendRecord() {
     }
     mutation += `
         createRecord (
-            input: { episodeId:"${dataEpisodes[episodeIndex].id}"}
+            input: { episodeId:"${dataEpisodes[dataEpisodesIndex].id}"}
         ) { clientMutationId }
     `;
     // 最終話だった場合、"見た"に変更
     if (
         titleElement?.textContent &&
         regex.test(titleElement.textContent) && // アニメが放送終了
-        episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number // 最終話
+        episodeIndex + 1 === dataEpisodes[dataEpisodes.length - 1].number && // 最終話
+        (settingData.autoChangeStatus == undefined || settingData.autoChangeStatus) // 設定
     ) {
         mutation += `
             updateStatus(
@@ -125,7 +127,6 @@ function sendRecord() {
     }
 
     mutation += "}";
-    console.log(mutation);
     fetchData(JSON.stringify({ query: mutation }));
 
     const uploadIconElement = document.getElementById("upload-icon");
@@ -169,49 +170,80 @@ function sendInterval(
 }
 
 // "第5話"のような話数から数字を取得する
-function remakeEpisode(episode: string) {
-    const numbers = episode
-        .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
-        .match(/\d+/g); // 全角を半角にして数値を取り出す
+class EpisodeNumberExtractor {
+    private remakeWords: Record<string, number> = {
+        〇: 0,
+        一: 1,
+        二: 2,
+        三: 3,
+        四: 4,
+        五: 5,
+        六: 6,
+        七: 7,
+        八: 8,
+        九: 9,
+        十: 10,
+    };
 
-    if (numbers) {
-        return Number(numbers[0]);
-    } else {
-        const remakeWords = {
-            〇: 0,
-            一: 1,
-            二: 2,
-            三: 3,
-            四: 4,
-            五: 5,
-            六: 6,
-            七: 7,
-            八: 8,
-            九: 9,
-            十: 10,
-        };
-        // flatMapで漢数字をアラビア数字に変換して、filterでundefinedを削除
-        const arrayKansuuji = [...episode]
-            .flatMap((s) => s.match(new RegExp(Object.keys(remakeWords).join("|"))))
-            .filter(Boolean);
-        let temp: number = -1;
-        if (arrayKansuuji.length >= 1) {
-            arrayKansuuji.forEach((kan) => {
-                temp += remakeWords[kan as keyof typeof remakeWords];
-            });
-            return temp;
-        } else {
-            // 前編、後編
-            const splitEpisode = episode.split(/ | |　/);
-            const episodeWord = splitEpisode[splitEpisode.length - 1];
-            if (episodeWord == "前編" || episodeWord == "前篇" || episodeWord == "本編") {
-                return 1;
-            } else if (episodeWord == "後編" || episodeWord == "後篇") {
-                return 2;
-            }
-        }
+    private episode: string;
+
+    constructor(episode: string) {
+        this.episode = episode;
     }
-    return -1;
+
+    // 全角数字を半角数字に変換して数値を取り出す
+    private ArabicNumberExtractor(): number | null {
+        const numbers = this.episode
+            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
+            .match(/\d+/g);
+
+        return numbers ? Number(numbers[0]) : null;
+    }
+
+    // 漢数字をアラビア数字に変換する
+    private KanjiNumberExtractor(): number | null {
+        const arrayKansuuji = [...this.episode]
+            .flatMap((s) => s.match(new RegExp(Object.keys(this.remakeWords).join("|"))))
+            .filter(Boolean);
+
+        if (arrayKansuuji.length >= 1) {
+            let num: number = 0;
+            arrayKansuuji.forEach((kan) => {
+                if (kan) {
+                    num += this.remakeWords[kan];
+                }
+            });
+            return num;
+        }
+
+        return null;
+    }
+
+    // 前編、後編などを識別する
+    private SpecialEpisodeIdentifier(): number {
+        const specialWords: Record<string, number> = {
+            前編: 1,
+            前篇: 1,
+            本編: 1,
+            後編: 2,
+            後篇: 2,
+        };
+
+        const splitEpisode = this.episode.split(/ | |　/);
+        const episodeWord = splitEpisode[splitEpisode.length - 1];
+
+        return specialWords[episodeWord] || -1;
+    }
+
+    public extractNumber(): number {
+        const number = this.ArabicNumberExtractor();
+        if (number !== null) return number;
+
+        const kanjiNumber = this.KanjiNumberExtractor();
+        if (kanjiNumber !== null) return kanjiNumber;
+
+        return this.SpecialEpisodeIdentifier();
+    }
 }
 
 // 作品ページのhtmlから放送時期を取得
@@ -296,7 +328,8 @@ export function sendWathingAnime() {
         }
 
         // エピソードから数字を取り出す
-        let episodeNumber = remakeEpisode(episode);
+        const episodeNumberExtractor = new EpisodeNumberExtractor(episode);
+        let episodeNumber = episodeNumberExtractor.extractNumber();
         if (episodeNumber < 0) {
             switchNotUploadIcon(uploadIconContainer, uploadIconElement);
             return;
@@ -342,19 +375,19 @@ export function sendWathingAnime() {
 
         // 現在のエピソードに一致するindexを取得
         dataEpisodes = data[animeIndex].episodes.nodes;
-        if (dataEpisodes[0] && dataEpisodes[0].number) {
-            episodeIndex = dataEpisodes.findIndex(
-                (dataEpisode) => dataEpisode.number == episodeNumber
-            );
-        } else if (dataEpisodes[0] && dataEpisodes[0].numberText) {
-            // numberがnullの時は、numberTextを使う
+        if (dataEpisodes[0] && dataEpisodes[0].numberText) {
+            // numberTextから取得
             dataEpisodes.forEach((dataEpisode, i) => {
-                if (remakeEpisode(dataEpisode.numberText) == episodeNumber) {
-                    episodeIndex = i;
+                const episodeNumberExtractor = new EpisodeNumberExtractor(dataEpisode.numberText);
+                const num = episodeNumberExtractor.extractNumber();
+                if (num == episodeNumber) {
+                    episodeIndex = num - 1; // numberTextから取得することで、総集編を省く
+                    dataEpisodesIndex = i; // データ送信用（総集編含む）
                 }
             });
         } else if (dataEpisodes.length === 1) {
             episodeIndex = 0;
+            dataEpisodesIndex = 0;
         }
 
         // 視聴済みのエピソードの場合スキップ

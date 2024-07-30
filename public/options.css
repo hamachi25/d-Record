@@ -16,7 +16,6 @@ body {
 /* トークン */
 .token-container {
     padding: 1rem 0.5rem;
-    border-bottom: 2px solid #e5e7eb;
 }
 .token-container > span {
     font-weight: 600;
@@ -68,9 +67,6 @@ body {
     margin: auto;
 }
 @media (prefers-color-scheme: dark) {
-    .token-container {
-        border-bottom: 2px solid gray !important;
-    }
     .token-container > input {
         color: rgb(209 213 219);
         background-color: #303030;
@@ -84,9 +80,6 @@ body {
 /* 視聴データの送信タイミング・UIの変更 */
 .radio-checkbox-container {
     padding: 1rem 0.5rem;
-}
-.send-timing-container {
-    border-bottom: 2px solid #e5e7eb;
 }
 .radio-checkbox-container > p {
     font-weight: 600;
@@ -103,12 +96,15 @@ body {
     margin-bottom: 0.25rem;
 }
 .radio-checkbox-container input {
-    width: 1rem;
-    height: 1rem;
+    min-width: 1rem;
+    min-height: 1rem;
     margin-right: 0.75rem;
 }
+body > div:not(:last-of-type) {
+    border-bottom: 2px solid #e5e7eb;
+}
 @media (prefers-color-scheme: dark) {
-    .send-timing-container {
+    body > div:not(:last-of-type) {
         border-bottom: 2px solid gray !important;
     }
 }
