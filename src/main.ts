@@ -1,36 +1,67 @@
-import { animeData, getAnimeData } from "./anime-data-scraper";
-import { addDropMenu } from "./create-drop-menu";
+import { animeData, getAnimeDataFromAnnict, getAnimeDataFromDanime } from "./anime-data-scraper";
+import { createDropMenu } from "./create-drop-menu";
 import { createRecordButton } from "./create-record-button";
-import { sendWathingAnime } from "./record-watch-episode";
+import { handleRecordEpisode } from "./record-watch-episode";
 import { getSettings } from "./get-local-storage";
+import { queryWithEpisodes, queryWithoutEpisodes } from "./query";
+import { switchNotUploadIcon } from "./record-watch-episode";
 
 const path = window.location.pathname.replace("/animestore/", "");
 async function main() {
     await getSettings();
+
     if (path == "ci_pc") {
         // 作品ページ
-        await getAnimeData();
+        const animeTitle = document.querySelector(".titleWrap > h1")?.firstChild?.textContent;
+        if (!animeTitle) return;
+
+        // エピソード数が多いと取得に時間がかかるため、61以上の場合ステータスボタンのみ表示
+        let query;
+        const episodeElement = document.querySelectorAll(".episodeContainer>.swiper-slide");
+        if (episodeElement && episodeElement.length < 5) {
+            query = queryWithEpisodes;
+        } else {
+            query = queryWithoutEpisodes;
+        }
+
+        try {
+            await getAnimeDataFromAnnict(animeTitle, document, query);
+        } catch (e) { return; }
+
         if (animeData) {
-            addDropMenu();
+            createDropMenu();
             createRecordButton();
         }
     } else if (path == "sc_d_pc") {
         // 再生画面
         let currentLocation: string;
-        // ページ読み込みされないのでDOMの変更を検知
-        const observer = new MutationObserver(() => {
-            if (currentLocation != location.href) {
+
+        const observer = new MutationObserver(async () => {
+            if (currentLocation !== location.href) {
+                const isAnimeTitleDisplayed: boolean = currentLocation === undefined; // 初回のみタイトルを表示する
+
                 currentLocation = location.href;
-                sendWathingAnime();
+
+                const animeTitle = document.querySelector(".backInfoTxt1")?.textContent;
+                if (!animeTitle) return;
+
+                try {
+                    const danimeDocument = await getAnimeDataFromDanime();
+                    if (!danimeDocument) return;
+
+                    await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
+                } catch (e) {
+                    switchNotUploadIcon();
+                    return;
+                }
+
+                handleRecordEpisode(isAnimeTitleDisplayed);
             }
         });
 
         const videoWrapper = document.querySelector(".videoWrapper");
         if (videoWrapper) {
-            observer.observe(videoWrapper, {
-                childList: true,
-                subtree: true,
-            });
+            observer.observe(videoWrapper, { childList: true, subtree: true, });
         }
     }
 }

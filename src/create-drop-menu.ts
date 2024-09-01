@@ -4,7 +4,7 @@ import {
     svgPathD,
     convertStatusToJapanese,
     changeStatusText,
-} from "./update-watch-status";
+} from "./utils";
 import { animeData } from "./anime-data-scraper";
 import { fetchData } from "./fetch";
 
@@ -18,7 +18,7 @@ const statusArray = [
 ];
 
 // annictのドロップメニューを追加
-export function addDropMenu() {
+export function createDropMenu() {
     const currentStatus = animeData.viewerStatusState;
     currentStatus ? convertStatusToJapanese(currentStatus) : convertStatusToJapanese("NO_STATE");
 

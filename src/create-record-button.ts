@@ -1,8 +1,9 @@
 import { animeData, viewData } from "./anime-data-scraper";
-import { changeStatusToWatching } from "./update-watch-status";
+import { changeStatusText, changeStatusToWatching, changeStatusToWatched } from "./utils";
 import { fetchData } from "./fetch";
 import { settingData } from "./get-local-storage";
 import { Episode } from "./types";
+import { isAiring, handleUnregisteredNextEpisode, getNextEpisodeIndex } from "./utils";
 
 const recordButtonElement = `
     <div class="record-container">
@@ -38,6 +39,10 @@ const recordButtonElement = `
 
 // 記録ボタンを作成
 export async function createRecordButton() {
+    // エピソード数が61以上の場合は、取得に時間がかかるため記録ボタンを作成しない
+    const episodeElement = document.querySelectorAll(".episodeContainer>.swiper-slide");
+    if (episodeElement && episodeElement.length >= 5) return;
+
     // "記録"クリックイベント
     function singleRecordButton(i: number, j: number) {
         const button = document.querySelectorAll(".record-button:first-of-type")[j];
@@ -46,13 +51,19 @@ export async function createRecordButton() {
             let mutation = "mutation{";
 
             // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
-            if (!(!isAiring && j === recordContainer.length - 1)) {
+            if (
+                !(
+                    !isAiring &&
+                    j === recordContainer.length - 1
+                )
+            ) {
                 mutation = changeStatusToWatching(mutation);
+                changeStatusText("WATCHING");
             }
 
             mutation += `
                 createRecord (
-                    input: { episodeId:"${dataEpisodes[i].id}"}
+                    input: { episodeId:"${episodeData[i].id}"}
                 ) { clientMutationId }
             `;
 
@@ -61,21 +72,14 @@ export async function createRecordButton() {
                 !isAiring && // アニメが放送終了
                 j === recordContainer.length - 1 // 最終話
             ) {
-                mutation += `
-                    updateStatus(
-                        input:{
-                            state: WATCHED,
-                            workId: "${animeData.id}"
-                        }
-                    ) { clientMutationId }
-                `;
+                mutation = changeStatusToWatched(mutation);
+                changeStatusText("WATCHED");
             }
 
             mutation += "}";
             fetchData(JSON.stringify({ query: mutation }));
 
-            const recordContainers: NodeListOf<HTMLElement> =
-                document.querySelectorAll(".record-container");
+            const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(".record-container");
             recordContainers[j].style.display = "none"; // ボタンを非表示
         });
     }
@@ -88,9 +92,15 @@ export async function createRecordButton() {
             // その話数までのcreateRecordを作成してマージ
             let mutation = "mutation{";
 
-            // ステータスを"見たい"に変更
-            if (!(!isAiring && j === recordContainer.length - 1)) {
+            // 視聴ステータスが"見てる"以外だった場合、"見てる"に変更
+            if (
+                !(
+                    !isAiring &&
+                    j === recordContainer.length - 1
+                )
+            ) {
                 mutation = changeStatusToWatching(mutation);
+                changeStatusText("WATCHING");
             }
 
             const count = i - j;
@@ -99,7 +109,7 @@ export async function createRecordButton() {
             [...Array(j + 1)].forEach((_, k) => {
                 mutation += `
                     e${k}:createRecord(
-                        input:{ episodeId:"${dataEpisodes[count + k].id}" }
+                        input:{ episodeId:"${episodeData[count + k].id}" }
                     ) { clientMutationId }
                 `;
                 recordContainers[k].style.display = "none";
@@ -111,14 +121,8 @@ export async function createRecordButton() {
                 j === recordContainer.length - 1 && // 最終話
                 (settingData.autoChangeStatus == undefined || settingData.autoChangeStatus) // 設定
             ) {
-                mutation += `
-                    updateStatus(
-                        input:{
-                            state: WATCHED,
-                            workId: "${animeData.id}"
-                        }
-                    ) { clientMutationId }
-                `;
+                mutation = changeStatusToWatched(mutation);
+                changeStatusText("WATCHED");
             }
 
             mutation += "}";
@@ -126,71 +130,41 @@ export async function createRecordButton() {
         });
     }
 
-    const dataEpisodes: Episode[] = animeData.episodes.nodes;
     /*
     動画の要素と取得したエピソード数の差が、4以上だったら実行しない
-    Annict側で1期2期が別れている可能性などがある　例：水星の魔女
+    Annict側で1期2期が別れている可能性がある　例：水星の魔女
     */
     const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
     const diff = Math.abs(insertTargets.length - animeData.episodesCount);
-    if (dataEpisodes.length == 0 || diff > 4) return;
 
-    // 視聴済みのエピソードの場合スキップ
-    // viewer > libraryEntriesの中で何番目か取得
-    let index;
-    let viewIndex;
-    for (const [i, libraryEntry] of viewData.entries()) {
-        if (libraryEntry.work.annictId == animeData.annictId) {
-            viewIndex = i;
-            break;
-        }
-    }
-    // nextEpisodeが何話目か
-    for (const [i, dataEpisode] of dataEpisodes.entries()) {
-        if (
-            viewIndex !== undefined &&
-            viewData[viewIndex].nextEpisode &&
-            dataEpisode.annictId == viewData[viewIndex].nextEpisode.annictId
-        ) {
-            index = i;
-            break;
-        }
-    }
+    const episodeData: Episode[] = animeData.episodes.nodes;
+    if (episodeData.length === 0 || diff > 4) return;
 
-    // 放送中に次のエピソードが登録されていない時の処理
-    // 登録されていないと、すべてのエピソードにボタンが表示されてしまう
-    const titleElement = document.querySelector(".titleWrap > h1");
-    const regex = new RegExp("（全\\d+話）");
-    const isAiring = !regex.test(titleElement?.textContent || ""); // アニメが放送中
-    if (
-        index == undefined && // nextEpisodeがない
-        titleElement &&
-        titleElement.textContent &&
-        isAiring && // アニメが放送中
-        animeData.viewerStatusState == "WATCHING" && // ステータスが「見てる」
-        dataEpisodes[0].viewerRecordsCount == 1 //１話を１回しか見ていない
-    ) {
-        return;
-    }
+    let nextEpisodeIndex: number | undefined = getNextEpisodeIndex(viewData, episodeData);
+
+    const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(document, nextEpisodeIndex, episodeData);
+    if (isNextEpisodeUnregistered) return;
 
     // nextEpisodeがない・1話しかない場合はindexを0にする
-    if (index === undefined || dataEpisodes.length === 1) {
-        index = 0;
+    if (nextEpisodeIndex === undefined || episodeData.length === 1) {
+        nextEpisodeIndex = 0;
     }
 
     if (!settingData || !settingData.recordButton) {
         // ボタン挿入
         for (const [i, insertTarget] of insertTargets.entries()) {
-            if (index == undefined || (i < index && dataEpisodes[i].viewerRecordsCount != 0))
+            if (nextEpisodeIndex == undefined || (i < nextEpisodeIndex && episodeData[i].viewerRecordsCount != 0)) {
                 continue;
+            }
             insertTarget.insertAdjacentHTML("afterend", recordButtonElement);
         }
 
         // イベント追加
         let j = 0;
         for (const [i, _] of insertTargets.entries()) {
-            if (index == undefined || (i < index && dataEpisodes[i].viewerRecordsCount != 0))
+            if (nextEpisodeIndex == undefined || (i < nextEpisodeIndex && episodeData[i].viewerRecordsCount != 0)) {
                 continue;
+            }
             singleRecordButton(i, j);
             multiRecordButton(i, j);
             j++;
@@ -199,8 +173,9 @@ export async function createRecordButton() {
 
     if (!settingData || !settingData.nextEpisodeLine) {
         // 視聴した次のエピソードに赤枠をつける
-        if (index != undefined && insertTargets[index]) {
-            const itemModule = insertTargets[index].closest<HTMLElement>(".itemModule.list");
+        const insertTarget = insertTargets[nextEpisodeIndex];
+        if (nextEpisodeIndex !== undefined && insertTarget) {
+            const itemModule = insertTarget.closest<HTMLElement>(".itemModule.list");
             itemModule && itemModule.classList.add("next-episode-border");
         }
     }

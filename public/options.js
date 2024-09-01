@@ -19,7 +19,7 @@ function loadSettings() {
                     }
                 });
             } else {
-                sendTimingElements[1].checked = true;
+                sendTimingElements[2].checked = true;
             }
 
             items.nextEpisodeLine && (nextEpisodeLineElement.checked = items.nextEpisodeLine);

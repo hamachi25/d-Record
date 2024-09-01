@@ -5,9 +5,11 @@
     "description": "dアニメストアで見たアニメを記録することができます。自動もしくは手動で視聴したことをAnnictに送信して記録します。",
     "homepage_url": "https://github.com/hamachi25/d-Record",
     "icons": {
-        "16": "icon/icon16.png",
-        "48": "icon/icon48.png",
-        "128": "icon/icon128.png"
+        "16": "icon/icon-16.png",
+        "32": "icon/icon-32.png",
+        "48": "icon/icon-48.png",
+        "96": "icon/icon-96.png",
+        "128": "icon/icon-128.png"
     },
     "content_scripts": [
         {
@@ -15,12 +17,18 @@
                 "https://animestore.docomo.ne.jp/animestore/ci_pc*",
                 "https://animestore.docomo.ne.jp/animestore/sc_d_pc*"
             ],
-            "js": ["main.js"],
-            "css": ["inject.css"]
+            "js": [
+                "main.js"
+            ],
+            "css": [
+                "style.css"
+            ]
         }
     ],
     "action": {
         "default_popup": "options.html"
     },
-    "permissions": ["storage"]
+    "permissions": [
+        "storage"
+    ]
 }

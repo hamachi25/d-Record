@@ -158,11 +158,9 @@ li:not(:last-child) > .dropdown-item:hover {
 #upload-icon-container {
     text-align: center;
 }
-
 #upload-icon-container:hover > #upload-icon {
     opacity: 1;
 }
-
 #upload-icon {
     position: absolute;
     top: 50%;
@@ -170,16 +168,31 @@ li:not(:last-child) > .dropdown-item:hover {
     transform: translate(-50%, -50%);
     opacity: 0.6;
 }
-
 #upload-anime-title {
-    display: table;
+    display: block;
     transition: 0.5s;
+    max-width: 0px;
+    opacity: 0;
+    visibility: hidden;
 }
-
+#upload-anime-title.show {
+    max-width: 500px;
+    opacity: 1;
+    visibility: visible;
+}
 #upload-anime-title > span {
-    display: table-cell;
+    display: block;
     color: #ffffff;
-    opacity: 0.6;
     font-weight: 700;
-    vertical-align: middle;
+    transform: translateY(50%);
+    opacity: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: 0.4s;
+    visibility: hidden;
+}
+#upload-anime-title > span.show {
+    opacity: 0.6;
+    visibility: visible;
 }

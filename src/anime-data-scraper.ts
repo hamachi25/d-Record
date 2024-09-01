@@ -1,76 +1,71 @@
-import { fetchData } from "./fetch";
+import { fetchData, fetchDataFromDanime } from "./fetch";
 import { Work, NextEpisode } from "./types";
 
 export let animeData: Work; // 取得したアニメデータ
-export let viewData: NextEpisode[]; // 視聴データ
-
-const titleText = document.querySelector(".titleWrap > h1")?.firstChild?.textContent ?? "";
+export let viewData: NextEpisode[]; // 視聴中のアニメデータ
 
 /******************************************************************************/
 
 /* リクエストに送る季節を取得 */
 
-const yearPattern = /^(\d{4})年([春夏秋冬])$/; // 2024年春
-const yearPattern2 = /^製作年：(\d{4})年$/; // 製作年：2024年
-const seasonTranslation = {
-    春: "spring",
-    夏: "summer",
-    秋: "autumn",
-    冬: "winter",
-};
+export function getBroadcastYear(doc: Document, retry: boolean) {
+    const seasonalYearRegex = /^(\d{4})年([春夏秋冬])$/; // 2024年春
+    const nonSeasonalYearRegex = /^製作年：(\d{4})年$/; // 製作年：2024年
 
-function createReturnSeason(year: string) {
-    return [
-        `${year}-winter`,
-        `${year}-spring`,
-        `${year}-summer`,
-        `${year}-autumn`,
-        `${Number(year) + 1}-winter`,
-    ];
-}
+    const seasonTranslation = {
+        春: "spring",
+        夏: "summer",
+        秋: "autumn",
+        冬: "winter",
+    };
 
-export function getProductionYear(doc: Document, retry: boolean) {
+    function createReturnSeason(year: string) {
+        return [
+            `${year}-winter`,
+            `${year}-spring`,
+            `${year}-summer`,
+            `${year}-autumn`,
+            `${Number(year) + 1}-winter`,
+        ];
+    }
+
     const tagElements = Array.from(doc.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
-    const yearText = tagElements.find((elem) => elem.textContent?.match(yearPattern))?.textContent;
-    const yearText2 = tagElements.find((elem) =>
-        elem.textContent?.match(yearPattern2)
-    )?.textContent;
-    const matchText = yearText?.match(yearPattern);
-    const matchText2 = yearText2?.match(yearPattern2);
+    const seasonalYearText = tagElements.find((elem) => elem.textContent?.match(seasonalYearRegex))?.textContent;
+    const nonSeasonalYearText = tagElements.find((elem) => elem.textContent?.match(nonSeasonalYearRegex))?.textContent;
+    const seasonalYearMatch = seasonalYearText?.match(seasonalYearRegex);
+    const nonSeasonalYearMatch = nonSeasonalYearText?.match(nonSeasonalYearRegex);
 
-    let returnSeason: string[] = [];
-    if (yearText && matchText) {
+    if (seasonalYearText && seasonalYearMatch) {
         // 2024年春の場合
-
-        if (matchText2) {
-            const year2 = matchText2[1];
+        if (nonSeasonalYearMatch) {
+            // 2024年春と製作年～ 2つともある場合
+            const year = nonSeasonalYearMatch[1];
             if (!retry) {
                 if (
-                    matchText[1] > year2 ||
+                    seasonalYearMatch[1] > year ||
                     document.querySelectorAll("a[id].clearfix").length > 20
                 ) {
                     // "2024年春"と"製作年：2023年"の年が違う場合
                     // 2クール以上ある場合、放送時期が異なっていることがある
-                    returnSeason = createReturnSeason(year2);
-                    return returnSeason;
+                    return createReturnSeason(year);
                 }
             } else {
                 // 再検索
                 // 年がズレてる場合があるので冬は前後1年足す
-                returnSeason = createReturnSeason(matchText[1]);
-                returnSeason.push(`${Number(matchText[1]) - 1}-winter`);
+                let returnSeason: string[] = [];
+                returnSeason = createReturnSeason(seasonalYearMatch[1]);
+                returnSeason.push(`${Number(seasonalYearMatch[1]) - 1}-winter`);
                 return returnSeason;
             }
         }
 
-        const season = matchText[2] as keyof typeof seasonTranslation;
-        return `${matchText[1]}-${seasonTranslation[season]}`;
-    } else if (yearText2 && matchText2) {
+        const season = seasonalYearMatch[2] as keyof typeof seasonTranslation;
+        return `${seasonalYearMatch[1]}-${seasonTranslation[season]}`;
+    } else if (nonSeasonalYearText && nonSeasonalYearMatch) {
         // 製作年：2024年の場合
-        const year2 = matchText2[1];
+        const year2 = nonSeasonalYearMatch[1];
         if (!retry) {
-            returnSeason = createReturnSeason(year2);
-            return returnSeason;
+            return createReturnSeason(year2);
         } else {
             // 再検索
             // 前後3年で検索
@@ -86,12 +81,11 @@ export function getProductionYear(doc: Document, retry: boolean) {
         }
     } else {
         // 制作年が記載されていない場合、キャスト欄から年を取得
-        const yearText = document
-            .querySelector(".castContainer > p:nth-of-type(3)")
-            ?.lastChild?.textContent?.replace(/\n|年/g, "");
-        if (yearText && !isNaN(Number(yearText))) {
-            returnSeason = createReturnSeason(yearText);
-            return returnSeason;
+        const seasonalYearText = document
+            .querySelector(".castContainer > p:nth-of-type(3)")?.lastChild?.textContent
+            ?.replace(/\n|年/g, "");
+        if (seasonalYearText && !isNaN(Number(seasonalYearText))) {
+            return createReturnSeason(seasonalYearText);
         }
     }
 }
@@ -160,51 +154,6 @@ export function remakeString(title: string | null | undefined, retry: boolean) {
             .find((title) => title.length >= 3);
     }
 }
-
-/******************************************************************************/
-
-export const query = `
-    query SearchWorks($titles: [String!], $seasons: [String!]) {
-        searchWorks(
-            titles: $titles,
-            seasons: $seasons,
-            orderBy: { field: CREATED_AT, direction: ASC }
-        ) {
-            nodes {
-                id
-                annictId
-                viewerStatusState
-                title
-                episodesCount
-                episodes (
-                    orderBy: { field: SORT_NUMBER, direction: ASC }
-                ) {
-                    nodes {
-                        number
-                        numberText
-                        id
-                        annictId
-                        viewerRecordsCount
-                    }
-                }
-            }
-        }
-        viewer {
-            libraryEntries (
-                seasons: $seasons
-            ) {
-                nodes {
-                    work {
-                        annictId
-                    }
-                    nextEpisode {
-                        annictId
-                    }
-                }
-            }
-        }
-    }
-`;
 
 /******************************************************************************/
 
@@ -283,41 +232,79 @@ function removeWords(text: string, count: number) {
 
 /******************************************************************************/
 
-// アニメデータを取得
-export async function getAnimeData() {
-    const yearValue = getProductionYear(document, false);
-    const remakeTitle = remakeString(titleText, false);
+// dアニメストアから作品ページのhtmlを取得
+export let danimeDocument: Document;
+export async function getAnimeDataFromDanime(): Promise<Document | undefined> {
+    const partIdMatch = location.href.match(/(?<=partId=)\d+/); // URLからworkIdを取得
+    if (!partIdMatch) return;
 
+    let html: string | undefined;
+    try {
+        html = await fetchDataFromDanime(Number(partIdMatch[0].substring(0, 5)));
+    } catch (error) {
+        return;
+    }
+    if (!html) return;
+
+    danimeDocument = new DOMParser().parseFromString(html, "text/html");
+    return danimeDocument;
+}
+
+// アニメデータを取得
+export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, query: string) {
+    const remakeTitle = remakeString(animeTitle, false);
     const variables = {
         titles: remakeTitle,
-        seasons: yearValue,
+        seasons: getBroadcastYear(doc, false),
     };
-    const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
-    const json = await response.json();
+
+    let json;
+    try {
+        const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+        json = await response.json();
+    } catch (error) {
+        return;
+    }
+
+    if (json.data.viewer) {
+        viewData = json.data.viewer.libraryEntries.nodes;
+    }
 
     const allAnimeData: Work[] = json.data.searchWorks.nodes;
-    viewData = json.data.viewer.libraryEntries.nodes;
     if (allAnimeData.length == 1) {
         // 成功
         animeData = allAnimeData[0];
     } else if (allAnimeData.length >= 2) {
         // 成功
-        animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
+        animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData)];
     } else {
         // 失敗なので再度実行
         const variables = {
             titles: remakeString(remakeTitle, true),
-            seasons: getProductionYear(document, true),
+            seasons: getBroadcastYear(doc, true),
         };
-        const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
-        const json = await response.json();
+
+        let json;
+
+        try {
+            const response = await fetchData(
+                JSON.stringify({ query: query, variables: variables })
+            );
+            json = await response.json();
+        } catch (error) {
+            return;
+        }
         const allAnimeData: Work[] = json.data.searchWorks.nodes;
 
-        // 30以上の場合は、ありふれた単語である可能性が高いため諦める
         if (allAnimeData.length > 30) {
+            // 30以上の場合は、ありふれた単語である可能性が高いため諦める
             return;
-        } else if (allAnimeData.length > 0) {
-            animeData = allAnimeData[findCorrectAnime(titleText, allAnimeData)];
+        } else if (allAnimeData.length == 1) {
+            // 成功
+            animeData = allAnimeData[0];
+        } else if (allAnimeData.length >= 2) {
+            // 成功
+            animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData)];
         }
     }
 }

@@ -1,12 +1,12 @@
-export interface Episode {
+export type Episode = {
     number: number;
     numberText: string;
     id: string;
     annictId: string;
     viewerRecordsCount: number;
-}
+};
 
-export interface Work {
+export type Work = {
     id: string;
     annictId: string;
     viewerStatusState: string;
@@ -15,22 +15,24 @@ export interface Work {
     episodes: {
         nodes: Episode[];
     };
-}
+};
 
-export interface NextEpisode {
+export type NextEpisode = {
     work: {
         annictId: string;
     };
     nextEpisode: {
         annictId: string;
     };
-}
+};
 
-// interface SearchWorksAndViewer {
+// type SearchWorksAndViewer = {
 //     searchWorks: {
 //         nodes: Work[];
 //     };
 //     viewer: {
-//         nodes: NextEpisode[];
+//        libraryEntries: {
+//          nodes: NextEpisode[];
+//        }
 //     };
-// }
+// };

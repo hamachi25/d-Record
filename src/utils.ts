@@ -1,7 +1,5 @@
 import { animeData } from "./anime-data-scraper";
-
-export let statusText = "";
-export let svgPathD = "";
+import { Episode, NextEpisode } from "./types";
 
 // annictメニューのsvg
 const noStateD =
@@ -17,36 +15,39 @@ const stopWatchingD =
     "M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z";
 export const svgPaths = [noStateD, watchedD, watchingD, wannaWatchD, holdD, stopWatchingD];
 
+export let statusText = "";
+export let svgPathD = "";
+
 // ステータスを日本語に変換
 export function convertStatusToJapanese(status: string | undefined) {
     switch (status) {
         case "NO_STATE":
             statusText = "未選択";
-            svgPathD = noStateD;
+            svgPathD = svgPaths[0];
             break;
         case "WATCHED":
             statusText = "見た";
-            svgPathD = watchedD;
+            svgPathD = svgPaths[1];
             break;
         case "WATCHING":
             statusText = "見てる";
-            svgPathD = watchingD;
+            svgPathD = svgPaths[2];
             break;
         case "WANNA_WATCH":
             statusText = "見たい";
-            svgPathD = wannaWatchD;
+            svgPathD = svgPaths[3];
             break;
         case "ON_HOLD":
             statusText = "一時中断";
-            svgPathD = holdD;
+            svgPathD = svgPaths[4];
             break;
         case "STOP_WATCHING":
             statusText = "視聴中止";
-            svgPathD = stopWatchingD;
+            svgPathD = svgPaths[5];
     }
 }
 
-// 視聴ステータスを変更する
+// 視聴ステータスのテキストを変更する
 export function changeStatusText(status: string | undefined) {
     convertStatusToJapanese(status);
     const label = document.querySelector("#annict > div > span");
@@ -56,10 +57,9 @@ export function changeStatusText(status: string | undefined) {
     }
 }
 
-// ステータスが"見てる"ではない場合は、見てるに変更
-export function changeStatusToWatching(mutation: string) {
-    if (animeData.viewerStatusState != "WATCHING") {
-        changeStatusText("WATCHING");
+// ステータスが"見てる"ではない場合は、"見てる"に変更
+export function changeStatusToWatching(mutation: string): string {
+    if (animeData.viewerStatusState !== "WATCHING") {
         return (mutation += `
             updateStatus(
                 input:{
@@ -72,3 +72,58 @@ export function changeStatusToWatching(mutation: string) {
         return mutation;
     }
 }
+
+// ステータスを"見た"に変更
+export function changeStatusToWatched(mutation: string): string {
+    return (
+        mutation += `
+            updateStatus(
+                input:{
+                    state: WATCHED,
+                    workId: "${animeData.id}"
+                }
+            ) { clientMutationId }
+        `
+    );
+}
+
+export function getNextEpisodeIndex(viewData: NextEpisode[], episodeData: Episode[]): number | undefined {
+    let viewIndex;// viewer > libraryEntries内のindex
+    for (const [i, libraryEntry] of viewData.entries()) {
+        if (libraryEntry.work.annictId == animeData.annictId) {
+            viewIndex = i;
+            break;
+        }
+    }
+    // nextEpisodeのindex 
+    let nextEpisodeIndex: number;
+    if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
+        for (const [i, episode] of episodeData.entries()) {
+            if (episode.annictId == viewData[viewIndex].nextEpisode.annictId) {
+                nextEpisodeIndex = i;
+                return nextEpisodeIndex;
+            }
+        }
+    }
+    return undefined;
+}
+
+// 次のエピソードがAnnictに登録されていない時の処理
+export let isAiring: boolean;
+export function handleUnregisteredNextEpisode(doc: Document, nextEpisodeIndex: number | undefined, episodeData: Episode[]): boolean {
+    const titleElement = doc.querySelector(".titleWrap > h1");
+    const regex = new RegExp("（全\\d+話）");
+    isAiring = !regex.test(titleElement?.textContent || "");
+
+    if (
+        nextEpisodeIndex === undefined && // nextEpisodeがない
+        isAiring && // アニメが放送中
+        animeData.viewerStatusState == "WATCHING" && // ステータスが「見てる」
+        episodeData[0].viewerRecordsCount == 1 //１話を１回しか見ていない
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
