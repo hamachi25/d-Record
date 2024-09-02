@@ -3,16 +3,14 @@ import { TokenInput } from "./components/TokenInput";
 import { SendTimingOptions } from "./components/SendTimingOptions";
 import { UIAndOtherOptions } from "./components/UIAndOtherOptions";
 
-type Settings = {
+const defaultSettings: {
 	Token?: string;
 	sendTiming?: string;
 	nextEpisodeLine?: boolean;
 	recordButton?: boolean;
 	animeTitle?: boolean;
 	autoChangeStatus?: boolean;
-};
-
-const defaultSettings: Settings = {
+} = {
 	Token: "",
 	sendTiming: "after-end",
 	nextEpisodeLine: false,
@@ -22,7 +20,7 @@ const defaultSettings: Settings = {
 };
 
 function App() {
-	const [settings, setSettings] = createSignal<Settings>(defaultSettings);
+	const [settings, setSettings] = createSignal(defaultSettings);
 
 	onMount(async () => {
 		const data = await browser.storage.local.get([
