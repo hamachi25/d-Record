@@ -1,22 +1,16 @@
 import { createSignal, onMount } from "solid-js";
 import { TokenInput } from "./components/TokenInput";
-import { SendTiming } from "./components/SendTiming";
-import { UIBehavior } from "./components/UIBehavior";
+import { SendTimingOptions } from "./components/SendTimingOptions";
+import { UIAndOtherOptions } from "./components/UIAndOtherOptions";
 
-type UISettings = {
+type Settings = {
+	Token?: string;
+	sendTiming?: string;
 	nextEpisodeLine?: boolean;
 	recordButton?: boolean;
 	animeTitle?: boolean;
-};
-
-type OtherSettings = {
 	autoChangeStatus?: boolean;
 };
-
-interface Settings extends UISettings, OtherSettings {
-	Token?: string;
-	sendTiming?: string;
-}
 
 const defaultSettings: Settings = {
 	Token: "",
@@ -24,7 +18,7 @@ const defaultSettings: Settings = {
 	nextEpisodeLine: false,
 	recordButton: false,
 	animeTitle: false,
-	autoChangeStatus: false,
+	autoChangeStatus: true,
 };
 
 function App() {
@@ -45,8 +39,8 @@ function App() {
 	return (
 		<>
 			<TokenInput token={settings().Token} />
-			<SendTiming sendTiming={settings().sendTiming} />
-			<UIBehavior
+			<SendTimingOptions sendTiming={settings().sendTiming} />
+			<UIAndOtherOptions
 				title="UIの変更"
 				options={[
 					{ value: "nextEpisodeLine", label: "作品ページの赤い枠線を非表示" },
@@ -54,12 +48,12 @@ function App() {
 					{ value: "animeTitle", label: "再生ページ右下のタイトルを非表示" },
 				]}
 				settings={{
-					nextEpisodeLine: settings().nextEpisodeLine,
-					recordButton: settings().recordButton,
-					animeTitle: settings().animeTitle,
+					nextEpisodeLine: settings().nextEpisodeLine ?? defaultSettings.nextEpisodeLine,
+					recordButton: settings().recordButton ?? defaultSettings.recordButton,
+					animeTitle: settings().animeTitle ?? defaultSettings.animeTitle,
 				}}
 			/>
-			<UIBehavior
+			<UIAndOtherOptions
 				title="その他"
 				options={[
 					{
@@ -68,7 +62,7 @@ function App() {
 					},
 				]}
 				settings={{
-					autoChangeStatus: settings().autoChangeStatus,
+					autoChangeStatus: settings().autoChangeStatus ?? defaultSettings.autoChangeStatus,
 				}}
 			/>
 		</>

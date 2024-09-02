@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For } from "solid-js";
 
-export function SendTiming(props: { sendTiming: string | undefined }) {
+export function SendTimingOptions(props: { sendTiming: string | undefined }) {
 	const [selectedTiming, setSelectedTiming] = createSignal("after-end");
 	const [options] = createSignal([
 		{ value: "not-send", label: "自動送信しない" },
