@@ -9,7 +9,7 @@ body {
 @media (prefers-color-scheme: dark) {
 	body {
 		color: rgb(209 213 219);
-		background-color: #0b0b0b;
+		background-color: #1e2127;
 	}
 }
 
@@ -24,6 +24,7 @@ body {
 }
 .token-container > input {
 	width: 100%;
+	box-sizing: border-box;
 	margin-top: 0.5rem;
 	padding: 0.5rem;
 	border: 1px solid #e5e7eb;
@@ -65,6 +66,7 @@ body {
 	width: 0.8rem;
 	height: 0.8rem;
 	margin: auto;
+	margin-left: 0.1em;
 }
 @media (prefers-color-scheme: dark) {
 	.token-container > input {
@@ -99,12 +101,14 @@ body {
 	min-width: 1rem;
 	min-height: 1rem;
 	margin-right: 0.75rem;
+	margin-top: auto;
+	margin-bottom: auto;
 }
-body > div:not(:last-of-type) {
+body > #root > div:not(:last-of-type) {
 	border-bottom: 2px solid #e5e7eb;
 }
 @media (prefers-color-scheme: dark) {
-	body > div:not(:last-of-type) {
+	body > #root > div:not(:last-of-type) {
 		border-bottom: 2px solid gray !important;
 	}
 }
