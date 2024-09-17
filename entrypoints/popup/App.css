@@ -13,6 +13,15 @@ body {
 	}
 }
 
+body > #root > div:not(:last-of-type) {
+	border-bottom: 2px solid #e5e7eb;
+}
+@media (prefers-color-scheme: dark) {
+	body > #root > div:not(:last-of-type) {
+		border-bottom: 2px solid gray !important;
+	}
+}
+
 /* トークン */
 .token-container {
 	padding: 1rem 0.5rem;
@@ -103,12 +112,4 @@ body {
 	margin-right: 0.75rem;
 	margin-top: auto;
 	margin-bottom: auto;
-}
-body > #root > div:not(:last-of-type) {
-	border-bottom: 2px solid #e5e7eb;
-}
-@media (prefers-color-scheme: dark) {
-	body > #root > div:not(:last-of-type) {
-		border-bottom: 2px solid gray !important;
-	}
 }

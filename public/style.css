@@ -1,0 +1,213 @@
+/* ドロップメニュ */
+.informationWrap > .actionArea > .btnArea {
+	width: auto !important;
+}
+
+#annict {
+	position: relative;
+}
+
+#annict-button {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	background: #f85a72;
+	user-select: none;
+}
+
+#annict-button:hover {
+	background: #f97388 !important;
+}
+
+#annict-button > span {
+	padding: 1px 7px 0 7px;
+}
+
+.dropdown-menu {
+	position: absolute;
+	width: 100%;
+	box-sizing: border-box;
+	top: 51px;
+	z-index: 1000;
+	display: block;
+	min-width: 10rem;
+	padding: 0.5rem 0;
+	margin: 0;
+	font-size: 1rem;
+	color: #212529;
+	text-align: left;
+	list-style: none;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 0.3rem;
+}
+@media screen and (min-width: 960px) {
+	.dropdown-menu {
+		top: 45px;
+	}
+}
+
+li:last-child > .dropdown-item {
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	text-align: center;
+	text-decoration: none;
+}
+
+li:not(:last-child) > .dropdown-item:hover {
+	color: #1e2125;
+	background-color: #e9ecef;
+}
+
+.dropdown-item {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 1rem;
+	clear: both;
+	font-weight: 400;
+	color: #212529;
+	text-align: inherit;
+	white-space: nowrap;
+	background-color: transparent;
+	border: 0;
+	font-size: 16px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.status-state {
+	display: flex;
+	align-items: center;
+}
+
+.status-state > span {
+	transform: translateY(6%);
+}
+
+.dropdown-item > svg {
+	margin-right: 1rem;
+}
+
+.dropdown-svg {
+	width: 1em;
+}
+
+#hover-title {
+	opacity: 0;
+	position: absolute;
+	top: -28px;
+	z-index: 2000;
+	background-color: #fff;
+	white-space: nowrap;
+	width: auto;
+	padding: 2px 5px;
+	height: auto;
+	border-radius: 2px;
+	left: 0;
+	color: #606060;
+	box-shadow: 0 1px 2px 0 #bbb;
+	cursor: default;
+	transition: 0.2s;
+	user-select: none;
+}
+
+#annict-button:hover + #hover-title {
+	opacity: 1;
+}
+
+/* 記録 */
+.record-container {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	min-height: 22px;
+	padding: 1%;
+	display: flex;
+}
+
+.record-button {
+	display: none;
+	border: 1px solid;
+	border-radius: 3px;
+	white-space: nowrap;
+	margin-right: 0.4em;
+	color: #5b5b5b;
+	cursor: pointer;
+	transition: 0.15s ease-in-out;
+}
+
+.record-button:hover {
+	background-color: white;
+}
+
+.record-button:active {
+	background-color: #94f0ff;
+}
+
+.record-svg {
+	pointer-events: none;
+	width: 0.875em;
+}
+
+.record-container:hover .record-button {
+	display: block;
+}
+
+.next-episode-border {
+	margin-bottom: 6px !important;
+}
+.next-episode-border > section > a.clearfix {
+	border: 2px solid rgb(248, 90, 114) !important;
+}
+
+/* 再生画面 */
+#d-record-container {
+	display: flex;
+	width: auto !important;
+}
+
+#upload-icon-container {
+	width: 44px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#upload-icon-container:hover > #upload-icon {
+	opacity: 1;
+}
+#upload-icon {
+	opacity: 0.6;
+}
+
+#upload-anime-title {
+	display: block;
+	transition: 0.5s;
+	max-width: 0px;
+	opacity: 0;
+	visibility: hidden;
+}
+#upload-anime-title.show {
+	max-width: 500px;
+	opacity: 1;
+	visibility: visible;
+}
+#upload-anime-title > span {
+	display: flex !important;
+	height: 100%;
+	color: #ffffff;
+	font-weight: 700;
+	align-items: center;
+	opacity: 0;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	transition: 0.4s;
+	visibility: hidden;
+}
+#upload-anime-title > span.show {
+	opacity: 0.6;
+	visibility: visible;
+}

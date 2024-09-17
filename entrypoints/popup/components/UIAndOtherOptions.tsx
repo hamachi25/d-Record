@@ -1,5 +1,3 @@
-import { createSignal, For, on } from "solid-js";
-
 export function UIAndOtherOptions(props: {
 	title: string;
 	options: { value: string; label: string }[];

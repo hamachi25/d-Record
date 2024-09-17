@@ -1,7 +1,7 @@
-import { createSignal, onMount } from "solid-js";
 import { TokenInput } from "./components/TokenInput";
 import { SendTimingOptions } from "./components/SendTimingOptions";
 import { UIAndOtherOptions } from "./components/UIAndOtherOptions";
+import "./App.css";
 
 const defaultSettings: {
 	Token?: string;

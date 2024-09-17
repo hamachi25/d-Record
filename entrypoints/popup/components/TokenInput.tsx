@@ -1,13 +1,9 @@
-import { createEffect, createSignal, Show } from "solid-js";
-
 export function TokenInput(props: { token: string | undefined }) {
 	const [token, setToken] = createSignal("");
 	const [isSaved, setIsSaved] = createSignal(false);
 
 	createEffect(() => {
-		if (props.token) {
-			setToken(props.token);
-		}
+		if (props.token) setToken(props.token);
 	});
 
 	async function saveToken(token: string) {

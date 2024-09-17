@@ -1,5 +1,3 @@
-import { createEffect, createSignal, For } from "solid-js";
-
 export function SendTimingOptions(props: { sendTiming: string | undefined }) {
 	const [selectedTiming, setSelectedTiming] = createSignal("after-end");
 	const [options] = createSignal([
@@ -9,9 +7,7 @@ export function SendTimingOptions(props: { sendTiming: string | undefined }) {
 	]);
 
 	createEffect(() => {
-		if (props.sendTiming) {
-			setSelectedTiming(props.sendTiming);
-		}
+		if (props.sendTiming) setSelectedTiming(props.sendTiming);
 	});
 
 	async function handleChange(value: string) {
