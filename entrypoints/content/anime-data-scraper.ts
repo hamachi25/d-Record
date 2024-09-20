@@ -163,15 +163,18 @@ export function remakeString(title: string | null | undefined, retry: boolean) {
 /******************************************************************************/
 
 // 取得したアニメからタイトルが一致するものを探す
-export function findCorrectAnime(titleText: string, data: Work[]) {
+export function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 	// removeWords()を行った回数が最もすくないアニメのindexを返す
 	const index = [];
 	const findTime = [];
+	console.log(data);
 	for (let i = 0; i < data.length; i++) {
+		const count = 5; // removeWords()の回数
 		let annictTitle = data[i].title;
 		let dTitle = titleText;
 		let added = false;
-		for (let j = 1; j <= 5; j++) {
+
+		for (let j = 1; j <= count; j++) {
 			annictTitle = removeWords(annictTitle, j);
 			dTitle = removeWords(dTitle, j);
 			if (annictTitle === dTitle && !added) {
@@ -187,7 +190,8 @@ export function findCorrectAnime(titleText: string, data: Work[]) {
 
 	// 見つからなかった場合
 	// 取得したアニメでエピソード差が小さいもののインデックスを出力
-	const episodeCounts = document.querySelectorAll("a[id].clearfix").length;
+	const episodeCounts = doc.querySelectorAll("a[id].clearfix").length;
+	console.log(episodeCounts);
 	const arrayDiff = data.map((eachAnimeData: Work) =>
 		Math.abs(episodeCounts - eachAnimeData.episodesCount),
 	);
@@ -278,7 +282,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		animeData = allAnimeData[0];
 	} else if (allAnimeData.length >= 2) {
 		// 成功
-		animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData)];
+		animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 	} else {
 		// 失敗なので再度実行
 		const variables = {
@@ -303,7 +307,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 			animeData = allAnimeData[0];
 		} else if (allAnimeData.length >= 2) {
 			// 成功
-			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData)];
+			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 		}
 	}
 }

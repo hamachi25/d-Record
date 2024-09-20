@@ -1,5 +1,8 @@
+import "~/assets/UploadToggleButton.css";
+import { AnimeTitle } from "./AnimeTitle";
 import { animeData } from "../anime-data-scraper";
 import { cleanupIntervalOrEvent, createIntervalOrEvent } from "../record-watch-episode";
+import { getNotRecordWork } from "../storage";
 
 const [uploadIcon, setUploadIcon] = createSignal("upload");
 export { setUploadIcon };
@@ -11,45 +14,33 @@ const notUploadIconBase64 =
 const completeUploadIconBase64 =
 	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAcZJREFUeNpiYBgFo2AkAWUJUQV0MWY6WSygLCd73NvPv0OQh7vh7/evjO+/fDtAL18LmGipn7925fJ/GMhIiPsPFDcAyTPRwQ37F61aY6CprQMX0NQBswXo4fv5a1cs/48MPn788N/fzeU9KGRwagSqm/8fNwjAoy8ApqgsP/c/uuUwcaDlCXhd/h8/2I9H336Qgok9XWBMluVEOKABj75+kK9BFqGD5tpqkOUFRMUduo9Bli6cM/t+Z3PjeWx5GSnOE7BZDnMU0YkH3cegbDR/1sz/u7ZvgyUgAyyWO/g4O+K0HATIcsC2TRv3g4IPSypOQLLcACQGkkMGIAdHBcHTJfkOQE9QIItAvgU5ApfloIIHZDmyOFkOeP70ab+xptp95JIM5ghQiWakrvoeXQ7EB0UbSC+yONlpAFtxCgNPHj3CcBjIUaDECtJLFQfgKtPRAVL6MICaQz0HEHIEuuU0cQA+R0BruAQ0c6jvAGRHgMqGE0ePYrWcWAcw4nIAEhfUcDiIrubFs2f8wHwe8OHDewVVNfUDnr5+B7EYZQ/EDnDLgIAcB1ANYHMAPRokeAEuBxQC8Qcq2gMya8Jos3wUDEoAEGAAfIZhhifLZSgAAAAASUVORK5CYII=";
 
-function AnimeTitle() {
-	const [show, setShow] = createSignal(true);
-
-	const timeoutID = setTimeout(() => setShow(false), 4000);
-
-	onCleanup(() => clearTimeout(timeoutID));
-
-	return (
-		<div id="upload-anime-title" classList={{ show: show() }}>
-			<span classList={{ show: show() }}>{animeData.title}</span>
-		</div>
-	);
-}
-
 export function UploadToggleButton() {
 	const [isIconDisplayed, setIconDisplayed] = createSignal(uploadIconBase64);
 
+	const partId = location.href.match(/(?<=partId=)\d+/);
+	const workId = partId && partId[0].substring(0, 5);
+
 	async function changeUploadToggle() {
-		const workId = location.href.match(/(?<=partId=)\d+/);
+		if (uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload") return;
 
-		const result = await browser.storage.local.get("notRecordWork");
-		const notRecordArray = result.notRecordWork || [];
+		const notRecordWork = await getNotRecordWork();
 
-		if (uploadIcon() === "upload" && workId) {
+		if (uploadIcon() === "upload") {
 			setUploadIcon("notUpload");
 
 			cleanupIntervalOrEvent();
 
-			if (!notRecordArray.includes(Number(workId[0]))) {
-				notRecordArray.push(Number(workId[0]));
-				browser.storage.local.set({ notRecordWork: notRecordArray });
+			if (!notRecordWork.includes(Number(workId))) {
+				notRecordWork.push(Number(workId));
+				browser.storage.local.set({ notRecordWork: notRecordWork });
 			}
-		} else if (uploadIcon() === "notUpload" && workId) {
+		} else if (uploadIcon() === "notUpload") {
 			setUploadIcon("upload");
 
 			createIntervalOrEvent();
 
-			const newNotRecordArray = notRecordArray.filter((item: number) => item !== Number(workId[0]));
-			browser.storage.local.set({ notRecordWork: newNotRecordArray });
+			const newNotRecordWork = notRecordWork.filter((item: number) => item !== Number(workId));
+			browser.storage.local.set({ notRecordWork: newNotRecordWork });
 		}
 	}
 
@@ -77,11 +68,10 @@ export function UploadToggleButton() {
 				<img
 					id="upload-icon"
 					src={isIconDisplayed()}
-					style={
-						uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload"
-							? { opacity: 0.3 }
-							: {}
-					}
+					classList={{
+						"not-upload-icon":
+							uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload",
+					}}
 				/>
 			</div>
 		</>

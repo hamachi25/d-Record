@@ -1,14 +1,15 @@
+import { ContentScriptContext } from "wxt/client";
+import { setUploadIcon } from "./components/UploadToggleButton";
 import { animeData, getAnimeDataFromAnnict, getAnimeDataFromDanime } from "./anime-data-scraper";
+import { createDropMenu } from "./create-drop-menu";
 import { createRecordButton } from "./create-record-button";
+import { createUploadButton } from "./create-upload-button";
+import { queryWithEpisodes, queryWithoutEpisodes } from "./query";
 import { handleRecordEpisode } from "./record-watch-episode";
 import { getSettings } from "./storage";
-import { queryWithEpisodes, queryWithoutEpisodes } from "./query";
-
-import { StatusDropMenu } from "./components/StatusDropMenu";
-import { setUploadIcon, UploadToggleButton } from "./components/UploadToggleButton";
 
 const path = window.location.pathname.replace("/animestore/", "");
-async function main() {
+async function main(ctx: ContentScriptContext) {
 	await getSettings();
 
 	if (path == "ci_pc") {
@@ -31,17 +32,10 @@ async function main() {
 			return;
 		}
 
-		if (animeData) createRecordButton();
-
-		const targetElement = document.querySelector(".btnArea>.btnAddMyList.addMyList");
-		if (!targetElement) return;
-
-		const newElement = document.createElement("div");
-		newElement.id = "annict";
-		newElement.classList.add("btnAddMyList", "addMyList", "add", "listen");
-
-		targetElement.insertAdjacentElement("afterend", newElement);
-		render(StatusDropMenu, newElement);
+		if (animeData) {
+			createDropMenu(ctx);
+			createRecordButton(ctx);
+		}
 	} else if (path == "sc_d_pc") {
 		// 再生画面
 		let currentLocation: string;
@@ -72,31 +66,23 @@ async function main() {
 				handleRecordEpisode();
 
 				if (isFirstRun) {
-					const targetElement = document.querySelector(".buttonArea>.time");
-					if (!targetElement) return;
-
-					const newElement = document.createElement("div");
-					newElement.id = "d-record-container";
-					newElement.classList.add("mainButton");
-
-					targetElement.insertAdjacentElement("afterend", newElement);
-					render(UploadToggleButton, newElement);
-
+					createUploadButton(ctx);
 					isFirstRun = false;
 				}
 			}
 		});
 
 		const videoWrapper = document.querySelector(".videoWrapper");
-		if (videoWrapper) {
-			observer.observe(videoWrapper, { childList: true, subtree: true });
-		}
+		if (videoWrapper) observer.observe(videoWrapper, { childList: true, subtree: true });
 	}
 }
 
 export default defineContentScript({
-	matches: ["https://animestore.docomo.ne.jp/*"],
-	main() {
-		main();
+	matches: [
+		"https://animestore.docomo.ne.jp/animestore/ci_pc*",
+		"https://animestore.docomo.ne.jp/animestore/sc_d_pc*",
+	],
+	main(ctx) {
+		main(ctx);
 	},
 });

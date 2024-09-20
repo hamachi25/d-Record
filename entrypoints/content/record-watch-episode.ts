@@ -1,4 +1,8 @@
+import { setUploadIcon } from "./components/UploadToggleButton";
 import { animeData, viewData, danimeDocument } from "./anime-data-scraper";
+import { fetchData } from "./fetch";
+import { settingData, getNotRecordWork } from "./storage";
+import { Episode } from "./types";
 import {
 	changeStatusToWatching,
 	changeStatusToWatched,
@@ -6,13 +10,6 @@ import {
 	handleUnregisteredNextEpisode,
 	getNextEpisodeIndex,
 } from "./utils";
-import { settingData } from "./storage";
-import { Episode } from "./types";
-import { fetchData } from "./fetch";
-
-import { setUploadIcon } from "./components/UploadToggleButton";
-
-export let notRecordArray: number[];
 
 let episodeData: Episode[];
 let episodeNumberFromDanime: number | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
@@ -23,7 +20,6 @@ let sendEvent: EventListener | null = null;
 
 export function cleanupIntervalOrEvent() {
 	if (sendInterval) clearInterval(sendInterval);
-
 	if (sendEvent) document.querySelector("video")?.removeEventListener("ended", sendEvent);
 }
 
@@ -34,7 +30,7 @@ function sendRecord() {
 	let mutation = "mutation{";
 
 	// 視聴ステータスが"見てる"以外だった場合、"見てる"に変更(最終回を除く)
-	if (!(!isAiring && episodeNumberFromDanime === episodeData[episodeData.length - 1].number)) {
+	if (isAiring === true || episodeNumberFromDanime !== episodeData[episodeData.length - 1].number) {
 		mutation = changeStatusToWatching(mutation);
 	}
 
@@ -46,7 +42,7 @@ function sendRecord() {
 
 	// 最終話だった場合、"見た"に変更
 	if (
-		!isAiring && // アニメが放送終了
+		isAiring === false && // アニメが放送終了
 		episodeNumberFromDanime === episodeData[episodeData.length - 1].number && // 最終話
 		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) // 設定
 	) {
@@ -97,7 +93,7 @@ export function createIntervalOrEvent() {
 	}
 }
 
-// "第5話"のような話数から数字を取得する
+// "第5話"のような話数から数字を取得
 function episodeNumberExtractor(episode: string): number | undefined {
 	const remakeWords: Record<string, number> = {
 		〇: 0,
@@ -113,7 +109,7 @@ function episodeNumberExtractor(episode: string): number | undefined {
 		十: 10,
 	};
 
-	// 全角数字を半角数字に変換して数値を取り出す
+	// 全角数字を半角数字に変換
 	function arabicNumberExtractor(): number | null {
 		const numbers = episode
 			.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
@@ -196,19 +192,6 @@ export async function handleRecordEpisode() {
 	if (!animeData || animeData.episodesCount === 0) return;
 	if (settingData.sendTiming && settingData.sendTiming == "not-send") return; // 自動送信しない設定の場合
 
-	const workId = location.href.match(/(?<=partId=)\d+/);
-	if (!workId) return;
-
-	// 送信しない作品かどうか
-	const result = await browser.storage.local.get("notRecordWork");
-	notRecordArray = result.notRecordWork || [];
-	const notRecordEpisode = notRecordArray.includes(Number(workId[0]));
-
-	if (notRecordEpisode) {
-		setUploadIcon("notUpload");
-		return;
-	}
-
 	const episode = document.querySelector(".backInfoTxt2")?.textContent;
 	if (!episode) {
 		setUploadIcon("immutableNotUpload");
@@ -228,7 +211,7 @@ export async function handleRecordEpisode() {
 
 	let nextEpisodeIndex: number | undefined = getNextEpisodeIndex(viewData, episodeData);
 
-	// 次のエピソードがAnnictに登録されているか
+	// 次のエピソードがAnnictに登録されていない場合
 	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
 		danimeDocument,
 		nextEpisodeIndex,
@@ -250,9 +233,16 @@ export async function handleRecordEpisode() {
 		return;
 	}
 
-	if (!notRecordEpisode) {
-		// 記録する
-		setUploadIcon("upload");
-		createIntervalOrEvent();
+	// 送信しない作品の場合
+	const partId = location.href.match(/(?<=partId=)\d+/);
+	const workId = partId && partId[0].substring(0, 5);
+
+	const notRecordWork = await getNotRecordWork();
+	if (notRecordWork.includes(Number(workId))) {
+		setUploadIcon("notUpload");
+		return;
 	}
+
+	setUploadIcon("upload");
+	createIntervalOrEvent();
 }

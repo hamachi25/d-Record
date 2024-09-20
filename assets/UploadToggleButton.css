@@ -1,0 +1,53 @@
+/* 再生画面 */
+#d-record-container {
+	display: flex;
+	width: auto !important;
+}
+
+/* アイコン */
+#upload-icon-container {
+	width: 44px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#upload-icon-container:hover > #upload-icon {
+	opacity: 1;
+}
+#upload-icon {
+	opacity: 0.6;
+}
+.not-upload-icon {
+	opacity: 0.3 !important;
+}
+
+/* アニメタイトル */
+#upload-anime-title {
+	display: block;
+	transition: 0.5s;
+	max-width: 0px;
+	opacity: 0;
+	visibility: hidden;
+}
+#upload-anime-title.show {
+	max-width: 500px;
+	opacity: 1;
+	visibility: visible;
+}
+#upload-anime-title > span {
+	display: flex !important;
+	height: 100%;
+	color: #ffffff;
+	font-weight: 700;
+	align-items: center;
+	opacity: 0;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+	transition: 0.4s;
+	visibility: hidden;
+}
+#upload-anime-title > span.show {
+	opacity: 0.6;
+	visibility: visible;
+}

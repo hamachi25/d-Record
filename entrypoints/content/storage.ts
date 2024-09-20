@@ -1,55 +1,32 @@
-// 保存してあるd-Recordの設定を取得
-export let settingData: LocalData;
-type LocalData = {
-	Token?: string;
-	sendTiming?: string;
-	nextEpisodeLine?: boolean;
-	recordButton?: boolean;
-	animeTitle?: boolean;
-	autoChangeStatus?: boolean;
-};
+import { Settings } from "./types";
+
+// d-Recordの設定を取得
+export let settingData: Settings;
 
 export async function getSettings(): Promise<void> {
-	return new Promise((resolve, reject) => {
-		browser.storage.local
-			.get([
-				"Token",
-				"sendTiming",
-				"nextEpisodeLine",
-				"recordButton",
-				"animeTitle",
-				"autoChangeStatus",
-			])
-			.then((result) => {
-				if (browser.runtime.lastError) {
-					reject(browser.runtime.lastError);
-				} else {
-					settingData = result;
-					resolve();
-				}
-			})
-			.catch((error) => {
-				reject(error);
-			});
-	});
+	const result = await browser.storage.local.get([
+		"Token",
+		"sendTiming",
+		"nextEpisodeLine",
+		"recordButton",
+		"animeTitle",
+		"autoChangeStatus",
+	]);
+
+	if (browser.runtime.lastError) {
+		throw new Error(browser.runtime.lastError.message);
+	}
+
+	settingData = result;
 }
 
-export async function getNotRecordSettings(): Promise<string[]> {
-	return new Promise((resolve, reject) => {
-		browser.storage.local
-			.get("notRecordWork")
-			.then((result) => {
-				if (browser.runtime.lastError) {
-					reject(browser.runtime.lastError);
-				} else {
-					const notRecordWork = result.notRecordWork;
-					if (Array.isArray(notRecordWork)) {
-						resolve(notRecordWork);
-					}
-				}
-			})
-			.catch((error) => {
-				reject(error);
-			});
-	});
+// 自動送信を行わない作品リストを取得
+export async function getNotRecordWork(): Promise<number[]> {
+	const result = await browser.storage.local.get("notRecordWork");
+
+	if (browser.runtime.lastError) {
+		throw new Error(browser.runtime.lastError.message);
+	}
+
+	return result.notRecordWork || [];
 }

@@ -1,7 +1,6 @@
+import { setStatusAndSvg } from "./components/StatusDropMenu";
 import { animeData } from "./anime-data-scraper";
 import { Episode, NextEpisode } from "./types";
-
-import { createSignal } from "solid-js";
 
 // annictメニューのsvg
 const noStateD =
@@ -15,70 +14,56 @@ const holdD =
 	"M144 479H48c-26.5 0-48-21.5-48-48V79c0-26.5 21.5-48 48-48h96c26.5 0 48 21.5 48 48v352c0 26.5-21.5 48-48 48zm304-48V79c0-26.5-21.5-48-48-48h-96c-26.5 0-48 21.5-48 48v352c0 26.5 21.5 48 48 48h96c26.5 0 48-21.5 48-48z";
 const stopWatchingD =
 	"M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z";
-export const svgPaths = [noStateD, watchedD, watchingD, wannaWatchD, holdD, stopWatchingD];
+export const svgPaths = [noStateD, wannaWatchD, watchingD, watchedD, holdD, stopWatchingD];
 
-export let statusText = "";
-export let svgPathD = "";
-
-const [statusTextSolid, setstatusTextSolid] = createSignal("");
-export { statusTextSolid };
-const [svgPathDSolid, setSvgPathDSolid] = createSignal("");
-export { svgPathDSolid };
+export let statusText = "未選択";
+export let svgPathD = svgPaths[0];
 
 // ステータスを日本語に変換
 export function convertStatusToJapanese(status: string | undefined) {
 	switch (status) {
 		case "NO_STATE":
 			statusText = "未選択";
-			setstatusTextSolid(statusText);
 			svgPathD = svgPaths[0];
-			setSvgPathDSolid(svgPathD);
-			break;
-		case "WATCHED":
-			statusText = "見た";
-			setstatusTextSolid(statusText);
-			svgPathD = svgPaths[1];
-			setSvgPathDSolid(svgPathD);
-			break;
-		case "WATCHING":
-			statusText = "見てる";
-			setstatusTextSolid(statusText);
-			svgPathD = svgPaths[2];
-			setSvgPathDSolid(svgPathD);
 			break;
 		case "WANNA_WATCH":
 			statusText = "見たい";
-			setstatusTextSolid(statusText);
+			svgPathD = svgPaths[1];
+			break;
+		case "WATCHING":
+			statusText = "見てる";
+			svgPathD = svgPaths[2];
+			break;
+		case "WATCHED":
+			statusText = "見た";
 			svgPathD = svgPaths[3];
-			setSvgPathDSolid(svgPathD);
 			break;
 		case "ON_HOLD":
 			statusText = "一時中断";
-			setstatusTextSolid(statusText);
 			svgPathD = svgPaths[4];
-			setSvgPathDSolid(svgPathD);
 			break;
 		case "STOP_WATCHING":
 			statusText = "視聴中止";
-			setstatusTextSolid(statusText);
 			svgPathD = svgPaths[5];
-			setSvgPathDSolid(svgPathD);
 	}
 }
 
 // 視聴ステータスのテキストを変更する
-export function changeStatusText(status: string | undefined) {
+export function changeStatusText(status: string) {
 	convertStatusToJapanese(status);
-	const label = document.querySelector("#annict > div > span");
-	if (label) {
-		label.textContent = statusText;
-		document.querySelector("#annict > div > svg > path")?.setAttribute("d", svgPathD);
-	}
+
+	setStatusAndSvg({
+		svgPathD: svgPathD,
+		statusText: statusText,
+	});
 }
 
-// ステータスが"見てる"ではない場合は、"見てる"に変更
+// ステータスを"見てる"に変更
 export function changeStatusToWatching(mutation: string): string {
 	if (animeData.viewerStatusState !== "WATCHING") {
+		// animeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
+		animeData.viewerStatusState = "WATCHING";
+
 		return (mutation += `
             updateStatus(
                 input:{
@@ -94,14 +79,16 @@ export function changeStatusToWatching(mutation: string): string {
 
 // ステータスを"見た"に変更
 export function changeStatusToWatched(mutation: string): string {
+	animeData.viewerStatusState = "WATCHED";
+
 	return (mutation += `
-            updateStatus(
-                input:{
-                    state: WATCHED,
-                    workId: "${animeData.id}"
-                }
-            ) { clientMutationId }
-        `);
+        updateStatus(
+            input:{
+                state: WATCHED,
+                workId: "${animeData.id}"
+            }
+        ) { clientMutationId }
+    `);
 }
 
 export function getNextEpisodeIndex(
@@ -115,6 +102,7 @@ export function getNextEpisodeIndex(
 			break;
 		}
 	}
+
 	// nextEpisodeのindex
 	let nextEpisodeIndex: number;
 	if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
@@ -125,6 +113,7 @@ export function getNextEpisodeIndex(
 			}
 		}
 	}
+
 	return undefined;
 }
 

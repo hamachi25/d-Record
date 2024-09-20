@@ -1,6 +1,13 @@
+import "~/assets/StatusDropMenu.css";
 import { animeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { convertStatusToJapanese, statusText, svgPaths, svgPathD } from "../utils";
+
+const [statusAndSvg, setStatusAndSvg] = createSignal({
+	svgPathD: svgPathD,
+	statusText: statusText,
+});
+export { setStatusAndSvg };
 
 // annictのドロップメニューを追加
 export function StatusDropMenu() {
@@ -13,22 +20,15 @@ export function StatusDropMenu() {
 
 	const [statusArray] = createSignal([
 		["NO_STATE", svgPaths[0], "未選択"],
-		["WANNA_WATCH", svgPaths[3], "見たい"],
+		["WANNA_WATCH", svgPaths[1], "見たい"],
 		["WATCHING", svgPaths[2], "見てる"],
-		["WATCHED", svgPaths[1], "見た"],
+		["WATCHED", svgPaths[3], "見た"],
 		["ON_HOLD", svgPaths[4], "一時中断"],
 		["STOP_WATCHING", svgPaths[5], "視聴中止"],
 	]);
-	const [statusAndSvg, setStatusAndSvg] = createSignal({
-		svgPathD: svgPathD,
-		statusText: statusText,
-	});
 	const [show, setShow] = createSignal(false);
 
-	function handleClickOutside(event: MouseEvent) {
-		const menuElement = document.getElementById("annict-button");
-		if (menuElement && !menuElement.contains(event.target as Node)) setShow(false);
-	}
+	setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
 
 	createEffect(() => {
 		if (show()) {
@@ -41,6 +41,11 @@ export function StatusDropMenu() {
 			window.removeEventListener("click", handleClickOutside);
 		});
 	});
+
+	let annictButtonElement: HTMLDivElement | undefined;
+	function handleClickOutside(e: MouseEvent) {
+		if (annictButtonElement && !annictButtonElement.contains(e.target as Node)) setShow(false);
+	}
 
 	async function updateStatus(status: string) {
 		const mutation = `
@@ -67,7 +72,7 @@ export function StatusDropMenu() {
 
 	return (
 		<>
-			<div id="annict-button" onClick={() => setShow((prev) => !prev)}>
+			<div id="annict-button" onClick={() => setShow((prev) => !prev)} ref={annictButtonElement}>
 				<svg
 					class="dropdown-svg"
 					xmlns="http://www.w3.org/2000/svg"

@@ -6,10 +6,7 @@ export default defineConfig({
 		name: "d-Record dev",
 		content_scripts: [
 			{
-				matches: [
-					"https://animestore.docomo.ne.jp/animestore/ci_pc*",
-					"https://animestore.docomo.ne.jp/animestore/sc_d_pc*",
-				],
+				matches: ["https://animestore.docomo.ne.jp/animestore/ci_pc*"],
 				css: ["style.css"],
 			},
 		],
