@@ -1,27 +1,33 @@
 import "~/assets/UploadToggleButton.css";
 import { AnimeTitle } from "./AnimeTitle";
-import { animeData } from "../anime-data-scraper";
+import { animeDataSignal, loading } from "../anime-data-scraper";
 import { cleanupIntervalOrEvent, createIntervalOrEvent } from "../record-watch-episode";
 import { getNotRecordWork } from "../storage";
 
-const [uploadIcon, setUploadIcon] = createSignal("upload");
+const [uploadIcon, setUploadIcon] = createSignal("loading");
 export { setUploadIcon };
 
-const uploadIconBase64 =
-	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABJ0lEQVRYhe2XsW3DMBBFn4IM4FGUCaz0LjKC07pKNuAIHkEj2Bs4G2iEuEtpd+kuDQMTMo/WUbYIB/kAIepE3j3pTiRYiQgl9VA0+hUAFr7lS0Ry20pOWuX6yQ2+lHMtpwKIBc+GsAavg2DfCkRt8Wktwpm/HoE2sG+D/sHi0ArQAc9ADXz17E/+2afF4aMR4ADsEnBmaV/AARJp7QCfrTLXRUcrxZHS2o9xgc152/rC3NFF2C++2NsfLQ6H1MAHp7xvSOe6Axrgxd83wHwswA4tfzrEL6S7BHD3u2FRgE7pm2RdiEJtgNegPzkADFuYkrrrGvgbAENqoMG2EPXnJlVJ/Fxwq8NC1TdoKTBtKGOkAbwB+yvG2QPvsQdaCiZT8b/gH6A4wA9MTTwvPMgvWAAAAABJRU5ErkJggg==";
-const notUploadIconBase64 =
-	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAWJAAAFiQFtaJ36AAABv0lEQVRYhdWXMU7DMBSGvyIOkBvAyEZgYS0MiAEJNiQWMneh3CDcoNygDDCHka2cgHZjLBuIpRULTI/Btmocp42TlIpfsho9P/v/+/L7WWmJCKvE2krZGxBwrEd1iEjV0ZEZOlX3qUqeSB7JXwnwkZcVEdcVEFtkXwUiciQiEolIZuWkZi7UhJH+nQJ9K/5gPU+cNTEwBE58G4YKGAL7etM3J76j58ZWPAEGwIazz8A8rAcKmNiLPeJs9IBLJza1RAHFFUgB8Yx+CZH3OtclfwfaQPYrWmC2eejpnNRjqrsFa3NcoR5wzWejC5wH7lfKA0/M3llG/l0DnALbTuwbePHEgwUMUJ6YB5dkhHrf3UUC6lxGWwXxG9QxdfuBF6HH0CAFzpzYFPWP+yEbhQqINIHb1T6AQ/z+aExAjDKh29WegQNKltxFWQ8k+FvqNbBblRzKVeAI2HNipqVmuewlCHDJR6hzP65LDuHH8BZ1vhshB38FugW5j5q4aN6H9qKElsy+CyLUFXoRQBCKlhswFYhQLp/bNpcB44HYQ/7ZIM8rcOWbMBXYtGKVWmpVGA9s6tGm+MpdqoCV4d9/nNbGD5zxXDUg8eVTAAAAAElFTkSuQmCC";
-const completeUploadIconBase64 =
-	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAcZJREFUeNpiYBgFo2AkAWUJUQV0MWY6WSygLCd73NvPv0OQh7vh7/evjO+/fDtAL18LmGipn7925fJ/GMhIiPsPFDcAyTPRwQ37F61aY6CprQMX0NQBswXo4fv5a1cs/48MPn788N/fzeU9KGRwagSqm/8fNwjAoy8ApqgsP/c/uuUwcaDlCXhd/h8/2I9H336Qgok9XWBMluVEOKABj75+kK9BFqGD5tpqkOUFRMUduo9Bli6cM/t+Z3PjeWx5GSnOE7BZDnMU0YkH3cegbDR/1sz/u7ZvgyUgAyyWO/g4O+K0HATIcsC2TRv3g4IPSypOQLLcACQGkkMGIAdHBcHTJfkOQE9QIItAvgU5ApfloIIHZDmyOFkOeP70ab+xptp95JIM5ghQiWakrvoeXQ7EB0UbSC+yONlpAFtxCgNPHj3CcBjIUaDECtJLFQfgKtPRAVL6MICaQz0HEHIEuuU0cQA+R0BruAQ0c6jvAGRHgMqGE0ePYrWcWAcw4nIAEhfUcDiIrubFs2f8wHwe8OHDewVVNfUDnr5+B7EYZQ/EDnDLgIAcB1ANYHMAPRokeAEuBxQC8Qcq2gMya8Jos3wUDEoAEGAAfIZhhifLZSgAAAAASUVORK5CYII=";
+const loadingAnimationSVGIcon =
+	"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20fill%3D%22%23fff%22%20viewBox%3D%220%200%2024%2024%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%220%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(45%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.125s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(90%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.25s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(135%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.375s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(180%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.5s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(225%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.625s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(270%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.75s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%222%22%20r%3D%222%22%20opacity%3D%22.1%22%20transform%3D%22rotate(315%2012%2012)%22%3E%3Canimate%20attributeName%3D%22opacity%22%20begin%3D%22.875s%22%20dur%3D%221s%22%20from%3D%221%22%20repeatCount%3D%22indefinite%22%20to%3D%22.1%22%2F%3E%3C%2Fcircle%3E%3C%2Fsvg%3E";
+const uploadSVGIcon =
+	"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M1%2015.5c0-2.3%201.2-4.4%203.1-5.5.5-4%203.8-7%207.9-7%204.1%200%207.4%203%207.9%207%201.8%201.1%203.1%203.2%203.1%205.5%200%203.4-2.6%206.2-6%206.5H7c-3.4-.3-6-3.1-6-6.5zM16.8%2020c2.3-.2%204.2-2.1%204.2-4.5%200-1.6-.8-3-2.1-3.8l-.8-.5-.1-1C17.6%207.3%2015%205%2012%205s-5.6%202.3-6%205.2l-.1.9-.8.5c-1.3.9-2.1%202.3-2.1%203.9%200%202.4%201.8%204.3%204.2%204.5h9.6z%22%2F%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M13%2013v4h-2v-4H8l4-5%204%205z%22%2F%3E%3C%2Fsvg%3E";
+const notUploadSVGIcon =
+	"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M1%2015.5c0-2.3%201.2-4.4%203.1-5.5.5-4%203.8-7%207.9-7%204.1%200%207.4%203%207.9%207%201.8%201.1%203.1%203.2%203.1%205.5%200%203.4-2.6%206.2-6%206.5H7c-3.4-.3-6-3.1-6-6.5zM16.8%2020c2.3-.2%204.2-2.1%204.2-4.5%200-1.6-.8-3-2.1-3.8l-.8-.5-.1-1C17.6%207.3%2015%205%2012%205s-5.6%202.3-6%205.2l-.1.9-.8.5c-1.3.9-2.1%202.3-2.1%203.9%200%202.4%201.8%204.3%204.2%204.5h9.6z%22%2F%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22m12%2014.6-3.2%203.2-1.5-1.5%203.2-3.2-3.2-3.3%201.5-1.5%203.2%203.2%203.2-3.2%201.5%201.5-3.2%203.3%203.2%203.2-1.5%201.5z%22%2F%3E%3C%2Fsvg%3E";
+const completeUploadSVGIcon =
+	"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xml%3Aspace%3D%22preserve%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22M1%2015.5c0-2.3%201.2-4.4%203.1-5.5.5-4%203.8-7%207.9-7%204.1%200%207.4%203%207.9%207%201.8%201.1%203.1%203.2%203.1%205.5%200%203.4-2.6%206.2-6%206.5H7c-3.4-.3-6-3.1-6-6.5zM16.8%2020c2.3-.2%204.2-2.1%204.2-4.5%200-1.6-.8-3-2.1-3.8l-.8-.5-.1-1C17.6%207.3%2015%205%2012%205s-5.6%202.3-6%205.2l-.1.9-.8.5c-1.3.9-2.1%202.3-2.1%203.9%200%202.4%201.8%204.3%204.2%204.5h9.6z%22%2F%3E%3Cpath%20fill%3D%22%23FFF%22%20d%3D%22m5.4%2013.8%201.5-1.5%203.2%203.2%205.9-6%201.5%201.5-7.4%207.5z%22%2F%3E%3C%2Fsvg%3E";
 
 export function UploadToggleButton() {
-	const [isIconDisplayed, setIconDisplayed] = createSignal(uploadIconBase64);
-
 	const partId = location.href.match(/(?<=partId=)\d+/);
 	const workId = partId && partId[0].substring(0, 5);
 
 	async function changeUploadToggle() {
-		if (uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload") return;
+		if (
+			uploadIcon() === "loading" ||
+			uploadIcon() === "immutableNotUpload" ||
+			uploadIcon() === "completeUpload"
+		) {
+			return;
+		}
 
 		const notRecordWork = await getNotRecordWork();
 
@@ -44,30 +50,34 @@ export function UploadToggleButton() {
 		}
 	}
 
-	createEffect(() => {
+	function updateIcon() {
 		switch (uploadIcon()) {
+			case "loding":
+				return loadingAnimationSVGIcon;
 			case "upload":
-				setIconDisplayed(uploadIconBase64);
-				break;
+				return uploadSVGIcon;
 			case "notUpload":
-				setIconDisplayed(notUploadIconBase64);
-				break;
+				return notUploadSVGIcon;
 			case "immutableNotUpload":
-				setIconDisplayed(notUploadIconBase64);
-				break;
+				return notUploadSVGIcon;
 			case "completeUpload":
-				setIconDisplayed(completeUploadIconBase64);
-				break;
+				return completeUploadSVGIcon;
 		}
-	});
+	}
 
 	return (
 		<>
 			<AnimeTitle />
-			<div id="upload-icon-container" title={animeData.title} onClick={changeUploadToggle}>
+			<div
+				id="upload-icon-container"
+				title={animeDataSignal()?.title ? animeDataSignal()?.title : loading().message}
+				onClick={changeUploadToggle}
+			>
 				<img
 					id="upload-icon"
-					src={isIconDisplayed()}
+					src={updateIcon()}
+					width={28}
+					height={28}
 					classList={{
 						"not-upload-icon":
 							uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload",

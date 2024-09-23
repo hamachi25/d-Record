@@ -51,12 +51,7 @@ function sendRecord() {
 
 	mutation += "}";
 
-	try {
-		fetchData(JSON.stringify({ query: mutation }));
-	} catch {
-		setUploadIcon("immutableNotUpload");
-		return;
-	}
+	fetchData(JSON.stringify({ query: mutation }));
 
 	setUploadIcon("completeUpload");
 	cleanupIntervalOrEvent();
@@ -76,7 +71,6 @@ export function createIntervalOrEvent() {
 		const startTime = Date.now();
 		const startVideoTime = video.currentTime;
 		sendInterval = setInterval(() => {
-			console.log(startTime);
 			// 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
 			if (
 				video &&

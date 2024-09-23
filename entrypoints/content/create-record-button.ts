@@ -21,7 +21,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 	const episodeData: Episode[] = animeData.episodes.nodes;
 	if (episodeData.length === 0 || diff > 4) return;
 
-	let nextEpisodeIndex: number | undefined = getNextEpisodeIndex(viewData, episodeData);
+	let nextEpisodeIndex = getNextEpisodeIndex(viewData, episodeData);
 
 	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
 		document,
@@ -66,7 +66,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 		// 視聴した次のエピソードに赤枠をつける
 		const insertTarget = insertTargets[nextEpisodeIndex];
 		if (nextEpisodeIndex !== undefined && insertTarget) {
-			const itemModule = insertTarget.closest<HTMLElement>(".itemModule.list");
+			const itemModule = insertTarget.closest(".itemModule.list");
 			if (itemModule) itemModule.classList.add("next-episode-border");
 		}
 	}

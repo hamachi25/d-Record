@@ -1,4 +1,4 @@
-/* ドロップメニュ */
+/*** ドロップメニュ ***/
 #annict {
 	position: relative;
 }
@@ -11,22 +11,27 @@
 	align-items: center;
 	background: #f85a72;
 	user-select: none;
+	z-index: 100;
 }
 #annict-button:hover {
 	background: #f97388 !important;
 }
+#annict-button > svg,
+#annict-button > div {
+	margin-right: 4px;
+}
 #annict-button > span {
-	padding: 1px 7px 0 7px;
+	margin-left: 4px;
 }
 
 .dropdown-menu {
 	position: absolute;
 	width: 100%;
+	min-width: 10rem;
 	box-sizing: border-box;
 	top: 51px;
-	z-index: 1000;
+	z-index: 10;
 	display: block;
-	min-width: 10rem;
 	padding: 0.5rem 0;
 	margin: 0;
 	font-size: 1rem;
@@ -37,6 +42,15 @@
 	background-clip: padding-box;
 	border: 1px solid rgba(0, 0, 0, 0.15);
 	border-radius: 0.3rem;
+	transition:
+		opacity 0.05s ease-in-out,
+		visibility 0.05s ease-in-out;
+	opacity: 0;
+	visibility: hidden;
+}
+.dropdown-menu.show {
+	opacity: 1;
+	visibility: visible;
 }
 @media screen and (min-width: 960px) {
 	.dropdown-menu {
@@ -45,6 +59,8 @@
 }
 
 li:last-child > .dropdown-item {
+	font-size: 15px;
+	font-weight: bold;
 	padding-left: 0 !important;
 	padding-right: 0 !important;
 	text-align: center;
@@ -58,7 +74,7 @@ li:not(:last-child) > .dropdown-item:hover {
 .dropdown-item {
 	display: block;
 	width: 100%;
-	padding: 0.5rem 1rem;
+	padding: 0.5rem 1.5rem;
 	clear: both;
 	font-weight: 400;
 	color: #212529;
@@ -80,18 +96,17 @@ li:not(:last-child) > .dropdown-item:hover {
 }
 
 .dropdown-item > svg {
-	margin-right: 1rem;
+	margin-right: 1.3rem;
 }
-
 .dropdown-svg {
 	width: 1em;
 }
 
-#hover-title {
+#hover-message {
 	opacity: 0;
 	position: absolute;
 	top: -28px;
-	z-index: 2000;
+	z-index: 100;
 	background-color: #fff;
 	white-space: nowrap;
 	width: auto;
@@ -105,7 +120,6 @@ li:not(:last-child) > .dropdown-item:hover {
 	transition: 0.2s;
 	user-select: none;
 }
-
-#annict-button:hover + #hover-title {
+#annict-button:hover + #hover-message {
 	opacity: 1;
 }

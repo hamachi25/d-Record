@@ -1,4 +1,4 @@
-/* 再生画面 */
+/*** 再生画面 ***/
 #d-record-container {
 	display: flex;
 	width: auto !important;
@@ -18,7 +18,7 @@
 	opacity: 0.6;
 }
 .not-upload-icon {
-	opacity: 0.3 !important;
+	opacity: 0.4 !important;
 }
 
 /* アニメタイトル */
@@ -34,6 +34,7 @@
 	opacity: 1;
 	visibility: visible;
 }
+
 #upload-anime-title > span {
 	display: flex !important;
 	height: 100%;

@@ -16,7 +16,7 @@ importers:
         version: 9.9.1
       "@wxt-dev/module-solid":
         specifier: ^1.1.1
-        version: 1.1.2(solid-js@1.8.22)(vite@5.4.2(@types/node@22.5.1))(wxt@0.19.8(@types/node@22.5.1)(rollup@4.21.2))
+        version: 1.1.2(solid-js@1.8.22)(vite@5.4.2(@types/node@22.5.1))(wxt@0.19.10(@types/node@22.5.1)(rollup@4.21.2))
       eslint:
         specifier: ^9.9.1
         version: 9.9.1(jiti@1.21.6)
@@ -36,8 +36,8 @@ importers:
         specifier: ^8.3.0
         version: 8.3.0(eslint@9.9.1(jiti@1.21.6))(typescript@5.5.4)
       wxt:
-        specifier: ^0.19.1
-        version: 0.19.8(@types/node@22.5.1)(rollup@4.21.2)
+        specifier: ^0.19.10
+        version: 0.19.10(@types/node@22.5.1)(rollup@4.21.2)
 
 packages:
   "@aklinker1/rollup-plugin-visualizer@5.12.0":
@@ -981,10 +981,34 @@ packages:
         integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==,
       }
 
+  "@types/chrome@0.0.269":
+    resolution:
+      {
+        integrity: sha512-vF7x8YywnhXX2F06njQ/OE7a3Qeful43C5GUOsUksXWk89WoSFUU3iLeZW8lDpVO9atm8iZIEiLQTRC3H7NOXQ==,
+      }
+
   "@types/estree@1.0.5":
     resolution:
       {
         integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==,
+      }
+
+  "@types/filesystem@0.0.36":
+    resolution:
+      {
+        integrity: sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA==,
+      }
+
+  "@types/filewriter@0.0.33":
+    resolution:
+      {
+        integrity: sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==,
+      }
+
+  "@types/har-format@1.2.15":
+    resolution:
+      {
+        integrity: sha512-RpQH4rXLuvTXKR0zqHq3go0RVXYv/YVqv4TnPH95VbwUxZdQlK1EtcMvQvMpDngHbt13Csh9Z4qT9AbkiQH5BA==,
       }
 
   "@types/http-cache-semantics@4.0.4":
@@ -4567,17 +4591,12 @@ packages:
       utf-8-validate:
         optional: true
 
-  wxt@0.19.8:
+  wxt@0.19.10:
     resolution:
       {
-        integrity: sha512-Z3LxRuM8rTZ9VOZnQ2DjtRz3uLpZpFzTfBjRVgEOHv1kf/7sRVdeKCY4pUmtimgfR2/NGclYAbCfAVTYQJg0GA==,
+        integrity: sha512-lX/dzAaau79SDsU7QZKUgxJUf9nBsaQXMiqsDNgGoqZO1wrRpFq0kijcN3/mNjGbXM989VJhEl7B6f3ttxKAnQ==,
       }
     hasBin: true
-    peerDependencies:
-      "@types/chrome": "*"
-    peerDependenciesMeta:
-      "@types/chrome":
-        optional: true
 
   xdg-basedir@5.1.0:
     resolution:
@@ -5143,7 +5162,20 @@ snapshots:
     dependencies:
       "@babel/types": 7.25.6
 
+  "@types/chrome@0.0.269":
+    dependencies:
+      "@types/filesystem": 0.0.36
+      "@types/har-format": 1.2.15
+
   "@types/estree@1.0.5": {}
+
+  "@types/filesystem@0.0.36":
+    dependencies:
+      "@types/filewriter": 0.0.33
+
+  "@types/filewriter@0.0.33": {}
+
+  "@types/har-format@1.2.15": {}
 
   "@types/http-cache-semantics@4.0.4": {}
 
@@ -5251,10 +5283,10 @@ snapshots:
 
   "@webext-core/match-patterns@1.0.3": {}
 
-  "@wxt-dev/module-solid@1.1.2(solid-js@1.8.22)(vite@5.4.2(@types/node@22.5.1))(wxt@0.19.8(@types/node@22.5.1)(rollup@4.21.2))":
+  "@wxt-dev/module-solid@1.1.2(solid-js@1.8.22)(vite@5.4.2(@types/node@22.5.1))(wxt@0.19.10(@types/node@22.5.1)(rollup@4.21.2))":
     dependencies:
       vite-plugin-solid: 2.10.2(solid-js@1.8.22)(vite@5.4.2(@types/node@22.5.1))
-      wxt: 0.19.8(@types/node@22.5.1)(rollup@4.21.2)
+      wxt: 0.19.10(@types/node@22.5.1)(rollup@4.21.2)
     transitivePeerDependencies:
       - "@testing-library/jest-dom"
       - solid-js
@@ -7274,9 +7306,10 @@ snapshots:
 
   ws@8.18.0: {}
 
-  wxt@0.19.8(@types/node@22.5.1)(rollup@4.21.2):
+  wxt@0.19.10(@types/node@22.5.1)(rollup@4.21.2):
     dependencies:
       "@aklinker1/rollup-plugin-visualizer": 5.12.0(rollup@4.21.2)
+      "@types/chrome": 0.0.269
       "@types/webextension-polyfill": 0.10.7
       "@webext-core/fake-browser": 1.3.1
       "@webext-core/isolated-element": 1.1.2
@@ -7289,6 +7322,7 @@ snapshots:
       consola: 3.2.3
       defu: 6.1.4
       dequal: 2.0.3
+      dotenv: 16.4.5
       esbuild: 0.23.1
       execa: 9.3.1
       fast-glob: 3.3.2
@@ -7310,9 +7344,11 @@ snapshots:
       ohash: 1.1.3
       open: 10.1.0
       ora: 8.1.0
+      perfect-debounce: 1.0.0
       picocolors: 1.0.1
       prompts: 2.4.2
       publish-browser-extension: 2.2.1
+      scule: 1.3.0
       unimport: 3.11.1(rollup@4.21.2)
       vite: 5.4.2(@types/node@22.5.1)
       vite-node: 2.0.5(@types/node@22.5.1)

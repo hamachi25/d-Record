@@ -1,17 +1,34 @@
+import { setUploadIcon } from "./components/UploadToggleButton";
+import { setLoading } from "./anime-data-scraper";
 import { settingData } from "./storage";
 
 function getToken(): string {
 	const token = settingData.Token;
-	if (!token) {
-		console.error("Annictのトークンがありません");
-		throw new Error("Annictのトークンがありません");
-	}
+	if (!token) throw new Error("Annictのトークンがありません");
 	return token;
 }
 
+function handleFetchError(error: Error) {
+	setUploadIcon("immutableNotUpload");
+	switch (error.message) {
+		case "Annictのトークンがありません":
+			setLoading({ status: "error", message: "Annictのトークンを設定してください" });
+			break;
+		case "Annictサーバーエラー":
+			setLoading({ status: "error", message: "Annictのサーバーエラーにより失敗しました" });
+			break;
+		case "dアニメサーバーエラー":
+			setLoading({ status: "error", message: "dアニメストアのサーバーエラーにより失敗しました" });
+			break;
+		default:
+			setLoading({ status: "error", message: "通信に失敗しました" });
+			throw new Error("通信に失敗しました");
+	}
+}
+
 export async function fetchData(query: string): Promise<Response> {
-	const token = getToken();
 	try {
+		const token = getToken();
 		const response = await fetch("https://api.annict.com/graphql", {
 			method: "POST",
 			headers: {
@@ -21,14 +38,12 @@ export async function fetchData(query: string): Promise<Response> {
 			body: query,
 		});
 
-		if (!response.ok) {
-			throw new Error("ネットワークエラー");
-		}
+		if (!response.ok) throw new Error("Annictサーバーエラー");
 
 		return response;
 	} catch (error) {
-		console.error(error);
-		throw Error;
+		if (error instanceof Error) handleFetchError(error);
+		throw error;
 	}
 }
 
@@ -37,13 +52,11 @@ export async function fetchDataFromDanime(workId: number) {
 	try {
 		const response = await fetch(requestURL);
 
-		if (!response.ok) {
-			throw new Error("ネットワークエラー");
-		}
+		if (!response.ok) throw new Error("dアニメサーバーエラー");
 
 		return await response.text();
 	} catch (error) {
-		console.error(error);
-		throw Error;
+		if (error instanceof Error) handleFetchError(error);
+		throw error;
 	}
 }

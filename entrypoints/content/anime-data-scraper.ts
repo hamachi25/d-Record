@@ -1,5 +1,14 @@
+import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
 import { Work, NextEpisode } from "./types";
+
+export const [loading, setLoading] = createSignal({
+	status: "loading",
+	message: "Annictからデータを取得しています",
+});
+
+const [animeDataSignal, setAnimeDataSignal] = createSignal<Work>();
+export { animeDataSignal };
 
 export let animeData: Work; // 取得したアニメデータ
 export let viewData: NextEpisode[]; // 視聴中のアニメデータ
@@ -167,7 +176,6 @@ export function findCorrectAnime(titleText: string, data: Work[], doc: Document)
 	// removeWords()を行った回数が最もすくないアニメのindexを返す
 	const index = [];
 	const findTime = [];
-	console.log(data);
 	for (let i = 0; i < data.length; i++) {
 		const count = 5; // removeWords()の回数
 		let annictTitle = data[i].title;
@@ -191,7 +199,6 @@ export function findCorrectAnime(titleText: string, data: Work[], doc: Document)
 	// 見つからなかった場合
 	// 取得したアニメでエピソード差が小さいもののインデックスを出力
 	const episodeCounts = doc.querySelectorAll("a[id].clearfix").length;
-	console.log(episodeCounts);
 	const arrayDiff = data.map((eachAnimeData: Work) =>
 		Math.abs(episodeCounts - eachAnimeData.episodesCount),
 	);
@@ -244,12 +251,7 @@ export async function getAnimeDataFromDanime(): Promise<Document | undefined> {
 	const partIdMatch = location.href.match(/(?<=partId=)\d+/); // URLからworkIdを取得
 	if (!partIdMatch) return;
 
-	let html: string | undefined;
-	try {
-		html = await fetchDataFromDanime(Number(partIdMatch[0].substring(0, 5)));
-	} catch {
-		return;
-	}
+	const html = await fetchDataFromDanime(Number(partIdMatch[0].substring(0, 5)));
 	if (!html) return;
 
 	danimeDocument = new DOMParser().parseFromString(html, "text/html");
@@ -264,50 +266,49 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		seasons: getBroadcastYear(doc, false),
 	};
 
-	let json;
-	try {
-		const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
-		json = await response.json();
-	} catch {
-		throw new Error();
-	}
+	const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+	const json = await response.json();
 
-	if (json.data.viewer) {
-		viewData = json.data.viewer.libraryEntries.nodes;
-	}
+	if (json.data.viewer) viewData = json.data.viewer.libraryEntries.nodes;
 
 	const allAnimeData: Work[] = json.data.searchWorks.nodes;
 	if (allAnimeData.length === 1) {
 		// 成功
 		animeData = allAnimeData[0];
+		setAnimeDataSignal(animeData);
 	} else if (allAnimeData.length >= 2) {
 		// 成功
 		animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
+		setAnimeDataSignal(animeData);
 	} else {
-		// 失敗なので再度実行
+		// 再度実行
 		const variables = {
 			titles: remakeString(remakeTitle, true),
 			seasons: getBroadcastYear(doc, true),
 		};
 
-		let json;
-		try {
-			const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
-			json = await response.json();
-		} catch {
-			return;
-		}
+		const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+		const json = await response.json();
+
 		const allAnimeData: Work[] = json.data.searchWorks.nodes;
 
-		if (allAnimeData.length > 30) {
-			// 30以上の場合は、ありふれた単語である可能性が高いため諦める
+		if (allAnimeData.length === 0 || allAnimeData.length >= 30) {
+			// 30以上の場合はありふれた単語と判断
+			setLoading({
+				status: "error",
+				message: "現時点ではこのアニメに対応していません",
+			});
+			setUploadIcon("immutableNotUpload");
 			return;
 		} else if (allAnimeData.length === 1) {
 			// 成功
 			animeData = allAnimeData[0];
+			setAnimeDataSignal(animeData);
 		} else if (allAnimeData.length >= 2) {
 			// 成功
 			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
+			setAnimeDataSignal(animeData);
 		}
 	}
+	setLoading({ status: "success", message: "" });
 }
