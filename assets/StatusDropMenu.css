@@ -1,4 +1,7 @@
 /*** ドロップメニュ ***/
+.informationWrap > .actionArea > .btnArea {
+	width: auto !important;
+}
 #annict {
 	position: relative;
 }
@@ -42,14 +45,17 @@
 	background-clip: padding-box;
 	border: 1px solid rgba(0, 0, 0, 0.15);
 	border-radius: 0.3rem;
-	transition:
-		opacity 0.05s ease-in-out,
-		visibility 0.05s ease-in-out;
+	transform: translateY(-20px);
 	opacity: 0;
 	visibility: hidden;
+	transition:
+		transform 0.15s cubic-bezier(0, 0, 0.2, 1),
+		opacity 0.1s cubic-bezier(0, 0, 0.2, 1),
+		visibility 0.1s cubic-bezier(0, 0, 0.2, 1);
 }
 .dropdown-menu.show {
 	opacity: 1;
+	transform: none;
 	visibility: visible;
 }
 @media screen and (min-width: 960px) {

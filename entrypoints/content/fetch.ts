@@ -15,10 +15,16 @@ function handleFetchError(error: Error) {
 			setLoading({ status: "error", message: "Annictのトークンを設定してください" });
 			break;
 		case "Annictサーバーエラー":
-			setLoading({ status: "error", message: "Annictのサーバーエラーにより失敗しました" });
+			setLoading({
+				status: "error",
+				message: "Annictのサーバーエラーにより、データ取得に失敗しました",
+			});
 			break;
 		case "dアニメサーバーエラー":
-			setLoading({ status: "error", message: "dアニメストアのサーバーエラーにより失敗しました" });
+			setLoading({
+				status: "error",
+				message: "dアニメストアのサーバーエラーにより、データ取得に失敗しました",
+			});
 			break;
 		default:
 			setLoading({ status: "error", message: "通信に失敗しました" });

@@ -102,9 +102,11 @@ body > #root > div:not(:last-of-type) {
 	margin-top: 0.5rem;
 }
 .radio-checkbox-container label {
+	position: relative;
 	display: flex;
 	align-items: center;
 	margin-bottom: 0.25rem;
+	cursor: pointer;
 }
 .radio-checkbox-container input {
 	min-width: 1rem;
