@@ -82,3 +82,5 @@ pnpm build
 - [TomoTom0](https://github.com/TomoTom0) - dアニ上での作品タイトルの取得方法や検索精度向上のためのコード（[danime-save-annict-2](https://github.com/TomoTom0/danime-save-annict-2)）
 - [プリン](https://github.com/kazu3jp) - トークンの保存、視聴ステータスのUIに関するコード（[danict](https://github.com/kazu3jp/danict)）
 - [家守カホウ](https://twitter.com/y_kahou) - URLからページごとに実行するためのコード（[dアニメストア便利化](https://greasyfork.org/ja/scripts/414008)）
+- [REMIX ICON](https://remixicon.com/) - アップロードアイコン
+- [CSS Stock](https://pote-chil.com/css-stock/ja/loading) - ローディングアイコン
