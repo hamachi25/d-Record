@@ -5,6 +5,7 @@
 	"version": "1.4",
 	"type": "module",
 	"scripts": {
+		"check": "check",
 		"dev": "wxt",
 		"dev:firefox": "wxt -b firefox",
 		"build": "wxt build",
