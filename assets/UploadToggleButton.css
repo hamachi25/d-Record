@@ -1,5 +1,5 @@
 /*** 再生画面 ***/
-#d-record-container {
+#drecord-container {
 	display: flex;
 	width: auto !important;
 }

@@ -44,7 +44,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 				anchor: insertTarget,
 				append: "after",
 				onMount: (container) => {
-					container.classList.add("record-container");
+					container.classList.add("drecord-record-button-container");
 
 					return render(() => RecordButton(i, j, insertTargets), container);
 				},

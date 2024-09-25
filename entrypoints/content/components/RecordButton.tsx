@@ -85,20 +85,28 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 	return (
 		<>
-			<button class="record-button" onClick={clickSingleRecordButton}>
-				<svg class="record-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+			<button class="drecord-record-button" onClick={clickSingleRecordButton}>
+				<svg
+					class="drecord-record-svg"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 512 512"
+				>
 					<path d="M435.848 83.466L172.804 346.51l-96.652-96.652c-4.686-4.686-12.284-4.686-16.971 0l-28.284 28.284c-4.686 4.686-4.686 12.284 0 16.971l133.421 133.421c4.686 4.686 12.284 4.686 16.971 0l299.813-299.813c4.686-4.686 4.686-12.284 0-16.971l-28.284-28.284c-4.686-4.686-12.284-4.686-16.97 0z"></path>
 				</svg>
 				記録
 			</button>
-			<button class="record-button" onClick={clickMultiRecordButton}>
-				<svg class="record-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+			<button class="drecord-record-button" onClick={clickMultiRecordButton}>
+				<svg
+					class="drecord-record-svg"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 512 512"
+				>
 					<path d="M35.5 183.9l148-148.4c4.7-4.7 12.3-4.7 17 0l148 148.4c4.7 4.7 4.7 12.3 0 17l-19.6 19.6c-4.8 4.8-12.5 4.7-17.1-.2L218 123.2V372c0 6.6-5.4 12-12 12h-28c-6.6 0-12-5.4-12-12V123.2l-93.7 97.1c-4.7 4.8-12.4 4.9-17.1.2l-19.6-19.6c-4.8-4.7-4.8-12.3-.1-17zM372 428H12c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h360c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12z"></path>
 				</svg>
 				ここまで記録
 			</button>
 			<svg
-				class="record-svg"
+				class="drecord-record-svg"
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 512 512"
 				style="min-width: 20px !important;"

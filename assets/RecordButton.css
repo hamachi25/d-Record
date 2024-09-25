@@ -1,5 +1,5 @@
 /*** 記録 ***/
-.record-container {
+.drecord-record-button-container {
 	position: absolute;
 	bottom: 0;
 	right: 0;
@@ -8,7 +8,7 @@
 	display: flex;
 }
 
-.record-button {
+.drecord-record-button {
 	display: none;
 	border: 1px solid;
 	border-radius: 3px;
@@ -19,20 +19,16 @@
 	transition: 0.15s ease-in-out;
 }
 
-.record-button:hover {
+.drecord-record-button:hover {
 	background-color: white;
 }
 
-.record-button:active {
-	background-color: #94f0ff;
-}
-
-.record-svg {
+.drecord-record-svg {
 	pointer-events: none;
 	width: 0.875em;
 }
 
-.record-container:hover .record-button {
+.drecord-record-button-container:hover .drecord-record-button {
 	display: block;
 }
 

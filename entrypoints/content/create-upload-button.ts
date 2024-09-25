@@ -7,7 +7,7 @@ export function createUploadButton(ctx: ContentScriptContext) {
 		anchor: ".buttonArea>.time",
 		append: "after",
 		onMount: (container) => {
-			container.id = "d-record-container";
+			container.id = "drecord-container";
 			container.classList.add("mainButton");
 
 			return render(UploadToggleButton, container);
