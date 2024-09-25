@@ -253,7 +253,9 @@ function removeWords(text: string, count: number) {
 /******************************************************************************/
 
 // 次のエピソードを取得
-function getNextEpisodeIndex(viewData: NextEpisode[], animeData: Work) {
+function getNextEpisodeIndex(viewData: NextEpisode[] | undefined, animeData: Work) {
+	if (!viewData) return undefined;
+
 	let viewIndex: number | undefined; // viewer > libraryEntries内のindex
 	for (const [i, libraryEntry] of viewData.entries()) {
 		if (libraryEntry.work.annictId == animeData.annictId) {
@@ -346,8 +348,8 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		title: animeData.title,
 		viewerStatusState: animeData.viewerStatusState,
 		episodesCount: animeData.episodesCount,
-		episodes: animeData.episodes.nodes,
-		nextEpisode: getNextEpisodeIndex(json.data.viewer.libraryEntries.nodes, animeData),
+		episodes: animeData.episodes?.nodes ?? [],
+		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, animeData),
 	});
 	setLoading({ status: "success", message: "" });
 }

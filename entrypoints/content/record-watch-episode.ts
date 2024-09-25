@@ -224,7 +224,6 @@ export async function handleRecordEpisode() {
 		return;
 	}
 
-	console.log(currentAnimeData.nextEpisode);
 	// nextEpisodeがない・1話しかない場合はindexを0にする
 	let nextEpisodeIndex: number = 0;
 	if (currentAnimeData.nextEpisode !== undefined && currentAnimeData.episodesCount !== 1) {
