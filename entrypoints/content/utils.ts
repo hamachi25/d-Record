@@ -1,5 +1,5 @@
-import { animeData } from "./anime-data-scraper";
-import { Episode, NextEpisode } from "./types";
+import { currentAnimeData, setCurrentAnimeData } from "./anime-data-scraper";
+import { Episode } from "./types";
 
 // annictメニューのsvg
 const noStateD =
@@ -15,35 +15,21 @@ const stopWatchingD =
 	"M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48z";
 export const svgPaths = [noStateD, wannaWatchD, watchingD, watchedD, holdD, stopWatchingD];
 
-export let statusText = "未選択";
-export let svgPathD = noStateD;
-
 // ステータスを日本語に変換
-export function convertStatusToJapanese(status: string | undefined) {
+export function convertStatusToJapanese(status: string) {
 	switch (status) {
-		case "NO_STATE":
-			statusText = "未選択";
-			svgPathD = noStateD;
-			break;
 		case "WANNA_WATCH":
-			statusText = "見たい";
-			svgPathD = wannaWatchD;
-			break;
+			return ["見たい", wannaWatchD];
 		case "WATCHING":
-			statusText = "見てる";
-			svgPathD = watchingD;
-			break;
+			return ["見てる", watchingD];
 		case "WATCHED":
-			statusText = "見た";
-			svgPathD = watchedD;
-			break;
+			return ["見た", watchedD];
 		case "ON_HOLD":
-			statusText = "一時中断";
-			svgPathD = holdD;
-			break;
+			return ["一時中断", holdD];
 		case "STOP_WATCHING":
-			statusText = "視聴中止";
-			svgPathD = stopWatchingD;
+			return ["視聴中止", stopWatchingD];
+		default:
+			return ["未選択", noStateD];
 	}
 }
 
@@ -52,7 +38,7 @@ export function changeStatusText(
 	status: string,
 	setStatusAndSvg: (status: { svgPathD: string; statusText: string }) => void,
 ) {
-	convertStatusToJapanese(status);
+	const [statusText, svgPathD] = convertStatusToJapanese(status);
 
 	setStatusAndSvg({
 		svgPathD: svgPathD,
@@ -62,15 +48,15 @@ export function changeStatusText(
 
 // ステータスを"見てる"に変更
 export function changeStatusToWatching(mutation: string): string {
-	if (animeData.viewerStatusState !== "WATCHING") {
-		// animeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
-		animeData.viewerStatusState = "WATCHING";
+	if (currentAnimeData.viewerStatusState !== "WATCHING") {
+		// currentAnimeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
+		setCurrentAnimeData("viewerStatusState", "WATCHING");
 
 		return (mutation += `
             updateStatus(
                 input:{
                     state: WATCHING,
-                    workId: "${animeData.id}"
+                    workId: "${currentAnimeData.id}"
                 }
             ) { clientMutationId }
         `);
@@ -81,60 +67,36 @@ export function changeStatusToWatching(mutation: string): string {
 
 // ステータスを"見た"に変更
 export function changeStatusToWatched(mutation: string): string {
-	animeData.viewerStatusState = "WATCHED";
+	setCurrentAnimeData("viewerStatusState", "WATCHED");
 
 	return (mutation += `
         updateStatus(
             input:{
                 state: WATCHED,
-                workId: "${animeData.id}"
+                workId: "${currentAnimeData.id}"
             }
         ) { clientMutationId }
     `);
 }
 
-export function getNextEpisodeIndex(
-	viewData: NextEpisode[],
-	episodeData: Episode[],
-): number | undefined {
-	let viewIndex; // viewer > libraryEntries内のindex
-	for (const [i, libraryEntry] of viewData.entries()) {
-		if (libraryEntry.work.annictId == animeData.annictId) {
-			viewIndex = i;
-			break;
-		}
-	}
-
-	// nextEpisodeのindex
-	let nextEpisodeIndex: number;
-	if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
-		for (const [i, episode] of episodeData.entries()) {
-			if (episode.annictId == viewData[viewIndex].nextEpisode.annictId) {
-				nextEpisodeIndex = i;
-				return nextEpisodeIndex;
-			}
-		}
-	}
-
-	return undefined;
+// 現在放送中かどうか
+export function isCurrentlyAiring(doc: Document): boolean {
+	const titleElement = doc.querySelector(".titleWrap > h1");
+	const regex = new RegExp("（全\\d+話）");
+	return !regex.test(titleElement?.textContent || "");
 }
 
 // 次のエピソードがAnnictに登録されていない時の処理
-export let isAiring: boolean;
 export function handleUnregisteredNextEpisode(
 	doc: Document,
 	nextEpisodeIndex: number | undefined,
 	episodeData: Episode[],
 ): boolean {
-	const titleElement = doc.querySelector(".titleWrap > h1");
-	const regex = new RegExp("（全\\d+話）");
-	isAiring = !regex.test(titleElement?.textContent || "");
-
 	if (
 		nextEpisodeIndex === undefined && // nextEpisodeがない
-		isAiring && // アニメが放送中
-		animeData.viewerStatusState == "WATCHING" && // ステータスが「見てる」
-		episodeData[0].viewerRecordsCount == 1 //１話を１回しか見ていない
+		isCurrentlyAiring(doc) && // アニメが放送中
+		currentAnimeData.viewerStatusState === "WATCHING" && // ステータスが「見てる」
+		episodeData[0].viewerRecordsCount === 1 //１話を１回しか見ていない
 	) {
 		return true;
 	}

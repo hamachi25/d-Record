@@ -1,6 +1,6 @@
 import "~/assets/UploadToggleButton.css";
 import { AnimeTitle } from "./AnimeTitle";
-import { animeDataSignal, loading } from "../anime-data-scraper";
+import { currentAnimeData, loading } from "../anime-data-scraper";
 import { cleanupIntervalOrEvent, createIntervalOrEvent } from "../record-watch-episode";
 import { getNotRecordWork } from "../storage";
 
@@ -50,7 +50,9 @@ export function UploadToggleButton() {
 
 			createIntervalOrEvent();
 
-			const newNotRecordWork = notRecordWork.filter((item: number) => item !== Number(workId));
+			const newNotRecordWork = notRecordWork.filter(
+				(item: number) => item !== Number(workId),
+			);
 			browser.storage.local.set({ notRecordWork: newNotRecordWork });
 		}
 	}
@@ -82,12 +84,15 @@ export function UploadToggleButton() {
 					classList={{
 						"drop-shadow": shadow(),
 						"not-upload-icon":
-							uploadIcon() === "immutableNotUpload" || uploadIcon() === "completeUpload",
+							uploadIcon() === "immutableNotUpload" ||
+							uploadIcon() === "completeUpload",
 					}}
 				/>
 				<div id="drecord-popup">
 					<div id="drecord-popupIn">
-						<span>{animeDataSignal()?.title ? animeDataSignal()?.title : loading().message}</span>
+						<span>
+							{currentAnimeData.title ? currentAnimeData.title : loading().message}
+						</span>
 					</div>
 				</div>
 			</div>

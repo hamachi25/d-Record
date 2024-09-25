@@ -1,17 +1,14 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
-import { animeData, viewData, danimeDocument } from "./anime-data-scraper";
+import { currentAnimeData, setCurrentAnimeData, danimeDocument } from "./anime-data-scraper";
 import { fetchData } from "./fetch";
 import { settingData, getNotRecordWork } from "./storage";
-import { Episode } from "./types";
 import {
 	changeStatusToWatching,
 	changeStatusToWatched,
-	isAiring,
+	isCurrentlyAiring,
 	handleUnregisteredNextEpisode,
-	getNextEpisodeIndex,
 } from "./utils";
 
-let episodeData: Episode[];
 let episodeNumberFromDanime: number | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
 let episodeIndex: number | undefined = undefined; // 取得したエピソードの中で何番目か(indexから取得するので、3.5話のような話数が入るとずれる)
 
@@ -26,24 +23,30 @@ export function cleanupIntervalOrEvent() {
 // データ送信
 function sendRecord() {
 	if (!danimeDocument || episodeIndex === undefined) return;
+	const isAiring = isCurrentlyAiring(danimeDocument);
 
 	let mutation = "mutation{";
 
 	// 視聴ステータスが"見てる"以外だった場合、"見てる"に変更(最終回を除く)
-	if (isAiring === true || episodeNumberFromDanime !== episodeData[episodeData.length - 1].number) {
+	if (
+		isAiring === true ||
+		episodeNumberFromDanime !==
+			currentAnimeData.episodes[currentAnimeData.episodesCount - 1].number
+	) {
 		mutation = changeStatusToWatching(mutation);
 	}
 
 	mutation += `
         createRecord (
-            input: { episodeId:"${episodeData[episodeIndex].id}"}
+            input: { episodeId:"${currentAnimeData.episodes[episodeIndex].id}"}
         ) { clientMutationId }
     `;
 
 	// 最終話だった場合、"見た"に変更
 	if (
 		isAiring === false && // アニメが放送終了
-		episodeNumberFromDanime === episodeData[episodeData.length - 1].number && // 最終話
+		episodeNumberFromDanime ===
+			currentAnimeData.episodes[currentAnimeData.episodesCount - 1].number && // 最終話
 		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) // 設定
 	) {
 		mutation = changeStatusToWatched(mutation);
@@ -52,6 +55,13 @@ function sendRecord() {
 	mutation += "}";
 
 	fetchData(JSON.stringify({ query: mutation }));
+
+	// 連続再生の場合、nextEpisodeを変更
+	if (currentAnimeData.nextEpisode) {
+		setCurrentAnimeData("nextEpisode", currentAnimeData.nextEpisode + 1);
+	} else {
+		setCurrentAnimeData("nextEpisode", 1);
+	}
 
 	setUploadIcon("completeUpload");
 	cleanupIntervalOrEvent();
@@ -159,20 +169,20 @@ function episodeNumberExtractor(episode: string): number | undefined {
 
 // エピソードのindexを取得
 function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
-	episodeData = animeData.episodes.nodes;
+	const episodeData = currentAnimeData.episodes;
 	if (!episodeData[0]) return;
 
 	if (episodeData[0].numberText) {
 		// numberTextから取得
-		episodeData.forEach((episode: Episode, i: number) => {
-			const num: number | undefined = episodeNumberExtractor(episode.numberText);
+		episodeData.forEach((episode, i) => {
+			const num = episodeNumberExtractor(episode.numberText);
 			if (num === episodeNumberFromDanime) {
 				episodeIndex = i; // データ送信用のindex（総集編が含まれるとずれる）
 			}
 		});
 	} else if (episodeData[0].number) {
 		// numberから取得
-		episodeData.forEach((episode: { number: number }, i: number) => {
+		episodeData.forEach((episode: { number: number }, i) => {
 			if (episode.number === episodeNumberFromDanime) {
 				episodeIndex = i;
 			}
@@ -183,8 +193,8 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 }
 
 export async function handleRecordEpisode() {
-	if (!animeData || animeData.episodesCount === 0) return;
-	if (settingData.sendTiming && settingData.sendTiming == "not-send") return; // 自動送信しない設定の場合
+	if (settingData.sendTiming && settingData.sendTiming == "not-send") return;
+	if (!currentAnimeData.id || currentAnimeData.episodesCount === 0) return;
 
 	const episode = document.querySelector(".backInfoTxt2")?.textContent;
 	if (!episode) {
@@ -203,25 +213,25 @@ export async function handleRecordEpisode() {
 	getEpisodeIndex(episodeNumberFromDanime);
 	if (episodeIndex === undefined) return;
 
-	let nextEpisodeIndex: number | undefined = getNextEpisodeIndex(viewData, episodeData);
-
 	// 次のエピソードがAnnictに登録されていない場合
 	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
 		danimeDocument,
-		nextEpisodeIndex,
-		episodeData,
+		currentAnimeData.nextEpisode,
+		currentAnimeData.episodes,
 	);
 	if (isNextEpisodeUnregistered) {
 		setUploadIcon("completeUpload");
 		return;
 	}
 
+	console.log(currentAnimeData.nextEpisode);
 	// nextEpisodeがない・1話しかない場合はindexを0にする
-	if (nextEpisodeIndex === undefined || episodeData.length === 1) {
-		nextEpisodeIndex = 0;
+	let nextEpisodeIndex: number = 0;
+	if (currentAnimeData.nextEpisode !== undefined && currentAnimeData.episodesCount !== 1) {
+		nextEpisodeIndex = currentAnimeData.nextEpisode;
 	}
 
-	// 現在のエピソードが記録済みの場合
+	// 現在のエピソードが記録済みの場合は送信しない
 	if (nextEpisodeIndex > episodeIndex) {
 		setUploadIcon("completeUpload");
 		return;

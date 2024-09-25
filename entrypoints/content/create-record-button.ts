@@ -1,9 +1,8 @@
 import { ContentScriptContext } from "wxt/client";
 import { RecordButton } from "./components/RecordButton";
-import { animeData, viewData } from "./anime-data-scraper";
+import { currentAnimeData } from "./anime-data-scraper";
 import { settingData } from "./storage";
-import { Episode } from "./types";
-import { handleUnregisteredNextEpisode, getNextEpisodeIndex } from "./utils";
+import { handleUnregisteredNextEpisode } from "./utils";
 
 // 記録ボタンを作成
 export async function createRecordButton(ctx: ContentScriptContext) {
@@ -16,30 +15,27 @@ export async function createRecordButton(ctx: ContentScriptContext) {
     Annict側で1期2期が別れている可能性がある 例：水星の魔女
     */
 	const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
-	const diff = Math.abs(insertTargets.length - animeData.episodesCount);
+	const diff = Math.abs(insertTargets.length - currentAnimeData.episodesCount);
 
-	const episodeData: Episode[] = animeData.episodes.nodes;
-	if (episodeData.length === 0 || diff > 4) return;
-
-	let nextEpisodeIndex = getNextEpisodeIndex(viewData, episodeData);
+	if (currentAnimeData.episodesCount === 0 || diff > 4) return;
 
 	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
 		document,
-		nextEpisodeIndex,
-		episodeData,
+		currentAnimeData.nextEpisode,
+		currentAnimeData.episodes,
 	);
 	if (isNextEpisodeUnregistered) return;
 
-	// nextEpisodeがない・1話しかない場合はindexを0にする
-	if (nextEpisodeIndex === undefined || episodeData.length === 1) nextEpisodeIndex = 0;
-
 	if (!settingData || !settingData.recordButton) {
+		// nextEpisodeがない・1話しかない場合はindexを0にする
+		let nextEpisodeIndex: number = 0;
+		if (currentAnimeData.nextEpisode !== undefined && currentAnimeData.episodesCount !== 1) {
+			nextEpisodeIndex = currentAnimeData.nextEpisode;
+		}
+
 		let j = 0;
 		for (const [i, insertTarget] of insertTargets.entries()) {
-			if (
-				nextEpisodeIndex === undefined ||
-				(i < nextEpisodeIndex && episodeData[i].viewerRecordsCount !== 0)
-			) {
+			if (i < nextEpisodeIndex && currentAnimeData.episodes[i].viewerRecordsCount !== 0) {
 				continue;
 			}
 
@@ -62,12 +58,8 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 		}
 	}
 
-	if (!settingData || !settingData.nextEpisodeLine) {
-		// 視聴した次のエピソードに赤枠をつける
-		const insertTarget = insertTargets[nextEpisodeIndex];
-		if (nextEpisodeIndex !== undefined && insertTarget) {
-			const itemModule = insertTarget.closest(".itemModule.list");
-			if (itemModule) itemModule.classList.add("next-episode-border");
-		}
-	}
+	// 次のエピソードに赤枠をつける
+	const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list");
+	const nextEpisodeElement = elements[currentAnimeData.nextEpisode ?? 0];
+	if (nextEpisodeElement) nextEpisodeElement.classList.add("next-episode-border");
 }

@@ -45,3 +45,13 @@ export type Settings = {
 	animeTitle?: boolean;
 	autoChangeStatus?: boolean;
 };
+
+export type CurrentAnimeData = {
+	id: string;
+	annictId: string;
+	title: string;
+	viewerStatusState: string;
+	episodesCount: number;
+	episodes: Episode[] | [];
+	nextEpisode: number | undefined; // CurrentAnimeEpisodeのnumber
+};

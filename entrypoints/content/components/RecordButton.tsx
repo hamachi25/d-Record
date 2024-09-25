@@ -1,17 +1,18 @@
 import "~/assets/RecordButton.css";
-import { animeDataSignal } from "../anime-data-scraper";
+import { currentAnimeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { settingData } from "../storage";
-import { Episode } from "../types";
 import {
 	changeStatusText,
 	changeStatusToWatched,
 	changeStatusToWatching,
-	isAiring,
+	isCurrentlyAiring,
 } from "../utils";
 import { setStatusAndSvg } from "./StatusDropMenu";
 
 export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
+	const isAiring = isCurrentlyAiring(document);
+
 	function updateStatusToWatching(mutation: string): string {
 		if (isAiring === true || i !== insertTargets.length - 1) {
 			mutation = changeStatusToWatching(mutation);
@@ -33,8 +34,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function clickSingleRecordButton() {
-		const episodeData: Episode[] | undefined = animeDataSignal()?.episodes.nodes;
-		if (!episodeData) return;
+		if (currentAnimeData.episodesCount === 0) return;
 
 		let mutation = "mutation{";
 
@@ -43,7 +43,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		mutation += `
 	        createRecord (
-	            input: { episodeId:"${episodeData[i].id}"}
+	            input: { episodeId:"${currentAnimeData.episodes[i].id}"}
 	        ) { clientMutationId }
 	    `;
 
@@ -59,8 +59,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function clickMultiRecordButton() {
-		const episodeData: Episode[] | undefined = animeDataSignal()?.episodes.nodes;
-		if (!episodeData) return;
+		if (currentAnimeData.episodesCount === 0) return;
 
 		let mutation = "mutation{";
 
@@ -71,7 +70,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		for (let k = 0; k <= j; k++) {
 			mutation += `
                 e${k}:createRecord(
-                    input:{ episodeId:"${animeDataSignal()?.episodes.nodes[i - j + k].id}" }
+                    input:{ episodeId:"${currentAnimeData.episodes[i - j + k].id}" }
                 ) { clientMutationId }
             `;
 

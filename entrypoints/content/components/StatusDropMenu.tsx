@@ -1,11 +1,11 @@
 import "~/assets/StatusDropMenu.css";
-import { animeDataSignal, loading } from "../anime-data-scraper";
+import { currentAnimeData, loading } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
-import { convertStatusToJapanese, statusText, svgPaths, svgPathD } from "../utils";
+import { convertStatusToJapanese, svgPaths } from "../utils";
 
 const [statusAndSvg, setStatusAndSvg] = createSignal({
-	svgPathD: svgPathD,
-	statusText: statusText,
+	svgPathD: svgPaths[0],
+	statusText: "未選択",
 });
 export { setStatusAndSvg };
 
@@ -22,12 +22,10 @@ export function StatusDropMenu() {
 	const [show, setShow] = createSignal(false);
 
 	createEffect(() => {
-		const currentStatus = animeDataSignal()?.viewerStatusState;
-		if (currentStatus) {
-			convertStatusToJapanese(currentStatus);
-		} else {
-			convertStatusToJapanese("NO_STATE");
-		}
+		const currentStatus = currentAnimeData.viewerStatusState;
+		const [statusText, svgPathD] = currentStatus
+			? convertStatusToJapanese(currentStatus)
+			: convertStatusToJapanese("NO_STATE");
 
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
 	});
@@ -59,12 +57,12 @@ export function StatusDropMenu() {
 		`;
 		const variables = {
 			state: status,
-			workId: animeDataSignal()?.id,
+			workId: currentAnimeData.id,
 		};
 
 		await fetchData(JSON.stringify({ query: mutation, variables: variables }));
 
-		convertStatusToJapanese(status);
+		const [statusText, svgPathD] = convertStatusToJapanese(status);
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
 	}
 
@@ -181,7 +179,7 @@ export function StatusDropMenu() {
 						</svg>
 						<span>{statusAndSvg().statusText}</span>
 					</div>
-					<span id="hover-message">{animeDataSignal()?.title}</span>
+					<span id="hover-message">{currentAnimeData.title}</span>
 				</Match>
 				<Match when={loading().status === "error"}>
 					<div id="annict-button">
@@ -194,8 +192,15 @@ export function StatusDropMenu() {
 				<Index each={statusArray()}>
 					{(status) => (
 						<li>
-							<button class="dropdown-item status-state" onClick={() => updateStatus(status()[0])}>
-								<svg class="dropdown-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+							<button
+								class="dropdown-item status-state"
+								onClick={() => updateStatus(status()[0])}
+							>
+								<svg
+									class="dropdown-svg"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 512 512"
+								>
 									<path d={status()[1]}></path>
 								</svg>
 								<span>{status()[2]}</span>
@@ -205,11 +210,11 @@ export function StatusDropMenu() {
 				</Index>
 				<li>
 					<a
-						href={`https://annict.com/works/${animeDataSignal()?.annictId}`}
+						href={`https://annict.com/works/${currentAnimeData.annictId}`}
 						target="_blank"
 						rel="noopener noreferrer"
 						class="dropdown-item"
-						title={animeDataSignal()?.title}
+						title={currentAnimeData.title}
 					>
 						Annictを開く
 					</a>

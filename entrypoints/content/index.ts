@@ -1,6 +1,10 @@
 import { ContentScriptContext } from "wxt/client";
 import { setUploadIcon } from "./components/UploadToggleButton";
-import { animeData, getAnimeDataFromAnnict, getAnimeDataFromDanime } from "./anime-data-scraper";
+import {
+	currentAnimeData,
+	getAnimeDataFromAnnict,
+	getAnimeDataFromDanime,
+} from "./anime-data-scraper";
 import { createDropMenu } from "./create-drop-menu";
 import { createRecordButton } from "./create-record-button";
 import { createUploadButton } from "./create-upload-button";
@@ -8,9 +12,9 @@ import { queryWithEpisodes, queryWithoutEpisodes } from "./query";
 import { handleRecordEpisode } from "./record-watch-episode";
 import { getSettings } from "./storage";
 
-const path = window.location.pathname.replace("/animestore/", "");
 async function main(ctx: ContentScriptContext) {
 	await getSettings();
+	const path = window.location.pathname.replace("/animestore/", "");
 
 	if (path == "ci_pc") {
 		createDropMenu(ctx);
@@ -31,7 +35,7 @@ async function main(ctx: ContentScriptContext) {
 
 		await getAnimeDataFromAnnict(animeTitle, document, query);
 
-		if (animeData) createRecordButton(ctx);
+		if (currentAnimeData.id) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
 		// 再生画面
 		let currentLocation: string;
@@ -54,7 +58,8 @@ async function main(ctx: ContentScriptContext) {
 
 					await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
 
-					if (!animeData || animeData.episodesCount === 0) observer.disconnect();
+					if (!currentAnimeData.id || currentAnimeData.episodesCount === 0)
+						observer.disconnect();
 				}
 
 				handleRecordEpisode();

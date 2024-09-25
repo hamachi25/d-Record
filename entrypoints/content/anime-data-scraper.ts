@@ -1,23 +1,27 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
-import { Work, NextEpisode } from "./types";
+import { CurrentAnimeData, NextEpisode, Work } from "./types";
 
 export const [loading, setLoading] = createSignal({
 	status: "loading",
 	message: "Annictからデータを取得しています",
 });
 
-const [animeDataSignal, setAnimeDataSignal] = createSignal<Work>();
-export { animeDataSignal };
-
-export let animeData: Work; // 取得したアニメデータ
-export let viewData: NextEpisode[]; // 視聴中のアニメデータ
+export const [currentAnimeData, setCurrentAnimeData] = createStore<CurrentAnimeData>({
+	id: "",
+	annictId: "",
+	title: "",
+	viewerStatusState: "",
+	episodesCount: 0,
+	episodes: [],
+	nextEpisode: undefined,
+});
 
 /******************************************************************************/
 
 /* リクエストに送る季節を取得 */
 
-export function getBroadcastYear(doc: Document, retry: boolean) {
+function getBroadcastYear(doc: Document, retry: boolean) {
 	const seasonalYearRegex = /^(\d{4})年([春夏秋冬])$/; // 2024年春
 	const nonSeasonalYearRegex = /^製作年：(\d{4})年$/; // 製作年：2024年
 
@@ -39,12 +43,14 @@ export function getBroadcastYear(doc: Document, retry: boolean) {
 	}
 
 	const tagElements = Array.from(doc.querySelectorAll(".tagArea > ul.tagWrapper > li > a"));
+
 	const seasonalYearText = tagElements.find((elem) =>
 		elem.textContent?.match(seasonalYearRegex),
 	)?.textContent;
 	const nonSeasonalYearText = tagElements.find((elem) =>
 		elem.textContent?.match(nonSeasonalYearRegex),
 	)?.textContent;
+
 	const seasonalYearMatch = seasonalYearText?.match(seasonalYearRegex);
 	const nonSeasonalYearMatch = nonSeasonalYearText?.match(nonSeasonalYearRegex);
 
@@ -112,7 +118,7 @@ export function getBroadcastYear(doc: Document, retry: boolean) {
 danime-save-annict-2
 https://github.com/TomoTom0/danime-save-annict-2/blob/105851c64900b4994eb095f0f1bd83e755cb5f1d/src/scripts/index.js#L447-L463
 */
-export function remakeString(title: string | null | undefined, retry: boolean) {
+function remakeString(title: string | null | undefined, retry: boolean) {
 	if (!title) return "";
 
 	if (!retry) {
@@ -161,7 +167,8 @@ export function remakeString(title: string | null | undefined, retry: boolean) {
 			.trim();
 	} else {
 		// 単語をわけて、3文字以上の単語で再検索
-		const separateWord = /\s+|;|:|・|‐|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+		const separateWord =
+			/\s+|;|:|・|‐|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
 		return title
 			.replace(/OVA/, "")
 			.split(separateWord)
@@ -172,7 +179,7 @@ export function remakeString(title: string | null | undefined, retry: boolean) {
 /******************************************************************************/
 
 // 取得したアニメからタイトルが一致するものを探す
-export function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
+function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 	// removeWords()を行った回数が最もすくないアニメのindexを返す
 	const index = [];
 	const findTime = [];
@@ -245,6 +252,33 @@ function removeWords(text: string, count: number) {
 
 /******************************************************************************/
 
+// 次のエピソードを取得
+function getNextEpisodeIndex(viewData: NextEpisode[], animeData: Work) {
+	let viewIndex: number | undefined; // viewer > libraryEntries内のindex
+	for (const [i, libraryEntry] of viewData.entries()) {
+		if (libraryEntry.work.annictId == animeData.annictId) {
+			viewIndex = i;
+			break;
+		}
+	}
+	if (viewIndex === undefined) return undefined;
+
+	// nextEpisodeのindex
+	let nextEpisodeIndex: number;
+	if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
+		for (const [i, episode] of animeData.episodes.nodes.entries()) {
+			if (episode.annictId === viewData[viewIndex].nextEpisode.annictId) {
+				nextEpisodeIndex = i;
+				return nextEpisodeIndex;
+			}
+		}
+	}
+
+	return undefined;
+}
+
+/******************************************************************************/
+
 // dアニメストアから作品ページのhtmlを取得
 export let danimeDocument: Document;
 export async function getAnimeDataFromDanime(): Promise<Document | undefined> {
@@ -269,17 +303,14 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 	const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
 	const json = await response.json();
 
-	if (json.data.viewer) viewData = json.data.viewer.libraryEntries.nodes;
-
-	const allAnimeData: Work[] = json.data.searchWorks.nodes;
+	let allAnimeData: Work[] = json.data.searchWorks.nodes;
+	let animeData: Work;
 	if (allAnimeData.length === 1) {
 		// 成功
 		animeData = allAnimeData[0];
-		setAnimeDataSignal(animeData);
 	} else if (allAnimeData.length >= 2) {
 		// 成功
 		animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
-		setAnimeDataSignal(animeData);
 	} else {
 		// 再度実行
 		const variables = {
@@ -290,9 +321,15 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
 		const json = await response.json();
 
-		const allAnimeData: Work[] = json.data.searchWorks.nodes;
+		allAnimeData = json.data.searchWorks.nodes;
 
-		if (allAnimeData.length === 0 || allAnimeData.length >= 30) {
+		if (allAnimeData.length === 1) {
+			// 成功
+			animeData = allAnimeData[0];
+		} else if (allAnimeData.length >= 2 && allAnimeData.length <= 30) {
+			// 成功
+			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
+		} else {
 			// 30以上の場合はありふれた単語と判断
 			setLoading({
 				status: "error",
@@ -300,15 +337,17 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 			});
 			setUploadIcon("immutableNotUpload");
 			return;
-		} else if (allAnimeData.length === 1) {
-			// 成功
-			animeData = allAnimeData[0];
-			setAnimeDataSignal(animeData);
-		} else if (allAnimeData.length >= 2) {
-			// 成功
-			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
-			setAnimeDataSignal(animeData);
 		}
 	}
+
+	setCurrentAnimeData({
+		id: animeData.id,
+		annictId: animeData.annictId,
+		title: animeData.title,
+		viewerStatusState: animeData.viewerStatusState,
+		episodesCount: animeData.episodesCount,
+		episodes: animeData.episodes.nodes,
+		nextEpisode: getNextEpisodeIndex(json.data.viewer.libraryEntries.nodes, animeData),
+	});
 	setLoading({ status: "success", message: "" });
 }
