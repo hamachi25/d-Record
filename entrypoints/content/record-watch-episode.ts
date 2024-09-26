@@ -69,10 +69,7 @@ let sendInterval: NodeJS.Timeout | null = null;
 let sendEvent: EventListener | null = null;
 export function createIntervalOrEvent() {
 	const video = document.querySelector("video");
-	if (!video) {
-		setUploadIcon("immutableNotUpload");
-		return;
-	}
+	if (!video) return;
 
 	if (settingData.sendTiming == "after-start") {
 		const startTime = Date.now();
@@ -87,7 +84,7 @@ export function createIntervalOrEvent() {
 				sendRecord();
 				cleanupIntervalOrEvent();
 			}
-		}, 1000);
+		}, 10000);
 	} else if (!settingData.sendTiming || settingData.sendTiming == "after-end") {
 		sendEvent = () => sendRecord();
 		video.addEventListener("ended", sendEvent);
@@ -255,10 +252,7 @@ export async function handleRecordEpisode() {
 	}
 
 	const episode = document.querySelector(".backInfoTxt2")?.textContent;
-	if (!episode) {
-		setUploadIcon("immutableNotUpload");
-		return;
-	}
+	if (!episode) return;
 
 	// エピソードから数字を取り出す
 	episodeNumberFromDanime = episodeNumberExtractor(episode);
