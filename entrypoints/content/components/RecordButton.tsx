@@ -1,5 +1,5 @@
 import "~/assets/RecordButton.css";
-import { currentAnimeData } from "../anime-data-scraper";
+import { animeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { settingData } from "../storage";
 import {
@@ -34,7 +34,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function clickSingleRecordButton() {
-		if (currentAnimeData.episodesCount === 0) return;
+		if (animeData.episodes.length === 0) return;
 
 		let mutation = "mutation{";
 
@@ -43,7 +43,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		mutation += `
 	        createRecord (
-	            input: { episodeId:"${currentAnimeData.episodes[i].id}"}
+	            input: { episodeId:"${animeData.episodes[i].id}"}
 	        ) { clientMutationId }
 	    `;
 
@@ -59,7 +59,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function clickMultiRecordButton() {
-		if (currentAnimeData.episodesCount === 0) return;
+		if (animeData.episodes.length === 0) return;
 
 		let mutation = "mutation{";
 
@@ -70,7 +70,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		for (let k = 0; k <= j; k++) {
 			mutation += `
                 e${k}:createRecord(
-                    input:{ episodeId:"${currentAnimeData.episodes[i - j + k].id}" }
+                    input:{ episodeId:"${animeData.episodes[i - j + k].id}" }
                 ) { clientMutationId }
             `;
 

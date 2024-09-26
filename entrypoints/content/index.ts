@@ -1,10 +1,6 @@
 import { ContentScriptContext } from "wxt/client";
 import { setUploadIcon } from "./components/UploadToggleButton";
-import {
-	currentAnimeData,
-	getAnimeDataFromAnnict,
-	getAnimeDataFromDanime,
-} from "./anime-data-scraper";
+import { animeData, getAnimeDataFromAnnict, getAnimeDataFromDanime } from "./anime-data-scraper";
 import { createDropMenu } from "./create-drop-menu";
 import { createRecordButton } from "./create-record-button";
 import { createUploadButton } from "./create-upload-button";
@@ -25,9 +21,8 @@ async function main(ctx: ContentScriptContext) {
 
 		// エピソード数が多いと取得に時間がかかるため、5ページ以上の場合ステータスボタンのみ表示
 		let query;
-		const count = 5;
 		const episodeElement = document.querySelectorAll(".episodeContainer>.swiper-slide");
-		if (episodeElement && episodeElement.length < count) {
+		if (episodeElement && episodeElement.length < 5) {
 			query = queryWithEpisodes;
 		} else {
 			query = queryWithoutEpisodes;
@@ -35,7 +30,7 @@ async function main(ctx: ContentScriptContext) {
 
 		await getAnimeDataFromAnnict(animeTitle, document, query);
 
-		if (currentAnimeData.id) createRecordButton(ctx);
+		if (animeData.id && query === queryWithEpisodes) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
 		// 再生画面
 		let currentLocation: string;
@@ -51,15 +46,12 @@ async function main(ctx: ContentScriptContext) {
 					createUploadButton(ctx);
 
 					const animeTitle = document.querySelector(".backInfoTxt1")?.textContent;
-					if (!animeTitle) return;
-
 					const danimeDocument = await getAnimeDataFromDanime();
-					if (!danimeDocument) return;
+					if (!danimeDocument || !animeTitle) return;
 
 					await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
 
-					if (!currentAnimeData.id || currentAnimeData.episodesCount === 0)
-						observer.disconnect();
+					if (!animeData.id || animeData.episodes.length === 0) observer.disconnect();
 				}
 
 				handleRecordEpisode();

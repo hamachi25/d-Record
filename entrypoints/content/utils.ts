@@ -1,4 +1,4 @@
-import { currentAnimeData, setCurrentAnimeData } from "./anime-data-scraper";
+import { animeData, setAnimeData } from "./anime-data-scraper";
 import { Episode } from "./types";
 
 // annictメニューのsvg
@@ -48,15 +48,15 @@ export function changeStatusText(
 
 // ステータスを"見てる"に変更
 export function changeStatusToWatching(mutation: string): string {
-	if (currentAnimeData.viewerStatusState !== "WATCHING") {
+	if (animeData.viewerStatusState !== "WATCHING") {
 		// currentAnimeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
-		setCurrentAnimeData("viewerStatusState", "WATCHING");
+		setAnimeData("viewerStatusState", "WATCHING");
 
 		return (mutation += `
             updateStatus(
                 input:{
                     state: WATCHING,
-                    workId: "${currentAnimeData.id}"
+                    workId: "${animeData.id}"
                 }
             ) { clientMutationId }
         `);
@@ -67,13 +67,13 @@ export function changeStatusToWatching(mutation: string): string {
 
 // ステータスを"見た"に変更
 export function changeStatusToWatched(mutation: string): string {
-	setCurrentAnimeData("viewerStatusState", "WATCHED");
+	setAnimeData("viewerStatusState", "WATCHED");
 
 	return (mutation += `
         updateStatus(
             input:{
                 state: WATCHED,
-                workId: "${currentAnimeData.id}"
+                workId: "${animeData.id}"
             }
         ) { clientMutationId }
     `);
@@ -95,7 +95,7 @@ export function handleUnregisteredNextEpisode(
 	if (
 		nextEpisodeIndex === undefined && // nextEpisodeがない
 		isCurrentlyAiring(doc) && // アニメが放送中
-		currentAnimeData.viewerStatusState === "WATCHING" && // ステータスが「見てる」
+		animeData.viewerStatusState === "WATCHING" && // ステータスが「見てる」
 		episodeData[0].viewerRecordsCount === 1 //１話を１回しか見ていない
 	) {
 		return true;

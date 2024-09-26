@@ -1,6 +1,6 @@
 import "~/assets/UploadToggleButton.css";
 import { AnimeTitle } from "./AnimeTitle";
-import { currentAnimeData, loading } from "../anime-data-scraper";
+import { animeData, loading } from "../anime-data-scraper";
 import { cleanupIntervalOrEvent, createIntervalOrEvent } from "../record-watch-episode";
 import { getNotRecordWork } from "../storage";
 
@@ -90,9 +90,7 @@ export function UploadToggleButton() {
 				/>
 				<div id="drecord-popup">
 					<div id="drecord-popupIn">
-						<span>
-							{currentAnimeData.title ? currentAnimeData.title : loading().message}
-						</span>
+						<span>{loading().message ? loading().message : animeData.title}</span>
 					</div>
 				</div>
 			</div>

@@ -1,5 +1,5 @@
 import "~/assets/StatusDropMenu.css";
-import { currentAnimeData, loading } from "../anime-data-scraper";
+import { animeData, loading } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { convertStatusToJapanese, svgPaths } from "../utils";
 
@@ -22,7 +22,7 @@ export function StatusDropMenu() {
 	const [show, setShow] = createSignal(false);
 
 	createEffect(() => {
-		const currentStatus = currentAnimeData.viewerStatusState;
+		const currentStatus = animeData.viewerStatusState;
 		const [statusText, svgPathD] = currentStatus
 			? convertStatusToJapanese(currentStatus)
 			: convertStatusToJapanese("NO_STATE");
@@ -57,7 +57,7 @@ export function StatusDropMenu() {
 		`;
 		const variables = {
 			state: status,
-			workId: currentAnimeData.id,
+			workId: animeData.id,
 		};
 
 		await fetchData(JSON.stringify({ query: mutation, variables: variables }));
@@ -179,7 +179,7 @@ export function StatusDropMenu() {
 						</svg>
 						<span>{statusAndSvg().statusText}</span>
 					</div>
-					<span id="hover-message">{currentAnimeData.title}</span>
+					<span id="hover-message">{animeData.title}</span>
 				</Match>
 				<Match when={loading().status === "error"}>
 					<div id="annict-button">
@@ -210,11 +210,11 @@ export function StatusDropMenu() {
 				</Index>
 				<li>
 					<a
-						href={`https://annict.com/works/${currentAnimeData.annictId}`}
+						href={`https://annict.com/works/${animeData.annictId}`}
 						target="_blank"
 						rel="noopener noreferrer"
 						class="dropdown-item"
-						title={currentAnimeData.title}
+						title={animeData.title}
 					>
 						Annictを開く
 					</a>

@@ -51,7 +51,6 @@ export type CurrentAnimeData = {
 	annictId: string;
 	title: string;
 	viewerStatusState: string;
-	episodesCount: number;
 	episodes: Episode[] | [];
 	nextEpisode: number | undefined; // CurrentAnimeEpisodeのnumber
 };

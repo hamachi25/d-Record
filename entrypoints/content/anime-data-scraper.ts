@@ -7,12 +7,11 @@ export const [loading, setLoading] = createSignal({
 	message: "Annictからデータを取得しています",
 });
 
-export const [currentAnimeData, setCurrentAnimeData] = createStore<CurrentAnimeData>({
+export const [animeData, setAnimeData] = createStore<CurrentAnimeData>({
 	id: "",
 	annictId: "",
 	title: "",
 	viewerStatusState: "",
-	episodesCount: 0,
 	episodes: [],
 	nextEpisode: undefined,
 });
@@ -184,7 +183,7 @@ function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 	const index = [];
 	const findTime = [];
 	for (let i = 0; i < data.length; i++) {
-		const count = 5; // removeWords()の回数
+		const count = 7; // removeWords()の回数
 		let annictTitle = data[i].title;
 		let dTitle = titleText;
 		let added = false;
@@ -207,7 +206,7 @@ function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 	// 取得したアニメでエピソード差が小さいもののインデックスを出力
 	const episodeCounts = doc.querySelectorAll("a[id].clearfix").length;
 	const arrayDiff = data.map((eachAnimeData: Work) =>
-		Math.abs(episodeCounts - eachAnimeData.episodesCount),
+		Math.abs(episodeCounts - eachAnimeData.episodes.nodes.length),
 	);
 	return arrayDiff.indexOf(Math.min(...arrayDiff));
 }
@@ -234,13 +233,18 @@ function removeWords(text: string, count: number) {
 				String.fromCharCode(s.charCodeAt(0) - 65248),
 			);
 		case 3:
-			return text.replace(/[[［《【＜〈～－―-].+[-―－～〉＞】》］]]|[（(｢「『」｣』)）]/g, "");
+			// 「」内の（）を削除 例：映画「文豪ストレイドッグス DEAD APPLE（デッドアップル）」
+			return text.replace(/「([^」]*?)（([^）]*?)）([^」]*)」/g, "「$1$3」");
 		case 4:
+			return text.replace(/[[［《【＜〈].+?[〉＞】》］\]]|[（(｢「『」｣』)）]/g, "");
+		case 5:
 			return text.replace(
 				/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g,
 				"",
 			);
-		case 5:
+		case 6:
+			return text.replace(/[～－―-].+?[-―－～]/g, "");
+		case 7:
 			return text.replace(
 				new RegExp(Object.keys(remakeWords).join("|"), "g"),
 				(match) => remakeWords[match as keyof typeof remakeWords],
@@ -306,13 +310,13 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 	const json = await response.json();
 
 	let allAnimeData: Work[] = json.data.searchWorks.nodes;
-	let animeData: Work;
+	let selectedAnimeData: Work;
 	if (allAnimeData.length === 1) {
 		// 成功
-		animeData = allAnimeData[0];
+		selectedAnimeData = allAnimeData[0];
 	} else if (allAnimeData.length >= 2) {
 		// 成功
-		animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
+		selectedAnimeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 	} else {
 		// 再度実行
 		const variables = {
@@ -327,10 +331,10 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 
 		if (allAnimeData.length === 1) {
 			// 成功
-			animeData = allAnimeData[0];
+			selectedAnimeData = allAnimeData[0];
 		} else if (allAnimeData.length >= 2 && allAnimeData.length <= 30) {
 			// 成功
-			animeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
+			selectedAnimeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 		} else {
 			// 30以上の場合はありふれた単語と判断
 			setLoading({
@@ -342,14 +346,13 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		}
 	}
 
-	setCurrentAnimeData({
-		id: animeData.id,
-		annictId: animeData.annictId,
-		title: animeData.title,
-		viewerStatusState: animeData.viewerStatusState,
-		episodesCount: animeData.episodesCount,
-		episodes: animeData.episodes?.nodes ?? [],
-		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, animeData),
+	setAnimeData({
+		id: selectedAnimeData.id,
+		annictId: selectedAnimeData.annictId,
+		title: selectedAnimeData.title,
+		viewerStatusState: selectedAnimeData.viewerStatusState,
+		episodes: selectedAnimeData.episodes?.nodes ?? [],
+		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, selectedAnimeData),
 	});
 	setLoading({ status: "success", message: "" });
 }

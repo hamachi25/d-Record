@@ -2,7 +2,6 @@ import { Settings } from "./types";
 
 // d-Recordの設定を取得
 export let settingData: Settings;
-
 export async function getSettings(): Promise<void> {
 	const result = await browser.storage.local.get([
 		"Token",
