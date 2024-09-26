@@ -68,8 +68,6 @@ function sendRecord() {
 let sendInterval: NodeJS.Timeout | null = null;
 let sendEvent: EventListener | null = null;
 export function createIntervalOrEvent() {
-	cleanupIntervalOrEvent();
-
 	const video = document.querySelector("video");
 	if (!video) {
 		setUploadIcon("immutableNotUpload");
@@ -201,6 +199,8 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 }
 
 export async function handleRecordEpisode() {
+	cleanupIntervalOrEvent(); // 前のイベントを削除
+
 	const partId = location.href.match(/(?<=partId=)\d+/);
 	const workId = partId && partId[0].substring(0, 5);
 	const notRecordWork = await getNotRecordWork();
@@ -222,6 +222,7 @@ export async function handleRecordEpisode() {
 
 	const episodeElements: NodeListOf<HTMLElement> =
 		danimeDocument.querySelectorAll("a[id].clearfix");
+
 	// 映画などエピソードがない場合、ステータスのみ変更
 	if (animeData.episodes.length === 0 && episodeElements.length === 1) {
 		// 送信しない作品の場合
@@ -231,7 +232,7 @@ export async function handleRecordEpisode() {
 		}
 
 		if (settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) {
-			// ステータスの自動変更がオンの場合
+			// ステータスの自動変更がオンの場合、イベントを作成
 			createIntervalOrEvent();
 			setUploadIcon("upload");
 			return;
