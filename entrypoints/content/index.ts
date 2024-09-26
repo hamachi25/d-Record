@@ -36,7 +36,7 @@ async function main(ctx: ContentScriptContext) {
 		let currentLocation: string;
 		let isFirstRun = true;
 
-		const observer = new MutationObserver(async () => {
+		const handleMutation = async () => {
 			if (currentLocation !== location.href) {
 				currentLocation = location.href;
 				setUploadIcon("loding");
@@ -51,15 +51,28 @@ async function main(ctx: ContentScriptContext) {
 
 					await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
 
-					if (!animeData.id || animeData.episodes.length === 0) observer.disconnect();
+					if (!animeData.id || animeData.episodes.length === 0) {
+						mainObserver.disconnect();
+						return;
+					}
 				}
 
 				handleRecordEpisode();
 			}
+		};
+
+		const mainObserver = new MutationObserver(handleMutation);
+		const waitObserver = new MutationObserver(() => {
+			const targetElement = document.getElementById("video");
+			if (targetElement) {
+				waitObserver.disconnect();
+				handleMutation(); // 初回実行
+				mainObserver.observe(targetElement, { attributes: true });
+			}
 		});
 
 		const videoWrapper = document.querySelector(".videoWrapper");
-		if (videoWrapper) observer.observe(videoWrapper, { childList: true, subtree: true });
+		if (videoWrapper) waitObserver.observe(videoWrapper, { attributes: true });
 	}
 }
 
