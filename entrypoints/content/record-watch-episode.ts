@@ -47,11 +47,7 @@ function sendRecord() {
 	}
 
 	// 映画などエピソードがない場合、ステータスのみ変更
-	if (
-		episodeIndex === undefined &&
-		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus)
-	)
-		mutation = changeStatusToWatched(mutation);
+	if (episodeIndex === undefined) mutation = changeStatusToWatched(mutation);
 
 	mutation += "}";
 
@@ -205,6 +201,10 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 }
 
 export async function handleRecordEpisode() {
+	const partId = location.href.match(/(?<=partId=)\d+/);
+	const workId = partId && partId[0].substring(0, 5);
+	const notRecordWork = await getNotRecordWork();
+
 	// 設定
 	if (settingData.sendTiming && settingData.sendTiming == "not-send") {
 		setUploadIcon("immutableNotUpload");
@@ -220,17 +220,30 @@ export async function handleRecordEpisode() {
 		return;
 	}
 
-	const insertTargets: NodeListOf<HTMLElement> =
+	const episodeElements: NodeListOf<HTMLElement> =
 		danimeDocument.querySelectorAll("a[id].clearfix");
 	// 映画などエピソードがない場合、ステータスのみ変更
-	if (animeData.episodes.length === 0 && insertTargets.length === 1) {
-		createIntervalOrEvent();
-		setUploadIcon("upload");
-		return;
+	if (animeData.episodes.length === 0 && episodeElements.length === 1) {
+		// 送信しない作品の場合
+		if (notRecordWork.includes(Number(workId))) {
+			setUploadIcon("notUpload");
+			return;
+		}
+
+		if (settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) {
+			// ステータスの自動変更がオンの場合
+			createIntervalOrEvent();
+			setUploadIcon("upload");
+			return;
+		} else {
+			// ステータスの自動変更がオフの場合
+			setUploadIcon("immutableNotUpload");
+			return;
+		}
 	}
 
 	// 動画の要素と取得したエピソード数の差が、4以上だったら実行しない
-	const diff = Math.abs(insertTargets.length - animeData.episodes.length);
+	const diff = Math.abs(episodeElements.length - animeData.episodes.length);
 	if (diff > 4) {
 		setLoading({
 			status: "error",
@@ -292,9 +305,6 @@ export async function handleRecordEpisode() {
 	}
 
 	// 送信しない作品の場合
-	const partId = location.href.match(/(?<=partId=)\d+/);
-	const workId = partId && partId[0].substring(0, 5);
-	const notRecordWork = await getNotRecordWork();
 	if (notRecordWork.includes(Number(workId))) {
 		setUploadIcon("notUpload");
 		return;

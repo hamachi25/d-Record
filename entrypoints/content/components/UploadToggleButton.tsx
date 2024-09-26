@@ -2,7 +2,7 @@ import "~/assets/UploadToggleButton.css";
 import { AnimeTitle } from "./AnimeTitle";
 import { animeData, loading } from "../anime-data-scraper";
 import { cleanupIntervalOrEvent, createIntervalOrEvent } from "../record-watch-episode";
-import { getNotRecordWork } from "../storage";
+import { getNotRecordWork, settingData } from "../storage";
 
 const [uploadIcon, setUploadIcon] = createSignal("loading");
 export { setUploadIcon };
@@ -74,7 +74,9 @@ export function UploadToggleButton() {
 
 	return (
 		<>
-			<AnimeTitle />
+			<Show when={!settingData.animeTitle}>
+				<AnimeTitle />
+			</Show>
 			<div id="upload-icon-container" onClick={changeUploadToggle}>
 				<img
 					id="upload-icon"

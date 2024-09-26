@@ -54,7 +54,9 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 	}
 
 	// 次のエピソードに赤枠をつける
-	const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list");
-	const nextEpisodeElement = elements[animeData.nextEpisode ?? 0];
-	if (nextEpisodeElement) nextEpisodeElement.classList.add("next-episode-border");
+	if (!settingData.nextEpisodeLine) {
+		const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list");
+		const nextEpisodeElement = elements[animeData.nextEpisode ?? 0];
+		if (nextEpisodeElement) nextEpisodeElement.classList.add("next-episode-border");
+	}
 }
