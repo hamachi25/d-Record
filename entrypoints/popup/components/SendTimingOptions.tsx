@@ -19,19 +19,19 @@ export function SendTimingOptions(props: { sendTiming: string | undefined }) {
 		<div class="radio-checkbox-container send-timing-container">
 			<p>視聴データの送信タイミング</p>
 			<div>
-				<For each={options()}>
+				<Index each={options()}>
 					{(option) => (
 						<label>
 							<input
 								type="radio"
-								value={option.value}
-								checked={selectedTiming() === option.value}
-								onChange={() => handleChange(option.value)}
+								value={option().value}
+								checked={selectedTiming() === option().value}
+								onChange={() => handleChange(option().value)}
 							/>
-							{option.label}
+							{option().label}
 						</label>
 					)}
-				</For>
+				</Index>
 			</div>
 		</div>
 	);

@@ -40,19 +40,19 @@ export function UIAndOtherOptions(props: {
 		<div class="radio-checkbox-container">
 			<p>{props.title}</p>
 			<div>
-				<For each={props.options}>
+				<Index each={props.options}>
 					{(option, i) => (
 						<label>
 							<input
 								type="checkbox"
-								id={option.value}
-								checked={ischecked()[i()].checked}
-								onChange={() => handleChange(option.value)}
+								id={option().value}
+								checked={ischecked()[i].checked}
+								onChange={() => handleChange(option().value)}
 							/>
-							{option.label}
+							{option().label}
 						</label>
 					)}
-				</For>
+				</Index>
 			</div>
 		</div>
 	);
