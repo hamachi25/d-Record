@@ -51,7 +51,7 @@ async function main(ctx: ContentScriptContext) {
 
 					await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
 
-					if (!animeData.id || animeData.episodes.length === 0) {
+					if (!animeData.id) {
 						mainObserver.disconnect();
 						return;
 					}
