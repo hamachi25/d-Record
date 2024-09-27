@@ -3,7 +3,6 @@
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	padding: 1%;
 	display: flex;
 }
 .drecord-record-button {
@@ -34,10 +33,12 @@
 	background-color: rgb(229 231 235);
 }
 .drecord-record-svg-container {
+	padding: 4px 4px 4px 0;
 	height: 30px;
 	width: 30px;
 }
 .drecord-record-svg {
+	position: relative;
 	width: 30px;
 	height: 30px;
 	z-index: 100;
@@ -73,6 +74,7 @@
 }
 .drecord-record-button-list {
 	display: flex;
+	margin: 3px 0;
 	opacity: 0;
 	visibility: hidden;
 	transform: translateX(15px);
