@@ -1,0 +1,131 @@
+/*** ドロップメニュ ***/
+.informationWrap > .actionArea > .btnArea {
+	width: auto !important;
+}
+#annict {
+	position: relative;
+}
+
+#annict-button {
+	display: flex;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+	background: #f85a72;
+	user-select: none;
+	z-index: 100;
+}
+#annict-button:hover {
+	background: #f97388 !important;
+}
+#annict-button > svg,
+#annict-button > div {
+	margin-right: 4px;
+}
+#annict-button > span {
+	margin-left: 4px;
+}
+
+.dropdown-menu {
+	position: absolute;
+	width: 100%;
+	min-width: 10rem;
+	box-sizing: border-box;
+	top: 51px;
+	z-index: 10;
+	display: block;
+	padding: 0.5rem 0;
+	margin: 0;
+	font-size: 1rem;
+	color: #212529;
+	text-align: left;
+	list-style: none;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 0.3rem;
+	transform: translateY(-20px);
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		transform 0.15s cubic-bezier(0, 0, 0.2, 1),
+		opacity 0.1s cubic-bezier(0, 0, 0.2, 1),
+		visibility 0.1s cubic-bezier(0, 0, 0.2, 1);
+}
+.dropdown-menu.show {
+	opacity: 1;
+	transform: none;
+	visibility: visible;
+}
+@media screen and (min-width: 960px) {
+	.dropdown-menu {
+		top: 45px;
+	}
+}
+
+li:last-child > .dropdown-item {
+	font-size: 15px;
+	font-weight: bold;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	text-align: center;
+	text-decoration: none;
+}
+li:not(:last-child) > .dropdown-item:hover {
+	color: #1e2125;
+	background-color: #e9ecef;
+}
+
+.dropdown-item {
+	display: block;
+	width: 100%;
+	padding: 0.5rem 1.5rem;
+	clear: both;
+	font-weight: 400;
+	color: #212529;
+	text-align: inherit;
+	white-space: nowrap;
+	background-color: transparent;
+	border: 0;
+	font-size: 16px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.status-state {
+	display: flex;
+	align-items: center;
+}
+.status-state > span {
+	transform: translateY(6%);
+}
+
+.dropdown-item > svg {
+	margin-right: 1.3rem;
+}
+.dropdown-svg {
+	width: 1em;
+}
+
+#hover-message {
+	opacity: 0;
+	position: absolute;
+	top: -28px;
+	z-index: 100;
+	background-color: #fff;
+	white-space: nowrap;
+	width: auto;
+	padding: 2px 5px;
+	height: auto;
+	border-radius: 2px;
+	left: 0;
+	color: #606060;
+	box-shadow: 0 1px 2px 0 #bbb;
+	cursor: default;
+	transition: 0.2s;
+	user-select: none;
+}
+#annict-button:hover + #hover-message {
+	opacity: 1;
+}

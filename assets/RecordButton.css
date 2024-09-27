@@ -1,0 +1,40 @@
+/*** 記録 ***/
+.drecord-record-button-container {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	min-height: 22px;
+	padding: 1%;
+	display: flex;
+}
+
+.drecord-record-button {
+	display: none;
+	border: 1px solid;
+	border-radius: 3px;
+	white-space: nowrap;
+	margin-right: 0.4em;
+	color: #5b5b5b;
+	cursor: pointer;
+	transition: 0.15s ease-in-out;
+}
+
+.drecord-record-button:hover {
+	background-color: white;
+}
+
+.drecord-record-svg {
+	pointer-events: none;
+	width: 0.875em;
+}
+
+.drecord-record-button-container:hover .drecord-record-button {
+	display: block;
+}
+
+.next-episode-border {
+	margin-bottom: 6px !important;
+}
+.next-episode-border > section > a.clearfix {
+	border: 2px solid rgb(248, 90, 114) !important;
+}
