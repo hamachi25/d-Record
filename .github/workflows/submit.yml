@@ -45,6 +45,7 @@ jobs:
               run: |
                   if [ -n "${{ inputs.version }}" ]; then
                     echo "Using specified version: ${{ inputs.version }}"
+                    NEW_VERSION=${{ inputs.version }}
                     echo "newVersion=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
                   else
                     pnpx changelogen@latest --bump
