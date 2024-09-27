@@ -34,9 +34,13 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function deleteAndCreateNextEpisodeBorder() {
-		document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
-		const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list")[i + 1];
-		elements.classList.add("next-episode-border");
+		if (!settingData.nextEpisodeLine) {
+			document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
+			const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list")[
+				i + 1
+			];
+			elements.classList.add("next-episode-border");
+		}
 	}
 
 	function clickSingleRecordButton() {
