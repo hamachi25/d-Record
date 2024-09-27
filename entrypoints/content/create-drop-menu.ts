@@ -8,7 +8,6 @@ export function createDropMenu(ctx: ContentScriptContext) {
 		append: "after",
 		onMount: (container) => {
 			container.id = "annict";
-			container.classList.add("btnAddMyList", "addMyList", "add", "listen");
 
 			return render(StatusDropMenu, container);
 		},
