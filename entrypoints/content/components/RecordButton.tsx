@@ -100,49 +100,41 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		deleteAndCreateNextEpisodeBorder();
 	}
 
+	const [showButton, setShowButton] = createSignal(false);
+
 	return (
-		<>
-			<button class="drecord-record-button" onClick={clickSingleRecordButton}>
+		<div class="drecord-record-button-container" onMouseLeave={() => setShowButton(false)}>
+			<div classList={{ "drecord-record-button-list": true, show: showButton() }}>
+				<button class="drecord-record-button" onClick={clickSingleRecordButton}>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"></path>
+					</svg>
+					<span>記録</span>
+				</button>
+				<button class="drecord-record-button" onClick={clickMultiRecordButton}>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+						<path d="M11.602 13.7599L13.014 15.1719L21.4795 6.7063L22.8938 8.12051L13.014 18.0003L6.65 11.6363L8.06421 10.2221L10.189 12.3469L11.6025 13.7594L11.602 13.7599ZM11.6037 10.9322L16.5563 5.97949L17.9666 7.38977L13.014 12.3424L11.6037 10.9322ZM8.77698 16.5873L7.36396 18.0003L1 11.6363L2.41421 10.2221L3.82723 11.6352L3.82604 11.6363L8.77698 16.5873Z"></path>
+					</svg>
+					<span>ここまで記録</span>
+				</button>
+			</div>
+			<div class="drecord-record-svg-container" onMouseEnter={() => setShowButton(true)}>
 				<svg
 					class="drecord-record-svg"
 					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 512 512"
+					viewBox="0 0 24 24"
+					fill="currentColor"
 				>
-					<path d="M435.848 83.466L172.804 346.51l-96.652-96.652c-4.686-4.686-12.284-4.686-16.971 0l-28.284 28.284c-4.686 4.686-4.686 12.284 0 16.971l133.421 133.421c4.686 4.686 12.284 4.686 16.971 0l299.813-299.813c4.686-4.686 4.686-12.284 0-16.971l-28.284-28.284c-4.686-4.686-12.284-4.686-16.97 0z"></path>
-				</svg>
-				記録
-			</button>
-			<button class="drecord-record-button" onClick={clickMultiRecordButton}>
-				<svg
-					class="drecord-record-svg"
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 512 512"
-				>
-					<path d="M35.5 183.9l148-148.4c4.7-4.7 12.3-4.7 17 0l148 148.4c4.7 4.7 4.7 12.3 0 17l-19.6 19.6c-4.8 4.8-12.5 4.7-17.1-.2L218 123.2V372c0 6.6-5.4 12-12 12h-28c-6.6 0-12-5.4-12-12V123.2l-93.7 97.1c-4.7 4.8-12.4 4.9-17.1.2l-19.6-19.6c-4.8-4.7-4.8-12.3-.1-17zM372 428H12c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h360c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12z"></path>
-				</svg>
-				ここまで記録
-			</button>
-			<svg
-				class="drecord-record-svg"
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 512 512"
-				style="min-width: 20px !important;"
-			>
-				<g>
 					<path
-						d="M454.485,0H165.87c-13.647,0-32.707,7.895-42.357,17.544L50.247,90.81c-9.65,9.65-17.544,28.71-17.544,42.357
-            		v354.021c0,13.647,11.165,24.812,24.812,24.812h288.616c13.647,0,35.978,0,49.625,0h58.73c13.647,0,24.812-11.165,24.812-24.812
-            		v-58.731c0-13.647,0-35.978,0-49.624V24.812C479.297,11.165,468.132,0,454.485,0z M317.277,399.201c0,2.098-1.7,3.798-3.798,3.798
-            		h-180.19c-2.097,0-3.798-1.701-3.798-3.798v-16.709c0-2.098,1.701-3.798,3.798-3.798h180.19c2.098,0,3.798,1.7,3.798,3.798V399.201
-            		z M382.509,322.834c0,2.435-1.974,4.41-4.409,4.41H133.9c-2.435,0-4.409-1.974-4.409-4.41v-15.486c0-2.435,1.974-4.408,4.409-4.408
-            		h244.201c2.435,0,4.409,1.974,4.409,4.408V322.834z M382.509,247.08c0,2.435-1.974,4.408-4.409,4.408H133.9
-            		c-2.435,0-4.409-1.974-4.409-4.408v-15.486c0-2.435,1.974-4.409,4.409-4.409h244.201c2.435,0,4.409,1.974,4.409,4.409V247.08z
-            		 M382.509,171.326c0,2.435-1.974,4.408-4.409,4.408H133.9c-2.435,0-4.409-1.974-4.409-4.408v-15.487
-            		c0-2.435,1.974-4.409,4.409-4.409h244.201c2.435,0,4.409,1.974,4.409,4.409V171.326z"
-						style="fill: rgb(75, 75, 75);"
+						classList={{ show: !showButton() }}
+						d="M4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM5 5V19H19V5H5ZM11 11V7H13V11H17V13H13V17H11V13H7V11H11Z"
 					></path>
-				</g>
-			</svg>
-		</>
+					<path
+						classList={{ show: showButton() }}
+						d="M4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM11 11H7V13H11V17H13V13H17V11H13V7H11V11Z"
+					></path>
+				</svg>
+			</div>
+		</div>
 	);
 }
