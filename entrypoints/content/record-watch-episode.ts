@@ -9,6 +9,8 @@ import {
 	handleUnregisteredNextEpisode,
 } from "./utils";
 
+/******************************************************************************/
+
 let episodeNumberFromDanime: number | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
 let episodeIndex: number | undefined = undefined; // 取得したエピソードの中で何番目か(indexから取得するので、3.5話のような話数が入るとずれる)
 
@@ -96,6 +98,8 @@ export function cleanupIntervalOrEvent() {
 	if (sendEvent) document.querySelector("video")?.removeEventListener("ended", sendEvent);
 }
 
+/******************************************************************************/
+
 // "第5話"のような話数から数字を取得
 function episodeNumberExtractor(episode: string): number | undefined {
 	const remakeWords: Record<string, number> = {
@@ -166,6 +170,8 @@ function episodeNumberExtractor(episode: string): number | undefined {
 	return specialEpisodeIdentifier();
 }
 
+/******************************************************************************/
+
 // エピソードのindexを取得
 function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 	const episodeData = animeData.episodes;
@@ -194,6 +200,8 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 		episodeIndex = 0;
 	}
 }
+
+/******************************************************************************/
 
 export async function handleRecordEpisode() {
 	cleanupIntervalOrEvent(); // 前のイベントを削除

@@ -2,20 +2,6 @@ import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
 import { CurrentAnimeData, NextEpisode, Work } from "./types";
 
-export const [loading, setLoading] = createSignal({
-	status: "loading",
-	message: "Annictからデータを取得しています",
-});
-
-export const [animeData, setAnimeData] = createStore<CurrentAnimeData>({
-	id: "",
-	annictId: "",
-	title: "",
-	viewerStatusState: "",
-	episodes: [],
-	nextEpisode: undefined,
-});
-
 /******************************************************************************/
 
 /* リクエストに送る季節を取得 */
@@ -297,6 +283,20 @@ export async function getAnimeDataFromDanime(): Promise<Document | undefined> {
 	danimeDocument = new DOMParser().parseFromString(html, "text/html");
 	return danimeDocument;
 }
+
+export const [loading, setLoading] = createSignal({
+	status: "loading",
+	message: "Annictからデータを取得しています",
+});
+
+export const [animeData, setAnimeData] = createStore<CurrentAnimeData>({
+	id: "",
+	annictId: "",
+	title: "",
+	viewerStatusState: "",
+	episodes: [],
+	nextEpisode: undefined,
+});
 
 // アニメデータを取得
 export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, query: string) {
