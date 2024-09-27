@@ -2,7 +2,7 @@
 	"name": "d-record",
 	"description": "dアニメストアで見たアニメを記録することができます。自動もしくは手動で視聴したことをAnnictに送信して記録します。",
 	"private": true,
-	"version": "1.4",
+	"version": "1.4.0",
 	"type": "module",
 	"scripts": {
 		"check": "check",
