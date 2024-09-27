@@ -39,7 +39,7 @@ async function main(ctx: ContentScriptContext) {
 		const handleMutation = async () => {
 			if (currentLocation !== location.href) {
 				currentLocation = location.href;
-				setUploadIcon("loding");
+				setUploadIcon("loading");
 
 				if (isFirstRun) {
 					isFirstRun = false;

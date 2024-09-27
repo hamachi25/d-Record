@@ -59,7 +59,7 @@ export function UploadToggleButton() {
 
 	function updateIcon() {
 		switch (uploadIcon()) {
-			case "loding":
+			case "loading":
 				return loadingAnimationSVGIcon;
 			case "upload":
 				return uploadSVGIcon;
