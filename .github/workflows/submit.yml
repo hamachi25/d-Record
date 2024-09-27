@@ -8,11 +8,6 @@ on:
                 description: Skip submission and perform a dry run
 
 jobs:
-    validate:
-        name: Validate
-        uses: ./.github/workflows/validate.yml
-        secrets: inherit
-
     submit:
         name: Submit
         runs-on: ubuntu-latest
