@@ -6,6 +6,10 @@ on:
                 default: false
                 type: boolean
                 description: Skip submission and perform a dry run
+            version:
+                default: ""
+                type: string
+                description: Specify a version (leave empty for auto-versioning)
 
 jobs:
     submit:
@@ -39,9 +43,14 @@ jobs:
             - name: Bump Version
               id: version
               run: |
-                  pnpx changelogen@latest --bump
-                  NEW_VERSION=$(node -pe 'require("./package.json").version')
-                  echo "newVersion=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+                  if [ -n "${{ inputs.version }}" ]; then
+                    echo "Using specified version: ${{ inputs.version }}"
+                    echo "newVersion=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+                  else
+                    pnpx changelogen@latest --bump
+                    NEW_VERSION=$(node -pe 'require("./package.json").version')
+                    echo "newVersion=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+                  fi
 
             - name: Build and Zip
               run: |
