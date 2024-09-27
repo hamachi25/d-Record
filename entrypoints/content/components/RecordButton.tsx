@@ -1,5 +1,5 @@
 import "~/assets/RecordButton.css";
-import { animeData } from "../anime-data-scraper";
+import { animeData, setAnimeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { settingData } from "../storage";
 import {
@@ -33,6 +33,12 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		return mutation;
 	}
 
+	function deleteAndCreateNextEpisodeBorder() {
+		document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
+		const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list")[i + 1];
+		elements.classList.add("next-episode-border");
+	}
+
 	function clickSingleRecordButton() {
 		if (animeData.episodes.length === 0) return;
 
@@ -53,9 +59,17 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		mutation += "}";
 		fetchData(JSON.stringify({ query: mutation }));
 
-		const recordContainers: NodeListOf<HTMLElement> =
-			document.querySelectorAll(".record-container");
+		const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
+			".drecord-record-button-container",
+		);
 		recordContainers[j].style.display = "none";
+
+		const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
+		if (i === nextEpisodeIndex) {
+			setAnimeData("nextEpisode", nextEpisodeIndex + 1);
+
+			deleteAndCreateNextEpisodeBorder();
+		}
 	}
 
 	function clickMultiRecordButton() {
@@ -65,8 +79,9 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		mutation = updateStatusToWatching(mutation);
 
-		const recordContainers: NodeListOf<HTMLElement> =
-			document.querySelectorAll(".record-container");
+		const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
+			".drecord-record-button-container",
+		);
 		for (let k = 0; k <= j; k++) {
 			mutation += `
                 e${k}:createRecord(
@@ -81,6 +96,8 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		mutation += "}";
 		fetchData(JSON.stringify({ query: mutation }));
+
+		deleteAndCreateNextEpisodeBorder();
 	}
 
 	return (
