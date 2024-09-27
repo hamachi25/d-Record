@@ -58,12 +58,12 @@ jobs:
                   pnpm zip:firefox
 
             - name: List Output Directory
-              run: ls -la .output
+              run: ls -la output
 
             - name: Upload Artifacts
               uses: actions/upload-artifact@v4
               with:
-                  path: .output/*.zip
+                  path: output/*.zip
                   if-no-files-found: error
 
             - name: Submit
