@@ -67,8 +67,8 @@ function sendRecord() {
 }
 
 // インターバルかイベントを作成
-let sendInterval: NodeJS.Timeout | null = null;
-let sendEvent: EventListener | null = null;
+let sendInterval: NodeJS.Timeout | undefined = undefined;
+let sendEvent: EventListener | undefined = undefined;
 export function createIntervalOrEvent() {
 	const video = document.querySelector("video");
 	if (!video) return;
@@ -117,16 +117,16 @@ function episodeNumberExtractor(episode: string): number | undefined {
 	};
 
 	// 全角数字を半角数字に変換
-	function arabicNumberExtractor(): number | null {
+	function arabicNumberExtractor(): number | undefined {
 		const numbers = episode
 			.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
 			.match(/\d+/g);
 
-		return numbers ? Number(numbers[0]) : null;
+		return numbers ? Number(numbers[0]) : undefined;
 	}
 
 	// 漢数字をアラビア数字に変換する
-	function kanjiNumberExtractor(): number | null {
+	function kanjiNumberExtractor(): number | undefined {
 		const arrayKansuuji = [...episode]
 			.flatMap((s) => s.match(new RegExp(Object.keys(remakeWords).join("|"))))
 			.filter(Boolean);
@@ -141,7 +141,7 @@ function episodeNumberExtractor(episode: string): number | undefined {
 			return num;
 		}
 
-		return null;
+		return undefined;
 	}
 
 	// 前編、後編などを識別する
@@ -162,10 +162,10 @@ function episodeNumberExtractor(episode: string): number | undefined {
 	}
 
 	const number = arabicNumberExtractor();
-	if (number !== null) return number;
+	if (number !== undefined) return number;
 
 	const kanjiNumber = kanjiNumberExtractor();
-	if (kanjiNumber !== null) return kanjiNumber;
+	if (kanjiNumber !== undefined) return kanjiNumber;
 
 	return specialEpisodeIdentifier();
 }

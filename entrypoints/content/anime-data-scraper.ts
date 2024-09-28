@@ -103,7 +103,7 @@ function getBroadcastYear(doc: Document, retry: boolean) {
 danime-save-annict-2
 https://github.com/TomoTom0/danime-save-annict-2/blob/105851c64900b4994eb095f0f1bd83e755cb5f1d/src/scripts/index.js#L447-L463
 */
-function remakeString(title: string | null | undefined, retry: boolean) {
+function remakeString(title: string | undefined, retry: boolean) {
 	if (!title) return "";
 
 	if (!retry) {
