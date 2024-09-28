@@ -62,7 +62,7 @@
 	background-color: #fff;
 	background-clip: padding-box;
 	border: 1px solid rgba(0, 0, 0, 0.15);
-	border-radius: 0.3rem;
+	border-radius: 2px;
 	transform: translateY(-20px);
 	opacity: 0;
 	visibility: hidden;
@@ -71,15 +71,15 @@
 		opacity 0.1s cubic-bezier(0, 0, 0.2, 1),
 		visibility 0.1s cubic-bezier(0, 0, 0.2, 1);
 }
-.dropdown-menu.show {
-	opacity: 1;
-	transform: none;
-	visibility: visible;
-}
 @media screen and (min-width: 960px) {
 	.dropdown-menu {
 		top: 46px;
 	}
+}
+.dropdown-menu.show {
+	opacity: 1;
+	transform: none;
+	visibility: visible;
 }
 
 li:last-child > .dropdown-item {
@@ -118,16 +118,24 @@ li:not(:last-child) > .dropdown-item:hover {
 	transform: translateY(6%);
 }
 
+.dropdown-svg {
+	width: 16px;
+}
 .dropdown-item > svg {
-	margin-right: 2rem;
+	margin-right: 20px;
+}
+.dropdown-menu > li:nth-child(3) svg {
+	margin-right: 19px;
+	margin-left: 1px;
 }
 @media screen and (min-width: 960px) {
 	.dropdown-item > svg {
-		margin-right: 1.3rem;
+		margin-right: 13px;
 	}
-}
-.dropdown-svg {
-	width: 1em;
+	.dropdown-menu > li:nth-child(3) svg {
+		margin-right: 12px;
+		margin-left: 1px;
+	}
 }
 
 #hover-message {
