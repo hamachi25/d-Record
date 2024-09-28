@@ -1,5 +1,5 @@
 import "~/assets/StatusDropMenu.css";
-import { animeData, loading } from "../anime-data-scraper";
+import { animeData, loading, setAnimeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { convertStatusToJapanese, svgPaths } from "../utils";
 
@@ -48,6 +48,8 @@ export function StatusDropMenu() {
 	}
 
 	async function updateStatus(status: string) {
+		if (status === animeData.viewerStatusState) return; // 既に同じステータスの場合は何もしない
+
 		const mutation = `
 		    mutation UpdateStatus($state: StatusState!, $workId: ID!) {
 		        updateStatus (
@@ -64,6 +66,7 @@ export function StatusDropMenu() {
 
 		const [statusText, svgPathD] = convertStatusToJapanese(status);
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
+		setAnimeData("viewerStatusState", status);
 	}
 
 	return (
