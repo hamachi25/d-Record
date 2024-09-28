@@ -42,7 +42,7 @@ export function StatusDropMenu() {
 		});
 	});
 
-	let annictButtonElement: HTMLDivElement | undefined;
+	let annictButtonElement: HTMLButtonElement | undefined;
 	function handleClickOutside(e: MouseEvent) {
 		if (annictButtonElement && !annictButtonElement.contains(e.target as Node)) setShow(false);
 	}
@@ -73,7 +73,7 @@ export function StatusDropMenu() {
 		<>
 			<Switch>
 				<Match when={loading().status === "loading"}>
-					<div id="annict-button">
+					<button id="annict-button">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
@@ -163,11 +163,11 @@ export function StatusDropMenu() {
 							</circle>
 						</svg>
 						<span>読み込み中</span>
-					</div>
+					</button>
 					<span id="hover-message">{loading().message}</span>
 				</Match>
 				<Match when={loading().status === "success"}>
-					<div
+					<button
 						id="annict-button"
 						onClick={() => setShow((prev) => !prev)}
 						ref={annictButtonElement}
@@ -181,13 +181,13 @@ export function StatusDropMenu() {
 							<path d={statusAndSvg().svgPathD}></path>
 						</svg>
 						<span>{statusAndSvg().statusText}</span>
-					</div>
+					</button>
 					<span id="hover-message">{animeData.title}</span>
 				</Match>
 				<Match when={loading().status === "error"}>
-					<div id="annict-button">
+					<button id="annict-button">
 						<span>取得失敗</span>
-					</div>
+					</button>
 					<span id="hover-message">{loading().message}</span>
 				</Match>
 			</Switch>
