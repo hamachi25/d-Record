@@ -48,12 +48,11 @@
 .dropdown-menu {
 	position: absolute;
 	width: 100%;
-	min-width: 10rem;
 	box-sizing: border-box;
 	top: 52px;
 	z-index: 10;
 	display: block;
-	padding: 0.5rem 0;
+	padding: 5px 0;
 	margin: 0;
 	font-size: 1rem;
 	color: #212529;
@@ -85,10 +84,10 @@
 li:last-child > .dropdown-item {
 	font-size: 15px;
 	font-weight: bold;
-	padding-left: 0 !important;
-	padding-right: 0 !important;
+	padding: 9px 0;
 	text-align: center;
 	text-decoration: none;
+	line-height: 1;
 }
 li:not(:last-child) > .dropdown-item:hover {
 	color: #1e2125;
@@ -98,7 +97,7 @@ li:not(:last-child) > .dropdown-item:hover {
 .dropdown-item {
 	display: block;
 	width: 100%;
-	padding: 0.5rem 1.5rem;
+	padding: 5px 15px;
 	clear: both;
 	font-weight: 400;
 	color: #212529;
