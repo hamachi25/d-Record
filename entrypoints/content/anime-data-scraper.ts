@@ -1,6 +1,6 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
-import { CurrentAnimeData, NextEpisode, Work } from "./types";
+import { AnimeData, NextEpisode, Work } from "./types";
 
 /******************************************************************************/
 
@@ -289,7 +289,7 @@ export const [loading, setLoading] = createSignal({
 	message: "Annictからデータを取得しています",
 });
 
-export const [animeData, setAnimeData] = createStore<CurrentAnimeData>({
+export const [animeData, setAnimeData] = createStore<AnimeData>({
 	id: "",
 	annictId: "",
 	title: "",

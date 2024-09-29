@@ -49,7 +49,7 @@ export function changeStatusText(
 // ステータスを"見てる"に変更
 export function changeStatusToWatching(mutation: string): string {
 	if (animeData.viewerStatusState !== "WATCHING") {
-		// currentAnimeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
+		// AnimeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
 		setAnimeData("viewerStatusState", "WATCHING");
 
 		return (mutation += `
