@@ -12,9 +12,12 @@ export async function getSettings(): Promise<void> {
 		"autoChangeStatus",
 	]);
 
-	if (browser.runtime.lastError) {
-		throw new Error(browser.runtime.lastError.message);
-	}
+	if (browser.runtime.lastError) throw new Error(browser.runtime.lastError.message);
+
+	// 非表示にするかのbool値が入っているので、反転させる
+	result.nextEpisodeLine = !result.nextEpisodeLine;
+	result.recordButton = !result.recordButton;
+	result.animeTitle = !result.animeTitle;
 
 	settingData = result;
 }
@@ -23,9 +26,7 @@ export async function getSettings(): Promise<void> {
 export async function getNotRecordWork(): Promise<number[]> {
 	const result = await browser.storage.local.get("notRecordWork");
 
-	if (browser.runtime.lastError) {
-		throw new Error(browser.runtime.lastError.message);
-	}
+	if (browser.runtime.lastError) throw new Error(browser.runtime.lastError.message);
 
 	return result.notRecordWork || [];
 }

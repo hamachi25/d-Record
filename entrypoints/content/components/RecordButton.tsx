@@ -34,7 +34,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 	}
 
 	function deleteAndCreateNextEpisodeBorder() {
-		if (!settingData.nextEpisodeLine) {
+		if (settingData.nextEpisodeLine) {
 			document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
 			const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list")[
 				i + 1
