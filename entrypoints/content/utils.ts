@@ -50,7 +50,7 @@ export function changeStatusText(
 export function changeStatusToWatching(mutation: string): string {
 	if (animeData.viewerStatusState !== "WATCHING") {
 		// AnimeDataのステータスを変更することで、連続で記録ボタンを押した時に再度送らないようにする
-		setAnimeData("viewerStatusState", "WATCHING");
+		updateViewerStatus("WATCHING");
 
 		return (mutation += `
             updateStatus(
@@ -67,7 +67,7 @@ export function changeStatusToWatching(mutation: string): string {
 
 // ステータスを"見た"に変更
 export function changeStatusToWatched(mutation: string): string {
-	setAnimeData("viewerStatusState", "WATCHED");
+	updateViewerStatus("WATCHED");
 
 	return (mutation += `
         updateStatus(
@@ -102,4 +102,12 @@ export function handleUnregisteredNextEpisode(
 	}
 
 	return false;
+}
+
+export function updateNextEpisode(episode: number) {
+	setAnimeData("nextEpisode", episode);
+}
+
+export function updateViewerStatus(status: string) {
+	setAnimeData("viewerStatusState", status);
 }

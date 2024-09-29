@@ -1,7 +1,7 @@
 import "~/assets/StatusDropMenu.css";
-import { animeData, loading, setAnimeData } from "../anime-data-scraper";
+import { animeData, loading } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
-import { convertStatusToJapanese, svgPaths } from "../utils";
+import { convertStatusToJapanese, svgPaths, updateViewerStatus } from "../utils";
 
 const [statusAndSvg, setStatusAndSvg] = createSignal({
 	svgPathD: svgPaths[0],
@@ -66,7 +66,7 @@ export function StatusDropMenu() {
 
 		const [statusText, svgPathD] = convertStatusToJapanese(status);
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
-		setAnimeData("viewerStatusState", status);
+		updateViewerStatus(status);
 	}
 
 	return (

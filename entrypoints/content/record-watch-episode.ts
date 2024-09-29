@@ -1,5 +1,5 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
-import { animeData, setAnimeData, danimeDocument, setLoading } from "./anime-data-scraper";
+import { animeData, danimeDocument, setLoading } from "./anime-data-scraper";
 import { fetchData } from "./fetch";
 import { settingData, getNotRecordWork } from "./storage";
 import {
@@ -7,6 +7,7 @@ import {
 	changeStatusToWatched,
 	isCurrentlyAiring,
 	handleUnregisteredNextEpisode,
+	updateNextEpisode,
 } from "./utils";
 
 /******************************************************************************/
@@ -57,9 +58,9 @@ function sendRecord() {
 
 	// 連続再生の場合、nextEpisodeを変更
 	if (animeData.nextEpisode) {
-		setAnimeData("nextEpisode", animeData.nextEpisode + 1);
+		updateNextEpisode(animeData.nextEpisode + 1);
 	} else {
-		setAnimeData("nextEpisode", 1);
+		updateNextEpisode(1);
 	}
 
 	setUploadIcon("completeUpload");

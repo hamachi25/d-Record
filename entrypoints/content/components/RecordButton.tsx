@@ -1,5 +1,5 @@
 import "~/assets/RecordButton.css";
-import { animeData, setAnimeData } from "../anime-data-scraper";
+import { animeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
 import { settingData } from "../storage";
 import {
@@ -7,6 +7,7 @@ import {
 	changeStatusToWatched,
 	changeStatusToWatching,
 	isCurrentlyAiring,
+	updateNextEpisode,
 } from "../utils";
 import { setStatusAndSvg } from "./StatusDropMenu";
 
@@ -70,7 +71,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 		if (i === nextEpisodeIndex) {
-			setAnimeData("nextEpisode", nextEpisodeIndex + 1);
+			updateNextEpisode(nextEpisodeIndex + 1);
 
 			deleteAndCreateNextEpisodeBorder();
 		}
