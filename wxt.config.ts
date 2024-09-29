@@ -7,6 +7,9 @@ export default defineConfig({
 		permissions:
 			manifestVersion === 3 ? ["storage"] : ["storage", "https://api.annict.com/graphql"],
 	}),
+	zip: {
+		excludeSources: ["README.md"],
+	},
 	// vite: () => ({
 	// 	build: {
 	// 		minify: false,
