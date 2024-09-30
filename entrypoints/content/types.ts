@@ -46,11 +46,11 @@ export type Settings = {
 	autoChangeStatus?: boolean;
 };
 
-export type CurrentAnimeData = {
+export type AnimeData = {
 	id: string;
 	annictId: string;
 	title: string;
 	viewerStatusState: string;
 	episodes: Episode[] | [];
-	nextEpisode: number | undefined; // CurrentAnimeEpisodeのnumber
+	nextEpisode: number | undefined; // Episodeのnumber
 };

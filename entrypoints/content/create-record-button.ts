@@ -21,7 +21,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 	);
 	if (isNextEpisodeUnregistered) return;
 
-	if (!settingData || !settingData.recordButton) {
+	if (!settingData || settingData.recordButton) {
 		// nextEpisodeがない・1話しかない場合はindexを0にする
 		let nextEpisodeIndex: number = 0;
 		if (animeData.nextEpisode !== undefined && animeData.episodes.length !== 1) {
@@ -52,7 +52,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 	}
 
 	// 次のエピソードに赤枠をつける
-	if (!settingData.nextEpisodeLine) {
+	if (settingData.nextEpisodeLine) {
 		const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list");
 		const nextEpisodeElement = elements[animeData.nextEpisode ?? 0];
 		if (nextEpisodeElement) nextEpisodeElement.classList.add("next-episode-border");

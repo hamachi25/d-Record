@@ -74,7 +74,7 @@ export function UploadToggleButton() {
 
 	return (
 		<>
-			<Show when={!settingData.animeTitle}>
+			<Show when={settingData.animeTitle}>
 				<AnimeTitle />
 			</Show>
 			<div id="upload-icon-container" onClick={changeUploadToggle}>

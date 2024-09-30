@@ -1,11 +1,10 @@
 {
 	"name": "d-record",
-	"description": "dアニメストアで見たアニメを記録することができます。自動もしくは手動で視聴したことをAnnictに送信して記録します。",
+	"description": "dアニメストアで見たアニメを自動で記録します。",
 	"private": true,
-	"version": "1.4.0",
+	"version": "2.0.0",
 	"type": "module",
 	"scripts": {
-		"check": "check",
 		"dev": "wxt",
 		"dev:firefox": "wxt -b firefox",
 		"build": "wxt build",

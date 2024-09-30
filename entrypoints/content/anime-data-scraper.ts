@@ -1,6 +1,6 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
-import { CurrentAnimeData, NextEpisode, Work } from "./types";
+import { AnimeData, NextEpisode, Work } from "./types";
 
 /******************************************************************************/
 
@@ -103,7 +103,7 @@ function getBroadcastYear(doc: Document, retry: boolean) {
 danime-save-annict-2
 https://github.com/TomoTom0/danime-save-annict-2/blob/105851c64900b4994eb095f0f1bd83e755cb5f1d/src/scripts/index.js#L447-L463
 */
-function remakeString(title: string | null | undefined, retry: boolean) {
+function remakeString(title: string | undefined, retry: boolean) {
 	if (!title) return "";
 
 	if (!retry) {
@@ -289,7 +289,7 @@ export const [loading, setLoading] = createSignal({
 	message: "Annictからデータを取得しています",
 });
 
-export const [animeData, setAnimeData] = createStore<CurrentAnimeData>({
+export const [animeData, setAnimeData] = createStore<AnimeData>({
 	id: "",
 	annictId: "",
 	title: "",

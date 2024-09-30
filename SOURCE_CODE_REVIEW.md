@@ -2,5 +2,5 @@
 
 ```
 pnpm install
-pnpm build
+pnpm build:firefox
 ```

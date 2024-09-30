@@ -24,13 +24,13 @@
 	display: flex;
 	align-items: center;
 	border: 1px solid rgba(0, 0, 0, 0.2);
-	border-radius: 4px;
+	border-radius: 2px;
 	white-space: nowrap;
 	margin-right: 4px;
 	color: #5b5b5b;
 	cursor: pointer;
 	transition: 0.15s ease-in-out;
-	background-color: rgb(243 244 246);
+	background-color: #fff;
 	user-select: none;
 }
 .drecord-record-button:nth-child(2) {
@@ -46,7 +46,7 @@
 	}
 }
 .drecord-record-button:hover {
-	background-color: rgb(217, 219, 223);
+	background-color: rgb(225, 227, 231);
 }
 .drecord-record-button:active {
 	background-color: rgb(179, 180, 184);
