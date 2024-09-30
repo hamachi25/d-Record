@@ -1,0 +1,32 @@
+{
+	"name": "d-record",
+	"description": "dアニメストアで見たアニメを自動で記録します。",
+	"private": true,
+	"version": "2.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "wxt",
+		"dev:firefox": "wxt -b firefox",
+		"build": "wxt build",
+		"build:firefox": "wxt build -b firefox",
+		"zip": "wxt zip",
+		"zip:firefox": "wxt zip -b firefox",
+		"compile": "tsc --noEmit",
+		"postinstall": "wxt prepare",
+		"prettier": "prettier --write ."
+	},
+	"dependencies": {
+		"solid-js": "^1.8.19"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.9.1",
+		"@wxt-dev/module-solid": "^1.1.1",
+		"eslint": "^9.9.1",
+		"eslint-config-prettier": "^9.1.0",
+		"globals": "^15.9.0",
+		"prettier": "3.3.3",
+		"typescript": "^5.5.4",
+		"typescript-eslint": "^8.3.0",
+		"wxt": "^0.19.10"
+	}
+}
