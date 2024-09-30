@@ -2,7 +2,7 @@
 	"name": "d-record",
 	"description": "dアニメストアで見たアニメを自動で記録します。",
 	"private": true,
-	"version": "1.4.0",
+	"version": "2.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",
