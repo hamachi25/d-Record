@@ -8,7 +8,6 @@ export function createUploadButton(ctx: ContentScriptContext) {
 		append: "after",
 		onMount: (container) => {
 			container.id = "drecord-container";
-			container.classList.add("mainButton");
 
 			return render(UploadToggleButton, container);
 		},
