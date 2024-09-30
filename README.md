@@ -6,7 +6,7 @@
   <img alt="d-Record" src="https://github.com/hamachi25/d-Record/blob/images/logo-white.png">
 </picture>
 
-「d-Record」はdアニメストアで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。
+dアニメストアで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。
 
 ## インストール
 
