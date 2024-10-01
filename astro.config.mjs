@@ -15,9 +15,11 @@ export default defineConfig({
                     lang: "ja",
                 },
             },
+            favicon: "/public/favicon.svg",
             logo: {
-                light: "./src/assets/light-logo.svg",
-                dark: "./src/assets/dark-logo.svg",
+                light: "./src/assets/light-title.svg",
+                dark: "./src/assets/dark-title.svg",
+                replacesTitle: true,
             },
             social: {
                 github: "https://github.com/hamachi25/d-Record",

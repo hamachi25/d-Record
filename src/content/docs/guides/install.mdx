@@ -14,6 +14,7 @@ import annictTokenDark from "../../../assets/annict-token-dark.jpg";
 import annictShowLight from "../../../assets/annict-show-token.jpg";
 import annictShowDark from "../../../assets/annict-show-token-dark.jpg";
 import inputTokenLight from "../../../assets/input-token.jpg";
+import inputTokendark from "../../../assets/input-token-dark.jpg";
 
 d-Record は[Annict](https://annict.com/)に、見たアニメを自動送信するブラウザ拡張機能です。
 
@@ -25,7 +26,7 @@ d-Record は[Annict](https://annict.com/)に、見たアニメを自動送信す
 
     <div style="display:flex; gap:0.5rem">
         <a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn">
-            <img
+            <Image
                 alt="Chrome WebStore"
                 width="191.8"
                 height="58"
@@ -33,7 +34,7 @@ d-Record は[Annict](https://annict.com/)に、見たアニメを自動送信す
             />
         </a>
         <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/">
-            <img
+            <Image
                 alt="Firefox Browser ADD-ONS"
                 width="172"
                 height="60"
@@ -73,6 +74,11 @@ d-Record は[Annict](https://annict.com/)に、見たアニメを自動送信す
     <Image
         class="dark:sl-hidden"
         src={inputTokenLight}
+        alt="d-Recordのポップアップにトークンを入力"
+    />
+    <Image
+        class="light:sl-hidden"
+        src={inputTokendark}
         alt="d-Recordのポップアップにトークンを入力"
     />
 
