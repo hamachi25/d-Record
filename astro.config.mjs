@@ -38,9 +38,6 @@ export default defineConfig({
                 maxHeadingLevel: 4,
             },
             pagefind: false,
-            components: {
-                Footer: "./src/components/Footer.astro",
-            },
         }),
     ],
 });
