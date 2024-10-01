@@ -1,0 +1,81 @@
+---
+title: インストール
+description: d-Recordのインストール方法
+tableOfContents: false
+---
+
+import { Steps } from "@astrojs/starlight/components";
+import { Image } from "astro:assets";
+
+import annictCreateLight from "../../../assets/annict-create.jpg";
+import annictCreateDark from "../../../assets/annict-create-dark.jpg";
+import annictTokenLight from "../../../assets/annict-token.jpg";
+import annictTokenDark from "../../../assets/annict-token-dark.jpg";
+import annictShowLight from "../../../assets/annict-show-token.jpg";
+import annictShowDark from "../../../assets/annict-show-token-dark.jpg";
+import inputTokenLight from "../../../assets/input-token.jpg";
+
+d-Record は[Annict](https://annict.com/)に、見たアニメを自動送信するブラウザ拡張機能です。
+
+<Steps>
+
+1. 拡張機能をダウンロード
+
+    以下のボタンから、拡張機能をダウンロードします。
+
+    <div style="display:flex; gap:0.5rem">
+        <a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn">
+            <img
+                alt="Chrome WebStore"
+                width="191.8"
+                height="58"
+                src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"
+            />
+        </a>
+        <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/">
+            <img
+                alt="Firefox Browser ADD-ONS"
+                width="172"
+                height="60"
+                src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"
+            />
+        </a>
+    </div>
+
+2. Annict のアカウントを作成
+
+    [Annict](https://annict.com/)のアカウントを作成します。
+
+3. Annict のトークンを作成
+
+    拡張機能を使用するには、Annict のトークンが必要です。
+
+    [Annict のアプリケーション設定](https://annict.com/settings/apps)を開き、個人用アクセストークンの右横にある「**新規作成**」を押します。
+
+    <Image class="dark:sl-hidden" src={annictCreateLight} alt="アプリケーション設定" />
+    <Image class="light:sl-hidden" src={annictCreateDark} alt="アプリケーション設定" />
+
+    トークンの説明に「**d-Record**」と入力し、スコープを「**読み込み + 書き込み**」に変更し登録します。
+
+    <Image class="dark:sl-hidden" src={annictTokenLight} alt="アプリケーション設定" />
+    <Image class="light:sl-hidden" src={annictTokenDark} alt="アプリケーション設定" />
+
+    英語と数字の羅列（トークン）が表示されるので、コピーしましょう。
+
+    <Image class="dark:sl-hidden" src={annictShowLight} alt="アプリケーション設定" />
+    <Image class="light:sl-hidden" src={annictShowDark} alt="アプリケーション設定" />
+
+4. d-Record にトークンをインポート
+
+    ブラウザ右上から d-Record をクリックします。  
+    ポップアップが開くので、先ほどコピーしたトークンを入力します。
+
+    <Image
+        class="dark:sl-hidden"
+        src={inputTokenLight}
+        alt="d-Recordのポップアップにトークンを入力"
+    />
+
+</Steps>
+
+これでインストールは完了です！

@@ -1,0 +1,46 @@
+---
+title: 見たアニメを記録しよう
+description: d-Recordは、dアニメストアで見たアニメを記録するブラウザ拡張機能です。
+template: splash
+hero:
+    tagline: d-Recordは、dアニメストアで見たアニメを記録するブラウザ拡張機能です。
+    image:
+        light: ../../assets/light-logo.svg
+        dark: ../../assets/dark-logo.svg
+    actions:
+        - text: インストール
+          link: /guides/install/
+          icon: right-arrow
+        - text: ソースコード
+          link: https://github.com/hamachi25/d-Record
+          icon: external
+          variant: minimal
+---
+
+import { Card, CardGrid, LinkButton } from "@astrojs/starlight/components";
+
+## 主な特徴
+
+<CardGrid>
+    <Card title="Annictに自動送信" icon="pencil">
+        アニメの視聴記録ができるWebサービス[Annict](https://annict.com/)に、dアニメストアで見ているアニメを自動送信します。
+    </Card>
+    <Card title="手動でも送信できる" icon="add-document">
+        自動送信をオフにして手動で送信することもできます。Annictのウェブサイトのように、「送信する」と「ここまで送信」の２つを使用できます。
+    </Card>
+    <Card title="作品ごとにオンオフ" icon="setting">
+        再生ページに追加されたボタンから、作品ごとに送信のオンオフができます。
+    </Card>
+    <Card title="高い精度でアニメを取得" icon="open-book">
+        d-Recordは、dアニメストアとAnnictのアニメ名の表記揺れをカバーします。2024年夏アニメでは、92%を正確に取得できています。
+    </Card>
+</CardGrid>
+
+<LinkButton
+    href="/guides/feature/"
+    variant="secondary"
+    icon="right-arrow"
+    style="display: flex;justify-content: center;"
+>
+    機能一覧
+</LinkButton>
