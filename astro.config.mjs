@@ -15,7 +15,7 @@ export default defineConfig({
                     lang: "ja",
                 },
             },
-            favicon: "/public/favicon.svg",
+            favicon: "./public/favicon.svg",
             logo: {
                 light: "./src/assets/light-title.svg",
                 dark: "./src/assets/dark-title.svg",
@@ -38,6 +38,9 @@ export default defineConfig({
                 maxHeadingLevel: 4,
             },
             pagefind: false,
+            components: {
+                Footer: "./src/components/Footer.astro",
+            },
         }),
     ],
 });
