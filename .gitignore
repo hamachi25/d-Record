@@ -14,9 +14,11 @@ stats-*.json
 .wxt
 web-ext.config.ts
 .env.submit
+env.d.ts
 
 # Editor directories and files
-.vscode/*
+.vscode/
+.astro
 !.vscode/extensions.json
 .idea
 .DS_Store
