@@ -15,7 +15,6 @@ export default defineConfig({
                     lang: "ja",
                 },
             },
-            favicon: "./public/favicon.svg",
             logo: {
                 light: "./src/assets/light-title.svg",
                 dark: "./src/assets/dark-title.svg",
