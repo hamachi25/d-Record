@@ -22,6 +22,10 @@ jobs:
               uses: actions/checkout@v4
             - name: Install, build, and upload your site
               uses: withastro/action@v1
+            - name: pnpm install
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9.0
               # with:
               # path: . # リポジトリ内のAstroプロジェクトのルートロケーション。(オプション)
               # node-version: 18 # サイト構築に使用するNodeのバージョン。デフォルトは18です。（オプション）
