@@ -4,6 +4,8 @@ import starlight from "@astrojs/starlight";
 
 // https://astro.build/config
 export default defineConfig({
+    site: "https://astronaut.github.io",
+    base: "/my-repo",
     integrations: [
         starlight({
             title: "d-Record",
