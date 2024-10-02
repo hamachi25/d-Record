@@ -37,6 +37,15 @@ export default defineConfig({
                 maxHeadingLevel: 4,
             },
             pagefind: false,
+            head: [
+                {
+                    tag: "meta",
+                    attrs: {
+                        name: "google-site-verification",
+                        content: "IX_BtfrZkqoIAYxiNbckPHxuTa1RLD7S7Mu1zJfMPfM",
+                    },
+                },
+            ],
         }),
     ],
 });
