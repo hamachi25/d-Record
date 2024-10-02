@@ -2,6 +2,9 @@
 title: 見たアニメを記録しよう
 description: d-Recordは、dアニメストアで見たアニメを記録するブラウザ拡張機能です。
 template: splash
+head:
+    - tag: title
+      content: d-Record
 hero:
     tagline: d-Recordは、dアニメストアで見たアニメを記録するブラウザ拡張機能です。
     image:
@@ -19,20 +22,20 @@ hero:
 
 import { Card, CardGrid, LinkButton } from "@astrojs/starlight/components";
 
-## 主な特徴
+## 特徴
 
 <CardGrid>
-    <Card title="Annictに自動送信" icon="pencil">
-        アニメの視聴記録ができるWebサービス[Annict](https://annict.com/)に、dアニメストアで見ているアニメを自動送信します。
+    <Card title="Annictに自動送信" icon="rocket">
+        アニメの視聴記録ができるWebサービス[Annict](https://annict.com/)に、dアニメストアで見たアニメを自動送信します。
     </Card>
-    <Card title="手動でも送信できる" icon="add-document">
-        自動送信をオフにして手動で送信することもできます。Annictのウェブサイトのように、「送信する」と「ここまで送信」の２つを使用できます。
+    <Card title="手動で送信" icon="pencil">
+        自動送信をオフにして、エピソードごとに手動で送信することもできます。
     </Card>
-    <Card title="作品ごとにオンオフ" icon="setting">
-        再生ページに追加されたボタンから、作品ごとに送信のオンオフができます。
+    <Card title="自動送信のオンオフを切り替え" icon="setting">
+        再生ページのアップロードボタンから、作品ごとに送信のオンオフを切り替えることができます。
     </Card>
-    <Card title="高い精度でアニメを取得" icon="open-book">
-        d-Recordは、dアニメストアとAnnictのアニメ名の表記揺れをカバーします。2024年夏アニメでは、92%を正確に取得できています。
+    <Card title="高い精度でアニメを取得" icon="magnifier">
+        dアニメストアとAnnictのアニメ名の表記揺れをカバーします。<br></br>2024年夏アニメでは、92%を正確に取得できています。
     </Card>
 </CardGrid>
 
