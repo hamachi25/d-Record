@@ -72,6 +72,16 @@ export function UploadToggleButton() {
 		}
 	}
 
+	// 話数を追加
+	const addEpisode = (episode: {
+		normalized: string | number | undefined;
+		raw: string | number | undefined;
+	}) => {
+		if (episode.raw) return `  ${episode.raw}`; // 文字列の場合はそのまま返す
+		if (episode.normalized !== undefined) return `  第${episode.normalized}話`;
+		return "";
+	};
+
 	return (
 		<>
 			<Show when={settingData.animeTitle}>
@@ -92,7 +102,11 @@ export function UploadToggleButton() {
 				/>
 				<div id="drecord-popup">
 					<div id="drecord-popupIn">
-						<span>{loading().message ? loading().message : animeData.title}</span>
+						<span>
+							{loading().message
+								? loading().message
+								: animeData.title + addEpisode(animeData.currentEpisode)}
+						</span>
 					</div>
 				</div>
 			</div>

@@ -7,12 +7,13 @@ import {
 	changeStatusToWatched,
 	isCurrentlyAiring,
 	handleUnregisteredNextEpisode,
+	updateCurrentEpisode,
 	updateNextEpisode,
 } from "./utils";
 
 /******************************************************************************/
 
-let episodeNumberFromDanime: number | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
+let episodeNumberFromDanime: number | string | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
 let episodeIndex: number | undefined = undefined; // 取得したエピソードの中で何番目か(indexから取得するので、3.5話のような話数が入るとずれる)
 
 // データ送信
@@ -102,7 +103,7 @@ export function cleanupIntervalOrEvent() {
 /******************************************************************************/
 
 // "第5話"のような話数から数字を取得
-function episodeNumberExtractor(episode: string): number | undefined {
+function episodeNumberExtractor(episode: string): number | string {
 	const remakeWords: Record<string, number> = {
 		〇: 0,
 		一: 1,
@@ -145,38 +146,36 @@ function episodeNumberExtractor(episode: string): number | undefined {
 		return undefined;
 	}
 
-	// 前編、後編などを識別する
-	function specialEpisodeIdentifier(): number | undefined {
-		const specialWords: Record<string, number> = {
-			本編: 1,
-			前編: 1,
-			前篇: 1,
-			後編: 2,
-			後篇: 2,
-		};
-
-		// 半角スペース、ノーブレークスペース、全角スペース
-		const splitEpisode = episode.split(/\s|\u00A0|\u3000/);
-		const episodeWord = splitEpisode[splitEpisode.length - 1];
-
-		return specialWords[episodeWord] || undefined;
+	function specialEpisodeIdentifier(): string {
+		return episode
+			.replace(/[Ａ-Ｚａ-ｚ]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
+			.toLowerCase()
+			.replace(/\s/g, "");
 	}
 
 	const number = arabicNumberExtractor();
-	if (number !== undefined) return number;
+	if (number !== undefined) {
+		updateCurrentEpisode(number, undefined);
+		return number;
+	}
 
 	const kanjiNumber = kanjiNumberExtractor();
-	if (kanjiNumber !== undefined) return kanjiNumber;
+	if (kanjiNumber !== undefined) {
+		updateCurrentEpisode(kanjiNumber, undefined);
+		return kanjiNumber;
+	}
 
-	return specialEpisodeIdentifier();
+	const specialEpisode = specialEpisodeIdentifier();
+	updateCurrentEpisode(specialEpisode, episode);
+	return specialEpisode;
 }
 
 /******************************************************************************/
 
 // エピソードのindexを取得
-function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
+function getEpisodeIndex(episodeNumberFromDanime: number | string) {
+	episodeIndex = undefined; // 初期化
 	const episodeData = animeData.episodes;
-	if (!episodeData[0]) return;
 
 	if (episodeData[0].numberText) {
 		// numberTextから取得
@@ -188,6 +187,7 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 				break;
 			}
 		}
+		return;
 	} else if (episodeData[0].number) {
 		// numberから取得
 		for (let i = 0; i < episodeData.length; i++) {
@@ -197,9 +197,13 @@ function getEpisodeIndex(episodeNumberFromDanime: number | undefined) {
 				break;
 			}
 		}
+		return;
 	} else if (episodeData.length === 1) {
 		episodeIndex = 0;
+		return;
 	}
+
+	episodeIndex = undefined;
 }
 
 /******************************************************************************/
@@ -249,14 +253,13 @@ export async function handleRecordEpisode() {
 		}
 	}
 
-	// 動画の要素と取得したエピソード数の差が、4以上だったら実行しない
-	const diff = Math.abs(episodeElements.length - animeData.episodes.length);
-	if (diff > 4) {
+	// 複数のチャプターに分かれている映画
+	if (animeData.episodes.length === 0) {
+		setUploadIcon("immutableNotUpload");
 		setLoading({
 			status: "error",
 			message: "現時点ではこのアニメに対応していません",
 		});
-		setUploadIcon("immutableNotUpload");
 		return;
 	}
 
@@ -265,14 +268,6 @@ export async function handleRecordEpisode() {
 
 	// エピソードから数字を取り出す
 	episodeNumberFromDanime = episodeNumberExtractor(episode);
-	if (episodeNumberFromDanime === undefined || episodeNumberFromDanime < 0) {
-		setLoading({
-			status: "error",
-			message: "現時点ではこのアニメに対応していません",
-		});
-		setUploadIcon("immutableNotUpload");
-		return;
-	}
 
 	// エピソードの話数とindexを取得
 	getEpisodeIndex(episodeNumberFromDanime);
@@ -314,6 +309,8 @@ export async function handleRecordEpisode() {
 		return;
 	}
 
+	setLoading({ status: "success", message: "" });
 	setUploadIcon("upload");
+
 	createIntervalOrEvent();
 }

@@ -111,3 +111,13 @@ export function updateNextEpisode(episode: number) {
 export function updateViewerStatus(status: string) {
 	setAnimeData("viewerStatusState", status);
 }
+
+export function updateCurrentEpisode(
+	normalized: number | string,
+	raw: number | string | undefined,
+) {
+	batch(() => {
+		setAnimeData("currentEpisode", "normalized", normalized);
+		setAnimeData("currentEpisode", "raw", raw);
+	});
+}

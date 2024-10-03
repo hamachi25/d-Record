@@ -53,4 +53,8 @@ export type AnimeData = {
 	viewerStatusState: string;
 	episodes: Episode[] | [];
 	nextEpisode: number | undefined; // Episodeのnumber
+	currentEpisode: {
+		normalized: number | string | undefined;
+		raw: number | string | undefined;
+	};
 };
