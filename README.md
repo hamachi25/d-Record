@@ -68,6 +68,8 @@ d-Recordは話数ごとに視聴しているか確認しているのではなく
 
 ## ビルド
 
+[WXT](https://wxt.dev/)と[SolidJS](https://www.solidjs.com/)を使用しています。
+
 ```
 pnpm install
 pnpm build

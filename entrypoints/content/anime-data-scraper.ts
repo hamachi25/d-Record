@@ -54,22 +54,17 @@ function handleSeasonalYear(
 	const year = nonSeasonalYearMatch ? nonSeasonalYearMatch[1] : undefined;
 
 	// "2024年春"と"製作年：2023年"の年が違う場合
-	// 2クール以上ある場合、放送時期が異なっていることがある
+	if (year && !retry && seasonalYearMatch[1] > year) {
+		return createRequestSeason(year);
+	}
+
+	// 再検索
+	// 年がズレてる場合があるので冬は前後1年足す
 	if (year && retry) {
 		let returnSeason: string[] = [];
 		returnSeason = createRequestSeason(seasonalYearMatch[1]);
 		returnSeason.push(`${Number(seasonalYearMatch[1]) - 1}-winter`);
 		return returnSeason;
-	}
-
-	// 再検索
-	// 年がズレてる場合があるので冬は前後1年足す
-	if (
-		year &&
-		!retry &&
-		(seasonalYearMatch[1] > year || document.querySelectorAll("a[id].clearfix").length > 20)
-	) {
-		return createRequestSeason(year);
 	}
 
 	const seasonTranslation = {
@@ -155,7 +150,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 	} else {
 		// 単語をわけて、3文字以上の単語で再検索
 		const separateWord =
-			/\s+|;|:|・|‐|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+			/\s+|;|:|・|‐|─|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
 		return title
 			.replace(/OVA/, "")
 			.split(separateWord)
@@ -222,13 +217,13 @@ function removeWords(text: string, count: number): [string, number] {
         case 3:
             return [text.replace(/「([^」]*?)（([^）]*?)）([^」]*)」/g, "「$1$3」"), count];
         case 4:
-            return [text.replace(/[[［《【＜〈（(｢「『～－―\-』」｣)）〉＞】》］\]]/g, ""), count];
+            return [text.replace(/[[［《【＜〈（(｢「『～－─―\-』」｣)）〉＞】》］\]]/g, ""), count];
         case 5:
             return [text.replace(/[[［《【＜〈].+?[〉＞】》］\]]|[（(｢「『」｣』)）]/g, ""), count];
         case 6:
             return [text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, ""), count];
         case 7:
-            return [text.replace(/[～－―-].+?[-―－～]/g, ""), count];
+            return [text.replace(/[～－─―-].+?[-―─－～]/g, ""), count];
         case 8:
             return [text.replace(new RegExp(Object.keys(replacements).join("|"), "g"), match => replacements[match as keyof typeof replacements]), count];
         default:
