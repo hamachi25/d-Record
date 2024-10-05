@@ -4,8 +4,8 @@ import StatusDropMenu from "./components/StatusDropMenu";
 export function createDropMenu(ctx: ContentScriptContext) {
 	const ui = createIntegratedUi(ctx, {
 		position: "inline",
-		anchor: ".btnArea>.btnAddMyList.addMyList",
-		append: "after",
+		anchor: ".btnArea>.btnConcerned.favo",
+		append: "before",
 		onMount: (container) => {
 			container.id = "annict";
 
