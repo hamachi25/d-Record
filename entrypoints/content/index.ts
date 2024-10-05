@@ -9,7 +9,8 @@ import { handleRecordEpisode } from "./record-watch-episode";
 import { getSettings } from "./storage";
 
 async function main(ctx: ContentScriptContext) {
-	await getSettings();
+	const result = await getSettings();
+	if (!result) return;
 	const path = window.location.pathname.replace("/animestore/", "");
 
 	if (path == "ci_pc") {
@@ -19,9 +20,9 @@ async function main(ctx: ContentScriptContext) {
 		const animeTitle = document.querySelector(".titleWrap > h1")?.firstChild?.textContent;
 		if (!animeTitle) return;
 
-		await getAnimeDataFromAnnict(animeTitle, document, queryWithEpisodes);
+		const result = await getAnimeDataFromAnnict(animeTitle, document, queryWithEpisodes);
 
-		if (animeData.id) createRecordButton(ctx);
+		if (animeData.id || result) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
 		// 再生画面
 		let currentLocation: string;
@@ -38,11 +39,18 @@ async function main(ctx: ContentScriptContext) {
 
 					const animeTitle = document.querySelector(".backInfoTxt1")?.textContent;
 					const danimeDocument = await getAnimeDataFromDanime();
-					if (!danimeDocument || !animeTitle) return;
+					if (!danimeDocument || !animeTitle) {
+						mainObserver.disconnect();
+						return;
+					}
 
-					await getAnimeDataFromAnnict(animeTitle, danimeDocument, queryWithEpisodes);
+					const result = await getAnimeDataFromAnnict(
+						animeTitle,
+						danimeDocument,
+						queryWithEpisodes,
+					);
 
-					if (!animeData.id) {
+					if (!animeData.id || !result) {
 						mainObserver.disconnect();
 						return;
 					}

@@ -28,11 +28,10 @@ function handleFetchError(error: Error) {
 			break;
 		default:
 			setLoading({ status: "error", message: "通信に失敗しました" });
-			throw new Error("通信に失敗しました");
 	}
 }
 
-export async function fetchData(query: string): Promise<Response> {
+export async function fetchData(query: string) {
 	try {
 		const token = getToken();
 		const response = await fetch("https://api.annict.com/graphql", {
@@ -49,7 +48,7 @@ export async function fetchData(query: string): Promise<Response> {
 		return response;
 	} catch (error) {
 		if (error instanceof Error) handleFetchError(error);
-		throw error;
+		return false;
 	}
 }
 
@@ -63,6 +62,6 @@ export async function fetchDataFromDanime(workId: number) {
 		return await response.text();
 	} catch (error) {
 		if (error instanceof Error) handleFetchError(error);
-		throw error;
+		return false;
 	}
 }

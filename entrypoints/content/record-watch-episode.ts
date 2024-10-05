@@ -57,7 +57,8 @@ function sendRecord() {
 
 	mutation += "}";
 
-	fetchData(JSON.stringify({ query: mutation }));
+	const result = fetchData(JSON.stringify({ query: mutation }));
+	if (!result) return;
 
 	setUploadIcon("completeUpload");
 	cleanupIntervalOrEvent();
@@ -140,6 +141,7 @@ export async function handleRecordEpisode() {
 	const partId = location.href.match(/(?<=partId=)\d+/);
 	const workId = partId && partId[0].substring(0, 5);
 	const notRecordWork = await getNotRecordWork();
+	if (!notRecordWork) return;
 
 	// 設定
 	if (settingData.sendTiming && settingData.sendTiming == "not-send") {

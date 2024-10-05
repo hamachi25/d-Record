@@ -295,7 +295,7 @@ function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 
 // dアニメストアから作品ページのhtmlを取得
 export let danimeDocument: Document;
-export async function getAnimeDataFromDanime(): Promise<Document | undefined> {
+export async function getAnimeDataFromDanime() {
 	const partIdMatch = location.href.match(/(?<=partId=)\d+/); // URLからworkIdを取得
 	if (!partIdMatch) return;
 
@@ -334,6 +334,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 	};
 
 	const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+	if (!response) return false;
 	const json = await response.json();
 
 	let allAnimeData: Work[] = json.data.searchWorks.nodes;
@@ -352,6 +353,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		};
 
 		const response = await fetchData(JSON.stringify({ query: query, variables: variables }));
+		if (!response) return false;
 		const json = await response.json();
 
 		allAnimeData = json.data.searchWorks.nodes;
@@ -369,7 +371,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 				message: "現時点ではこのアニメに対応していません",
 			});
 			setUploadIcon("immutableNotUpload");
-			return;
+			return false;
 		}
 	}
 
@@ -386,4 +388,5 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, selectedAnimeData, sortedEpisodes), //sortedEpisodesの中のindex
 	});
 	setLoading({ status: "success", message: "" });
+	return true;
 }

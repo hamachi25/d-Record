@@ -37,6 +37,7 @@ export default function UploadToggleButton() {
 		}
 
 		const notRecordWork = await getNotRecordWork();
+		if (!notRecordWork) return;
 
 		if (uploadIcon() === "upload") {
 			setUploadIcon("notUpload");

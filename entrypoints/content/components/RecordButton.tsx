@@ -57,7 +57,8 @@ export default function RecordButton(i: number, j: number, insertTargets: NodeLi
 		mutation = updateStatusToWatched(mutation);
 
 		mutation += "}";
-		fetchData(JSON.stringify({ query: mutation }));
+		const result = fetchData(JSON.stringify({ query: mutation }));
+		if (!result) return;
 
 		const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
 			".drecord-record-button-container",
@@ -89,7 +90,8 @@ export default function RecordButton(i: number, j: number, insertTargets: NodeLi
 		mutation = updateStatusToWatched(mutation);
 
 		mutation += "}";
-		fetchData(JSON.stringify({ query: mutation }));
+		const result = fetchData(JSON.stringify({ query: mutation }));
+		if (!result) return;
 
 		deleteNextEpisodeBorder();
 	}

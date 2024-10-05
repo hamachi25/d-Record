@@ -64,7 +64,8 @@ export default function StatusDropMenu() {
 			workId: animeData.id,
 		};
 
-		await fetchData(JSON.stringify({ query: mutation, variables: variables }));
+		const result = await fetchData(JSON.stringify({ query: mutation, variables: variables }));
+		if (!result) return;
 
 		const [statusText, svgPathD] = convertStatusToJapanese(status);
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
