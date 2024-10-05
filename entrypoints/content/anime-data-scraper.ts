@@ -132,7 +132,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 			"Ⅵ", "Ⅶ", "VII", "Ⅷ", "VIII", "Ⅸ", "IX", "Ⅹ",
 		];
 		// ノーブレークスペースと全角スペースを、半角スペースに置き換える
-		const remakeWords = { "\u3000": " ", "\u00A0": " " };
+		const remakeWords = { "\u3000": " ", "\u00A0": " ", "!": "！" };
 
 		const titleRegex = /^(TV|テレビ|劇場|オリジナル)?\s?(アニメーション|アニメ)\s?[｢「『]/;
 		const match = title.match(titleRegex);
@@ -153,11 +153,11 @@ function remakeString(title: string | undefined, retry: boolean) {
 	} else {
 		// 単語をわけて再検索
 		const separateWord =
-			/\s+|;|:|・|‐|─|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
+			/\s+|;|:|・|‐|─|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]|'|’/g;
 		return title
-			.replace(/OVA/, "")
+			.replace(/OVA|劇場版/, "")
 			.split(separateWord)
-			.find((title) => title.length >= 3); // 3文字以上
+			.find((title) => title.length >= 2); // 2文字以上
 	}
 }
 
@@ -357,8 +357,17 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		selectedAnimeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 	} else {
 		// 再取得
+		const remakeTitle = remakeString(animeTitle, true);
+		if (!remakeTitle) {
+			setLoading({
+				status: "error",
+				message: "現時点ではこのアニメに対応していません",
+			});
+			setUploadIcon("immutableNotUpload");
+			return false;
+		}
 		const variables = {
-			titles: remakeString(remakeTitle, true),
+			titles: remakeTitle,
 			seasons: getBroadcastYear(doc, true),
 		};
 
