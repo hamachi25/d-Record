@@ -1,7 +1,9 @@
+/* 再生ページのアニメタイトル */
+
 import { animeData } from "../anime-data-scraper";
 import { loading } from "../anime-data-scraper";
 
-export function AnimeTitle() {
+export default function AnimeTitle() {
 	const [show, setShow] = createSignal(false);
 
 	createEffect(() => {

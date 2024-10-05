@@ -1,5 +1,5 @@
 import { ContentScriptContext } from "wxt/client";
-import { StatusDropMenu } from "./components/StatusDropMenu";
+import StatusDropMenu from "./components/StatusDropMenu";
 
 export function createDropMenu(ctx: ContentScriptContext) {
 	const ui = createIntegratedUi(ctx, {

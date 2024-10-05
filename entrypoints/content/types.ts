@@ -52,7 +52,8 @@ export type AnimeData = {
 	title: string;
 	viewerStatusState: string;
 	episodes: Episode[] | [];
-	nextEpisode: number | undefined; // Episodeのnumber
+	sortedEpisodes: Episode[] | [];
+	nextEpisode: number | undefined; // sortedEpisodesの中のindex
 	currentEpisode: {
 		normalized: number | string | undefined;
 		raw: number | string | undefined;

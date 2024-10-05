@@ -1,5 +1,5 @@
 import { ContentScriptContext } from "wxt/client";
-import { UploadToggleButton } from "./components/UploadToggleButton";
+import UploadToggleButton from "./components/UploadToggleButton";
 
 export function createUploadButton(ctx: ContentScriptContext) {
 	const ui = createIntegratedUi(ctx, {

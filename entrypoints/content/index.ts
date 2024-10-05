@@ -4,7 +4,7 @@ import { animeData, getAnimeDataFromAnnict, getAnimeDataFromDanime } from "./ani
 import { createDropMenu } from "./create-drop-menu";
 import { createRecordButton } from "./create-record-button";
 import { createUploadButton } from "./create-upload-button";
-import { queryWithEpisodes, queryWithoutEpisodes } from "./query";
+import { queryWithEpisodes } from "./query";
 import { handleRecordEpisode } from "./record-watch-episode";
 import { getSettings } from "./storage";
 
@@ -19,18 +19,9 @@ async function main(ctx: ContentScriptContext) {
 		const animeTitle = document.querySelector(".titleWrap > h1")?.firstChild?.textContent;
 		if (!animeTitle) return;
 
-		// エピソード数が多いと取得に時間がかかるため、5ページ以上の場合ステータスボタンのみ表示
-		let query;
-		const episodeElement = document.querySelectorAll(".episodeContainer>.swiper-slide");
-		if (episodeElement && episodeElement.length < 5) {
-			query = queryWithEpisodes;
-		} else {
-			query = queryWithoutEpisodes;
-		}
+		await getAnimeDataFromAnnict(animeTitle, document, queryWithEpisodes);
 
-		await getAnimeDataFromAnnict(animeTitle, document, query);
-
-		if (animeData.id && query === queryWithEpisodes) createRecordButton(ctx);
+		if (animeData.id) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
 		// 再生画面
 		let currentLocation: string;
