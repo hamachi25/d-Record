@@ -14,11 +14,10 @@ import {
 /******************************************************************************/
 
 let episodeNumberFromDanime: number | string | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
-let episodeIndex: number | undefined = undefined; // 取得したエピソードの中で何番目か(indexから取得するので、3.5話のような話数が入るとずれる)
+let episodeIndex: number | undefined = undefined; // sortedEpisodesの中のindex(データ送信用)
 
 // データ送信
 function sendRecord() {
-	if (!danimeDocument) return;
 	const isAiring = isCurrentlyAiring(danimeDocument);
 
 	let mutation = "mutation{";
@@ -64,7 +63,7 @@ function sendRecord() {
 	cleanupIntervalOrEvent();
 }
 
-// インターバルかイベントを作成
+// インターバル・イベントを作成
 let sendInterval: NodeJS.Timeout | undefined = undefined;
 let sendEvent: EventListener | undefined = undefined;
 export function createIntervalOrEvent() {
@@ -74,6 +73,7 @@ export function createIntervalOrEvent() {
 	if (settingData.sendTiming == "after-start") {
 		const startTime = Date.now();
 		const startVideoTime = video.currentTime;
+
 		sendInterval = setInterval(() => {
 			// 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
 			if (
@@ -91,6 +91,7 @@ export function createIntervalOrEvent() {
 	}
 }
 
+// インターバル・イベントを削除
 export function cleanupIntervalOrEvent() {
 	if (sendInterval) clearInterval(sendInterval);
 	if (sendEvent) document.querySelector("video")?.removeEventListener("ended", sendEvent);
@@ -98,25 +99,24 @@ export function cleanupIntervalOrEvent() {
 
 /******************************************************************************/
 
-// エピソードのindexを取得
+// エピソードのindexを取得(sortedEpisodes)
 function getEpisodeIndex(episodeNumberFromDanime: number | string) {
 	episodeIndex = undefined; // 初期化
 	const episodeData = animeData.sortedEpisodes;
 
-	console.log(episodeData);
 	if (episodeData[0].numberText) {
-		// numberTextから取得
+		/* numberTextから取得 */
 		for (let i = 0; i < episodeData.length; i++) {
 			const episode = episodeData[i];
 			const num = episodeNumberExtractor(episode.numberText);
 			if (num === episodeNumberFromDanime) {
-				episodeIndex = i; // データ送信用のindex（総集編が含まれるとずれる）
+				episodeIndex = i;
 				break;
 			}
 		}
 		return;
 	} else if (episodeData[0].number) {
-		// numberから取得
+		/* numberから取得 */
 		for (let i = 0; i < episodeData.length; i++) {
 			const episode = episodeData[i];
 			if (episode.number === episodeNumberFromDanime) {
@@ -158,11 +158,11 @@ export async function handleRecordEpisode() {
 		return;
 	}
 
-	const episodeElements: NodeListOf<HTMLElement> =
-		danimeDocument.querySelectorAll("a[id].clearfix");
-
 	// 映画などエピソードがない場合、ステータスのみ変更
-	if (animeData.episodes.length === 0 && episodeElements.length === 1) {
+	if (
+		animeData.episodes.length === 0 &&
+		danimeDocument.querySelectorAll("a[id].clearfix").length === 1
+	) {
 		// 送信しない作品の場合
 		if (notRecordWork.includes(Number(workId))) {
 			setUploadIcon("notUpload");
@@ -197,7 +197,7 @@ export async function handleRecordEpisode() {
 	// エピソードから数字を取り出す
 	episodeNumberFromDanime = episodeNumberExtractor(episode);
 
-	// エピソードの話数とindexを取得
+	// sortedEpisodesの中のindexを取得
 	getEpisodeIndex(episodeNumberFromDanime);
 	if (episodeIndex === undefined) {
 		setLoading({
@@ -215,7 +215,7 @@ export async function handleRecordEpisode() {
 		animeData.sortedEpisodes,
 	);
 	if (isNextEpisodeUnregistered) {
-		setUploadIcon("completeUpload");
+		setUploadIcon("completeUpload"); // 最新話まで視聴済みと判断
 		return;
 	}
 
@@ -226,7 +226,7 @@ export async function handleRecordEpisode() {
 	}
 
 	// 現在のエピソードが記録済みの場合は送信しない
-	// 1話目が1話目でない場合は送信しない(長編アニメ)
+	// 1話目のnumberが1でない場合は送信しない(長編アニメの場合は139話のように途中から始まる)
 	if (nextEpisodeIndex > episodeIndex && animeData.sortedEpisodes[0].number === 1) {
 		setUploadIcon("completeUpload");
 		return;

@@ -46,25 +46,26 @@ function createRequestSeason(year: string) {
 	];
 }
 
-// 2024年春の場合
+// "2024年春"の場合
 function handleSeasonalYear(
 	seasonalYearMatch: RegExpMatchArray,
 	nonSeasonalYearMatch: RegExpMatchArray | undefined,
 	retry: boolean,
 ) {
-	const year = nonSeasonalYearMatch ? nonSeasonalYearMatch[1] : undefined;
+	const nonSeasonalYear = nonSeasonalYearMatch ? nonSeasonalYearMatch[1] : undefined;
+	const seasonalYear = seasonalYearMatch[1];
 
-	// "2024年春"と"製作年：2023年"の年が違う場合
-	if (year && !retry && seasonalYearMatch[1] > year) {
-		return createRequestSeason(year);
+	// "2024年春"と"製作年：2023年"のように年が違う場合
+	// "2024年春"の方が大きい場合は、小さい"製作年：2023年"を使用
+	if (nonSeasonalYear && !retry && seasonalYear > nonSeasonalYear) {
+		return createRequestSeason(nonSeasonalYear); // 1年分検索
 	}
 
 	// 再検索
 	// 年がズレてる場合があるので冬は前後1年足す
-	if (year && retry) {
-		let returnSeason: string[] = [];
-		returnSeason = createRequestSeason(seasonalYearMatch[1]);
-		returnSeason.push(`${Number(seasonalYearMatch[1]) - 1}-winter`);
+	if (nonSeasonalYear && retry) {
+		const returnSeason = createRequestSeason(seasonalYear);
+		returnSeason.push(`${Number(seasonalYear) - 1}-winter`);
 		return returnSeason;
 	}
 
@@ -75,22 +76,22 @@ function handleSeasonalYear(
 		冬: "winter",
 	};
 	const season = seasonalYearMatch[2] as keyof typeof seasonTranslation;
-	return `${seasonalYearMatch[1]}-${seasonTranslation[season]}`;
+	return `${seasonalYear}-${seasonTranslation[season]}`;
 }
 
-// 製作年：2024年の場合
+// "製作年：2024年"の場合
 function handleNonSeasonalYear(nonSeasonalYearMatch: RegExpMatchArray, retry: boolean) {
-	const year2 = nonSeasonalYearMatch[1];
+	const nonSeasonalYear = nonSeasonalYearMatch[1];
 
 	if (!retry) {
-		return createRequestSeason(year2);
+		return createRequestSeason(nonSeasonalYear); // 1年分検索
 	}
 
 	// 再検索
 	// 前後3年で検索
 	const seasons = ["winter", "spring", "summer", "autumn"];
 	const result: string[] = [];
-	const startYear = Number(year2) - 1;
+	const startYear = Number(nonSeasonalYear) - 1;
 	[...Array(3)].forEach((_, i) => {
 		seasons.forEach((season) => {
 			result.push(`${startYear + i}-${season}`);
@@ -104,8 +105,9 @@ function handleNoYearInfo(doc: Document) {
 	const seasonalYearText = doc
 		.querySelector(".castContainer>p:nth-of-type(3)")
 		?.lastChild?.textContent?.replace(/\n|年/g, "");
+
 	if (seasonalYearText && !isNaN(Number(seasonalYearText))) {
-		return createRequestSeason(seasonalYearText);
+		return createRequestSeason(seasonalYearText); // 1年分検索
 	}
 }
 
@@ -141,7 +143,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 		}
 
 		return trimmedTitle
-			.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
+			.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248)) // 全角を半角に
 			.replace(new RegExp(deleteArray.join("|"), "g"), "")
 			.replace(
 				new RegExp(Object.keys(remakeWords).join("|"), "g"),
@@ -149,13 +151,13 @@ function remakeString(title: string | undefined, retry: boolean) {
 			)
 			.trim();
 	} else {
-		// 単語をわけて、3文字以上の単語で再検索
+		// 単語をわけて再検索
 		const separateWord =
 			/\s+|;|:|・|‐|─|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]/g;
 		return title
 			.replace(/OVA/, "")
 			.split(separateWord)
-			.find((title) => title.length >= 3);
+			.find((title) => title.length >= 3); // 3文字以上
 	}
 }
 
@@ -163,7 +165,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 
 // 取得したアニメからタイトルが一致するものを探す
 function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
-	// removeWords()を行った回数が最もすくないアニメのindexを返す
+	// removeWords関数を行った回数が最もすくないアニメのindexを返す
 	const index = [];
 	const findTime = [];
 	for (let i = 0; i < data.length; i++) {
@@ -216,10 +218,13 @@ function removeWords(text: string, count: number): [string, number] {
         case 2:
             return [text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248)), count];
         case 3:
+			// 「」に囲まれた()を削除
             return [text.replace(/「([^」]*?)（([^）]*?)）([^」]*)」/g, "「$1$3」"), count];
         case 4:
+			// カッコなどのみを削除 次には引き継がれない
             return [text.replace(/[[［《【＜〈（(｢「『～－─―\-』」｣)）〉＞】》］\]]/g, ""), count];
         case 5:
+			// カッコなどに囲まれた部分を削除
             return [text.replace(/[[［《【＜〈].+?[〉＞】》］\]]|[（(｢「『」｣』)）]/g, ""), count];
         case 6:
             return [text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, ""), count];
@@ -242,6 +247,7 @@ function getNextEpisodeIndex(
 ) {
 	if (!viewData || sortedEpisodes.length === 0) return undefined;
 
+	// viewerのannictIDと一致するものを、animeData内で探す
 	let viewIndex: number | undefined; // viewer > libraryEntries内のindex
 	for (let i = 0; i < viewData.length; i++) {
 		if (viewData[i].work.annictId == animeData.annictId) {
@@ -253,6 +259,7 @@ function getNextEpisodeIndex(
 
 	// nextEpisodeのindex
 	if (viewData[viewIndex].nextEpisode) {
+		// viewerのエピソードのannictIDと一致するものを、sortedEpisodes内で探す
 		for (let i = 0; i < sortedEpisodes.length; i++) {
 			if (sortedEpisodes[i].annictId === viewData[viewIndex].nextEpisode.annictId) {
 				return i;
@@ -265,7 +272,7 @@ function getNextEpisodeIndex(
 
 /******************************************************************************/
 
-// エピソード配列を、実際の順番に変える
+// エピソードの順番を、dアニメストアの順番に変える
 function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 	if (episodes === undefined || episodes.length === 0) return [];
 
@@ -273,12 +280,15 @@ function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 	const sortedEpisodeArray = [];
 	for (let i = 0; i < targets.length; i++) {
 		for (let j = 0; j < episodes.length; j++) {
-			const episodeNumber = episodes[j].numberText
+			const annictEpisodeNumber = episodes[j].numberText
 				? episodeNumberExtractor(episodes[j].numberText)
 				: episodes[j].number;
-			const targetTextContent = targets[i].textContent;
+			const danimeEpisodeText = targets[i].textContent;
 
-			if (targetTextContent && episodeNumberExtractor(targetTextContent) === episodeNumber) {
+			if (
+				danimeEpisodeText &&
+				episodeNumberExtractor(danimeEpisodeText) === annictEpisodeNumber
+			) {
 				sortedEpisodeArray.push(episodes[j]);
 				break;
 			}
@@ -343,10 +353,10 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		// 成功
 		selectedAnimeData = allAnimeData[0];
 	} else if (allAnimeData.length >= 2) {
-		// 成功
+		// 複数あるので正しいものを選択
 		selectedAnimeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 	} else {
-		// 再度実行
+		// 再取得
 		const variables = {
 			titles: remakeString(remakeTitle, true),
 			seasons: getBroadcastYear(doc, true),
@@ -362,7 +372,7 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 			// 成功
 			selectedAnimeData = allAnimeData[0];
 		} else if (allAnimeData.length >= 2 && allAnimeData.length <= 30) {
-			// 成功
+			// 複数あるので正しいものを選択
 			selectedAnimeData = allAnimeData[findCorrectAnime(animeTitle, allAnimeData, doc)];
 		} else {
 			// 30以上の場合はありふれた単語と判断
@@ -375,8 +385,8 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		}
 	}
 
-	// エピソード配列を、実際の順番に変える
-	const sortedEpisodes = createSortedEpisodes(doc, selectedAnimeData.episodes?.nodes);
+	const sortedEpisodes = createSortedEpisodes(doc, selectedAnimeData.episodes?.nodes); // エピソードの順番を、dアニメストアの順番に変える
+
 	// prettier-ignore
 	setAnimeData({
 		id: selectedAnimeData.id,

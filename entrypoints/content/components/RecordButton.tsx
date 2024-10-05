@@ -12,102 +12,128 @@ import {
 } from "../utils";
 import { setStatusAndSvg } from "./StatusDropMenu";
 
-export default function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
-	const isAiring = isCurrentlyAiring(document);
-
-	function updateStatusToWatching(mutation: string): string {
-		if (isAiring === true || i !== insertTargets.length - 1) {
-			mutation = changeStatusToWatching(mutation);
-			changeStatusText("WATCHING", setStatusAndSvg);
-		}
-		return mutation;
+function updateStatusToWatching(
+	mutation: string,
+	isAiring: boolean,
+	i: number,
+	insertTargets: NodeListOf<HTMLElement>,
+): string {
+	if (isAiring === true || i !== insertTargets.length - 1) {
+		mutation = changeStatusToWatching(mutation);
+		changeStatusText("WATCHING", setStatusAndSvg);
 	}
+	return mutation;
+}
 
-	function updateStatusToWatched(mutation: string): string {
-		if (
-			isAiring === false &&
-			i === insertTargets.length - 1 &&
-			(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus === true)
-		) {
-			mutation = changeStatusToWatched(mutation);
-			changeStatusText("WATCHED", setStatusAndSvg);
-		}
-		return mutation;
+function updateStatusToWatched(
+	mutation: string,
+	isAiring: boolean,
+	i: number,
+	insertTargets: NodeListOf<HTMLElement>,
+): string {
+	if (
+		isAiring === false &&
+		i === insertTargets.length - 1 &&
+		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus === true)
+	) {
+		mutation = changeStatusToWatched(mutation);
+		changeStatusText("WATCHED", setStatusAndSvg);
 	}
+	return mutation;
+}
 
-	function deleteNextEpisodeBorder() {
-		if (settingData.nextEpisodeLine) {
-			document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
-		}
+function deleteNextEpisodeBorder() {
+	if (settingData.nextEpisodeLine) {
+		document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
 	}
+}
 
-	function clickSingleRecordButton() {
-		let mutation = "mutation{";
+// "記録"ボタン
+function clickSingleRecordButton(
+	i: number,
+	j: number,
+	insertTargets: NodeListOf<HTMLElement>,
+	isAiring: boolean,
+) {
+	let mutation = "mutation{";
 
-		// ステータスを"見てる"に変更
-		mutation = updateStatusToWatching(mutation);
+	mutation = updateStatusToWatching(mutation, isAiring, i, insertTargets);
 
+	mutation += `
+        createRecord (
+            input: { episodeId:"${animeData.sortedEpisodes[i].id}"}
+        ) { clientMutationId }
+    `;
+
+	mutation = updateStatusToWatched(mutation, isAiring, i, insertTargets);
+
+	mutation += "}";
+	const result = fetchData(JSON.stringify({ query: mutation }));
+	if (!result) return;
+
+	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
+		".drecord-record-button-container",
+	);
+	recordContainers[j].style.display = "none"; // ボタンを非表示
+
+	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
+	if (i === nextEpisodeIndex) deleteNextEpisodeBorder();
+}
+
+// "ここまで記録"ボタン
+function clickMultiRecordButton(
+	i: number,
+	j: number,
+	insertTargets: NodeListOf<HTMLElement>,
+	isAiring: boolean,
+) {
+	let mutation = "mutation{";
+
+	mutation = updateStatusToWatching(mutation, isAiring, i, insertTargets);
+
+	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
+		".drecord-record-button-container",
+	);
+	for (let k = 0; k <= j; k++) {
 		mutation += `
-	        createRecord (
-	            input: { episodeId:"${animeData.sortedEpisodes[i].id}"}
-	        ) { clientMutationId }
-	    `;
+            e${k}:createRecord(
+                input:{ episodeId:"${animeData.sortedEpisodes[i - j + k].id}" }
+            ) { clientMutationId }
+        `;
 
-		// ステータスを"見た"に変更
-		mutation = updateStatusToWatched(mutation);
-
-		mutation += "}";
-		const result = fetchData(JSON.stringify({ query: mutation }));
-		if (!result) return;
-
-		const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
-			".drecord-record-button-container",
-		);
-		recordContainers[j].style.display = "none";
-
-		const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
-		if (i === nextEpisodeIndex) deleteNextEpisodeBorder();
+		recordContainers[k].style.display = "none"; // ボタンを非表示
 	}
 
-	function clickMultiRecordButton() {
-		let mutation = "mutation{";
+	mutation = updateStatusToWatched(mutation, isAiring, i, insertTargets);
 
-		mutation = updateStatusToWatching(mutation);
+	mutation += "}";
+	const result = fetchData(JSON.stringify({ query: mutation }));
+	if (!result) return;
 
-		const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
-			".drecord-record-button-container",
-		);
-		for (let k = 0; k <= j; k++) {
-			mutation += `
-                e${k}:createRecord(
-                    input:{ episodeId:"${animeData.sortedEpisodes[i - j + k].id}" }
-                ) { clientMutationId }
-            `;
+	deleteNextEpisodeBorder();
+}
 
-			recordContainers[k].style.display = "none";
-		}
-
-		mutation = updateStatusToWatched(mutation);
-
-		mutation += "}";
-		const result = fetchData(JSON.stringify({ query: mutation }));
-		if (!result) return;
-
-		deleteNextEpisodeBorder();
-	}
+export default function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
+	const isAiring = isCurrentlyAiring(document); // 現在放送中かどうか
 
 	const [showButton, setShowButton] = createSignal(false);
 
 	return (
 		<div class="drecord-record-button-container" onMouseLeave={() => setShowButton(false)}>
 			<div classList={{ "drecord-record-button-list": true, show: showButton() }}>
-				<button class="drecord-record-button" onClick={clickSingleRecordButton}>
+				<button
+					class="drecord-record-button"
+					onClick={() => clickSingleRecordButton(i, j, insertTargets, isAiring)}
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
 						<path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z"></path>
 					</svg>
 					<span>記録</span>
 				</button>
-				<button class="drecord-record-button" onClick={clickMultiRecordButton}>
+				<button
+					class="drecord-record-button"
+					onClick={() => clickMultiRecordButton(i, j, insertTargets, isAiring)}
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
 						<path d="M11.602 13.7599L13.014 15.1719L21.4795 6.7063L22.8938 8.12051L13.014 18.0003L6.65 11.6363L8.06421 10.2221L10.189 12.3469L11.6025 13.7594L11.602 13.7599ZM11.6037 10.9322L16.5563 5.97949L17.9666 7.38977L13.014 12.3424L11.6037 10.9322ZM8.77698 16.5873L7.36396 18.0003L1 11.6363L2.41421 10.2221L3.82723 11.6352L3.82604 11.6363L8.77698 16.5873Z"></path>
 					</svg>

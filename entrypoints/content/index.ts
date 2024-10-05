@@ -14,9 +14,9 @@ async function main(ctx: ContentScriptContext) {
 	const path = window.location.pathname.replace("/animestore/", "");
 
 	if (path == "ci_pc") {
+		/* 作品ページ */
 		createDropMenu(ctx);
 
-		// 作品ページ
 		const animeTitle = document.querySelector(".titleWrap > h1")?.firstChild?.textContent;
 		if (!animeTitle) return;
 
@@ -24,7 +24,7 @@ async function main(ctx: ContentScriptContext) {
 
 		if (animeData.id || result) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
-		// 再生画面
+		/* 再生ページ */
 		let currentLocation: string;
 		let isFirstRun = true;
 

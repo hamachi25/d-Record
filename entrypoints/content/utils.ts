@@ -110,10 +110,12 @@ export function handleUnregisteredNextEpisode(
 
 /******************************************************************************/
 
+// 視聴ステータスを更新
 export function updateViewerStatus(status: string) {
 	setAnimeData("viewerStatusState", status);
 }
 
+// 現在のエピソードを更新
 export function updateCurrentEpisode(
 	normalized: number | string,
 	raw: number | string | undefined,
@@ -170,6 +172,7 @@ export function episodeNumberExtractor(episode: string): number | string {
 		return undefined;
 	}
 
+	// 話数が文字列の場合の場合
 	function specialEpisodeIdentifier(): string {
 		return episode
 			.replace(/[Ａ-Ｚａ-ｚ]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))

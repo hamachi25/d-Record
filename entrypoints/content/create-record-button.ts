@@ -15,20 +15,21 @@ function createNextEpisodeBorder(i: number) {
 
 // エピソードが存在しているか確認
 function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
+	// dアニメストアのエピソード番号を取得
 	const episodeText = targets[i].querySelector(".textContainer>span>.number")?.textContent;
-	let normalizedEpisode: number | string | undefined = undefined;
-	normalizedEpisode = episodeText ? episodeNumberExtractor(episodeText) : undefined;
+	const normalizedEpisode = episodeText ? episodeNumberExtractor(episodeText) : undefined;
 	if (!normalizedEpisode) return false;
 
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	const sortedEpisodes = animeData.sortedEpisodes;
 	for (let j = 0; j < sortedEpisodes.length; j++) {
+		// annictのエピソード番号を取得
 		const episodeNumber = sortedEpisodes[j].numberText
 			? episodeNumberExtractor(sortedEpisodes[j].numberText)
 			: sortedEpisodes[j].number;
 
 		if (episodeNumber === normalizedEpisode) {
-			if (j === nextEpisodeIndex) createNextEpisodeBorder(i);
+			if (j === nextEpisodeIndex) createNextEpisodeBorder(i); // 次のエピソードに赤枠をつける
 			return true;
 		}
 	}
@@ -56,8 +57,10 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 		let j = 0;
 		for (const [i, insertTarget] of insertTargets.entries()) {
 			// 視聴済みのエピソードはスキップ
-			if (i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0)
+			if (i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0) {
 				continue;
+			}
+
 			// エピソードが存在していなかったらスキップ
 			if (!isEpisodeExist(insertTargets, i)) continue;
 
@@ -73,6 +76,7 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 				},
 			});
 			ui.mount();
+
 			j++;
 		}
 	}

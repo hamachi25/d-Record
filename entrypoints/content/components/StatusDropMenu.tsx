@@ -11,6 +11,29 @@ const [statusAndSvg, setStatusAndSvg] = createSignal({
 });
 export { setStatusAndSvg };
 
+async function updateStatus(status: string) {
+	if (status === animeData.viewerStatusState) return; // 既に同じステータスの場合は何もしない
+
+	const mutation = `
+		mutation UpdateStatus($state: StatusState!, $workId: ID!) {
+			updateStatus (
+				input : { state: $state, workId: $workId }
+			) { clientMutationId }
+		}
+	`;
+	const variables = {
+		state: status,
+		workId: animeData.id,
+	};
+
+	const result = await fetchData(JSON.stringify({ query: mutation, variables: variables }));
+	if (!result) return;
+
+	const [statusText, svgPathD] = convertStatusToJapanese(status);
+	setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
+	updateViewerStatus(status);
+}
+
 // annictのドロップメニューを追加
 export default function StatusDropMenu() {
 	const [statusArray] = createSignal([
@@ -32,6 +55,11 @@ export default function StatusDropMenu() {
 		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
 	});
 
+	// ドロップメニューの表示・非表示
+	let annictButtonElement: HTMLButtonElement | undefined;
+	function handleClickOutside(e: MouseEvent) {
+		if (annictButtonElement && !annictButtonElement.contains(e.target as Node)) setShow(false);
+	}
 	createEffect(() => {
 		if (show()) {
 			window.addEventListener("click", handleClickOutside);
@@ -44,37 +72,10 @@ export default function StatusDropMenu() {
 		});
 	});
 
-	let annictButtonElement: HTMLButtonElement | undefined;
-	function handleClickOutside(e: MouseEvent) {
-		if (annictButtonElement && !annictButtonElement.contains(e.target as Node)) setShow(false);
-	}
-
-	async function updateStatus(status: string) {
-		if (status === animeData.viewerStatusState) return; // 既に同じステータスの場合は何もしない
-
-		const mutation = `
-		    mutation UpdateStatus($state: StatusState!, $workId: ID!) {
-		        updateStatus (
-		            input : { state: $state, workId: $workId }
-		        ) { clientMutationId }
-		    }
-		`;
-		const variables = {
-			state: status,
-			workId: animeData.id,
-		};
-
-		const result = await fetchData(JSON.stringify({ query: mutation, variables: variables }));
-		if (!result) return;
-
-		const [statusText, svgPathD] = convertStatusToJapanese(status);
-		setStatusAndSvg({ svgPathD: svgPathD, statusText: statusText });
-		updateViewerStatus(status);
-	}
-
 	return (
 		<>
 			<Switch>
+				{/* ローディング */}
 				<Match when={loading().status === "loading"}>
 					<button id="annict-button">
 						<svg
@@ -169,6 +170,7 @@ export default function StatusDropMenu() {
 					</button>
 					<span id="hover-message">{loading().message}</span>
 				</Match>
+				{/* 取得成功 */}
 				<Match when={loading().status === "success"}>
 					<button
 						id="annict-button"
@@ -187,6 +189,7 @@ export default function StatusDropMenu() {
 					</button>
 					<span id="hover-message">{animeData.title}</span>
 				</Match>
+				{/* 取得失敗 */}
 				<Match when={loading().status === "error"}>
 					<button id="annict-button">
 						<span>取得失敗</span>
