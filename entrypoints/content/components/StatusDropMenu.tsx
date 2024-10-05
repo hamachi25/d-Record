@@ -1,3 +1,5 @@
+/* 作品ページのドロップメニュー */
+
 import "~/assets/StatusDropMenu.css";
 import { animeData, loading } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
@@ -10,7 +12,7 @@ const [statusAndSvg, setStatusAndSvg] = createSignal({
 export { setStatusAndSvg };
 
 // annictのドロップメニューを追加
-export function StatusDropMenu() {
+export default function StatusDropMenu() {
 	const [statusArray] = createSignal([
 		["NO_STATE", svgPaths[0], "未選択"],
 		["WANNA_WATCH", svgPaths[1], "見たい"],

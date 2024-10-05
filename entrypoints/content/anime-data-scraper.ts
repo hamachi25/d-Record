@@ -1,6 +1,7 @@
 import { setUploadIcon } from "./components/UploadToggleButton";
 import { fetchData, fetchDataFromDanime } from "./fetch";
-import { AnimeData, NextEpisode, Work } from "./types";
+import { AnimeData, Episode, NextEpisode, Work } from "./types";
+import { episodeNumberExtractor } from "./utils";
 
 /******************************************************************************/
 
@@ -234,12 +235,16 @@ function removeWords(text: string, count: number): [string, number] {
 /******************************************************************************/
 
 // 次のエピソードを取得
-function getNextEpisodeIndex(viewData: NextEpisode[] | undefined, animeData: Work) {
-	if (!viewData) return undefined;
+function getNextEpisodeIndex(
+	viewData: NextEpisode[] | undefined,
+	animeData: Work,
+	sortedEpisodes: Episode[],
+) {
+	if (!viewData || sortedEpisodes.length === 0) return undefined;
 
 	let viewIndex: number | undefined; // viewer > libraryEntries内のindex
-	for (const [i, libraryEntry] of viewData.entries()) {
-		if (libraryEntry.work.annictId == animeData.annictId) {
+	for (let i = 0; i < viewData.length; i++) {
+		if (viewData[i].work.annictId == animeData.annictId) {
 			viewIndex = i;
 			break;
 		}
@@ -247,17 +252,43 @@ function getNextEpisodeIndex(viewData: NextEpisode[] | undefined, animeData: Wor
 	if (viewIndex === undefined) return undefined;
 
 	// nextEpisodeのindex
-	let nextEpisodeIndex: number;
-	if (viewIndex !== undefined && viewData[viewIndex].nextEpisode) {
-		for (const [i, episode] of animeData.episodes.nodes.entries()) {
-			if (episode.annictId === viewData[viewIndex].nextEpisode.annictId) {
-				nextEpisodeIndex = i;
-				return nextEpisodeIndex;
+	if (viewData[viewIndex].nextEpisode) {
+		for (let i = 0; i < sortedEpisodes.length; i++) {
+			if (sortedEpisodes[i].annictId === viewData[viewIndex].nextEpisode.annictId) {
+				return i;
 			}
 		}
 	}
 
 	return undefined;
+}
+
+/******************************************************************************/
+
+// エピソード配列を、実際の順番に変える
+function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
+	if (episodes === undefined || episodes.length === 0) return [];
+
+	const targets = doc.querySelectorAll(".textContainer>span>.number");
+	const sortedEpisodeArray = [];
+	for (let i = 0; i < targets.length; i++) {
+		for (let j = 0; j < episodes.length; j++) {
+			const episodeNumber = episodes[j].numberText
+				? episodeNumberExtractor(episodes[j].numberText)
+				: episodes[j].number;
+			const targetTextContent = targets[i].textContent;
+
+			if (targetTextContent && episodeNumberExtractor(targetTextContent) === episodeNumber) {
+				sortedEpisodeArray.push(episodes[j]);
+				break;
+			}
+		}
+	}
+
+	// 並び替えに失敗した場合はそのまま返す
+	if (sortedEpisodeArray.length === 0) return episodes;
+
+	return sortedEpisodeArray;
 }
 
 /******************************************************************************/
@@ -286,6 +317,7 @@ export const [animeData, setAnimeData] = createStore<AnimeData>({
 	title: "",
 	viewerStatusState: "",
 	episodes: [],
+	sortedEpisodes: [],
 	nextEpisode: undefined,
 	currentEpisode: {
 		normalized: undefined,
@@ -341,13 +373,17 @@ export async function getAnimeDataFromAnnict(animeTitle: string, doc: Document, 
 		}
 	}
 
+	// エピソード配列を、実際の順番に変える
+	const sortedEpisodes = createSortedEpisodes(doc, selectedAnimeData.episodes?.nodes);
+	// prettier-ignore
 	setAnimeData({
 		id: selectedAnimeData.id,
 		annictId: selectedAnimeData.annictId,
 		title: selectedAnimeData.title,
 		viewerStatusState: selectedAnimeData.viewerStatusState,
 		episodes: selectedAnimeData.episodes?.nodes ?? [],
-		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, selectedAnimeData),
+		sortedEpisodes: sortedEpisodes,
+		nextEpisode: getNextEpisodeIndex(json.data.viewer?.libraryEntries.nodes, selectedAnimeData, sortedEpisodes), //sortedEpisodesの中のindex
 	});
 	setLoading({ status: "success", message: "" });
 }

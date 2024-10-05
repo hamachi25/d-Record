@@ -79,12 +79,16 @@ export function changeStatusToWatched(mutation: string): string {
     `);
 }
 
+/******************************************************************************/
+
 // 現在放送中かどうか
 export function isCurrentlyAiring(doc: Document): boolean {
 	const titleElement = doc.querySelector(".titleWrap > h1");
 	const regex = new RegExp("（全\\d+話）");
 	return !regex.test(titleElement?.textContent || "");
 }
+
+/******************************************************************************/
 
 // 次のエピソードがAnnictに登録されていない時の処理
 export function handleUnregisteredNextEpisode(
@@ -104,9 +108,7 @@ export function handleUnregisteredNextEpisode(
 	return false;
 }
 
-export function updateNextEpisode(episode: number) {
-	setAnimeData("nextEpisode", episode);
-}
+/******************************************************************************/
 
 export function updateViewerStatus(status: string) {
 	setAnimeData("viewerStatusState", status);
@@ -121,3 +123,67 @@ export function updateCurrentEpisode(
 		setAnimeData("currentEpisode", "raw", raw);
 	});
 }
+
+/******************************************************************************/
+
+// "第5話"のような話数から数字を取得
+export function episodeNumberExtractor(episode: string): number | string {
+	const remakeWords: Record<string, number> = {
+		〇: 0,
+		一: 1,
+		二: 2,
+		三: 3,
+		四: 4,
+		五: 5,
+		六: 6,
+		七: 7,
+		八: 8,
+		九: 9,
+		十: 10,
+	};
+
+	// 全角数字を半角数字に変換
+	function arabicNumberExtractor(): number | undefined {
+		const numbers = episode
+			.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
+			.match(/\d+/g);
+
+		return numbers?.length === 1 ? Number(numbers[0]) : undefined;
+	}
+
+	// 漢数字をアラビア数字に変換する
+	function kanjiNumberExtractor(): number | undefined {
+		const arrayKansuuji = [...episode]
+			.flatMap((s) => s.match(new RegExp(Object.keys(remakeWords).join("|"))))
+			.filter(Boolean);
+
+		if (arrayKansuuji.length >= 1) {
+			let num: number = 0;
+			arrayKansuuji.forEach((kan) => {
+				if (kan) {
+					num += remakeWords[kan];
+				}
+			});
+			return num;
+		}
+
+		return undefined;
+	}
+
+	function specialEpisodeIdentifier(): string {
+		return episode
+			.replace(/[Ａ-Ｚａ-ｚ]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 65248))
+			.toLowerCase()
+			.replace(/\s/g, "");
+	}
+
+	const number = arabicNumberExtractor();
+	if (number !== undefined) return number;
+
+	const kanjiNumber = kanjiNumberExtractor();
+	if (kanjiNumber !== undefined) return kanjiNumber;
+
+	return specialEpisodeIdentifier();
+}
+
+/******************************************************************************/

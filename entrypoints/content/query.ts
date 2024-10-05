@@ -1,21 +1,3 @@
-export const queryWithoutEpisodes = `
-    query SearchWorks($titles: [String!], $seasons: [String!]) {
-        searchWorks(
-            titles: $titles,
-            seasons: $seasons,
-            orderBy: { field: CREATED_AT, direction: ASC }
-        ) {
-            nodes {
-                id
-                annictId
-                viewerStatusState
-                title
-                episodesCount
-            }
-        }
-    }
-`;
-
 export const queryWithEpisodes = `
     query SearchWorks($titles: [String!], $seasons: [String!]) {
         searchWorks(

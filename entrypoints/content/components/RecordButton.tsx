@@ -1,3 +1,5 @@
+/* 作品ページの記録ボタン */
+
 import "~/assets/RecordButton.css";
 import { animeData } from "../anime-data-scraper";
 import { fetchData } from "../fetch";
@@ -7,11 +9,10 @@ import {
 	changeStatusToWatched,
 	changeStatusToWatching,
 	isCurrentlyAiring,
-	updateNextEpisode,
 } from "../utils";
 import { setStatusAndSvg } from "./StatusDropMenu";
 
-export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
+export default function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
 	const isAiring = isCurrentlyAiring(document);
 
 	function updateStatusToWatching(mutation: string): string {
@@ -34,19 +35,13 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		return mutation;
 	}
 
-	function deleteAndCreateNextEpisodeBorder() {
+	function deleteNextEpisodeBorder() {
 		if (settingData.nextEpisodeLine) {
 			document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
-			const elements = document.querySelectorAll(".episodeContainer>div>.itemModule.list")[
-				i + 1
-			];
-			elements.classList.add("next-episode-border");
 		}
 	}
 
 	function clickSingleRecordButton() {
-		if (animeData.episodes.length === 0) return;
-
 		let mutation = "mutation{";
 
 		// ステータスを"見てる"に変更
@@ -54,7 +49,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 
 		mutation += `
 	        createRecord (
-	            input: { episodeId:"${animeData.episodes[i].id}"}
+	            input: { episodeId:"${animeData.sortedEpisodes[i].id}"}
 	        ) { clientMutationId }
 	    `;
 
@@ -70,16 +65,10 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		recordContainers[j].style.display = "none";
 
 		const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
-		if (i === nextEpisodeIndex) {
-			updateNextEpisode(nextEpisodeIndex + 1);
-
-			deleteAndCreateNextEpisodeBorder();
-		}
+		if (i === nextEpisodeIndex) deleteNextEpisodeBorder();
 	}
 
 	function clickMultiRecordButton() {
-		if (animeData.episodes.length === 0) return;
-
 		let mutation = "mutation{";
 
 		mutation = updateStatusToWatching(mutation);
@@ -90,7 +79,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		for (let k = 0; k <= j; k++) {
 			mutation += `
                 e${k}:createRecord(
-                    input:{ episodeId:"${animeData.episodes[i - j + k].id}" }
+                    input:{ episodeId:"${animeData.sortedEpisodes[i - j + k].id}" }
                 ) { clientMutationId }
             `;
 
@@ -102,7 +91,7 @@ export function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTM
 		mutation += "}";
 		fetchData(JSON.stringify({ query: mutation }));
 
-		deleteAndCreateNextEpisodeBorder();
+		deleteNextEpisodeBorder();
 	}
 
 	const [showButton, setShowButton] = createSignal(false);
