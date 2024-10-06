@@ -29,6 +29,7 @@ export default defineConfig({
                     items: [
                         { label: "インストール", slug: "guides/install" },
                         { label: "機能", slug: "guides/feature" },
+                        { label: "Q&A", slug: "guides/qa" },
                     ],
                 },
             ],
