@@ -291,7 +291,7 @@ function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 			const danimeEpisodeNumber =
 				danimeEpisodeText && episodeNumberExtractor(danimeEpisodeText);
 
-			if (danimeEpisodeText && danimeEpisodeNumber === annictEpisodeNumber) {
+			if (danimeEpisodeNumber === annictEpisodeNumber) {
 				tempEpisodes[j].numberTextNormalized = annictEpisodeNumber;
 
 				sortedEpisodeArray.push(tempEpisodes[j]);

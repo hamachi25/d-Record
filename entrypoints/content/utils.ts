@@ -169,6 +169,8 @@ export function episodeNumberExtractor(episode: string): number | string {
 		}
 		result += temp;
 
+		if (result === 0) return undefined;
+
 		return result;
 	}
 

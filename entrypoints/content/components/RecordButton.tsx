@@ -68,13 +68,14 @@ function clickSingleRecordButton(
 	mutation = updateStatusToWatched(mutation, isAiring, i, insertTargets);
 
 	mutation += "}";
+
 	const result = fetchData(JSON.stringify({ query: mutation }));
 	if (!result) return;
 
 	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
 		".drecord-record-button-container",
 	);
-	recordContainers[j].style.display = "none"; // ボタンを非表示
+	if (recordContainers[j]) recordContainers[j].style.display = "none"; // ボタンを非表示
 
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	if (i === nextEpisodeIndex) deleteNextEpisodeBorder();
@@ -101,12 +102,13 @@ function clickMultiRecordButton(
             ) { clientMutationId }
         `;
 
-		recordContainers[k].style.display = "none"; // ボタンを非表示
+		if (recordContainers[k]) recordContainers[k].style.display = "none"; // ボタンを非表示
 	}
 
 	mutation = updateStatusToWatched(mutation, isAiring, i, insertTargets);
 
 	mutation += "}";
+
 	const result = fetchData(JSON.stringify({ query: mutation }));
 	if (!result) return;
 
