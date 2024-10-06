@@ -23,12 +23,7 @@ function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	const sortedEpisodes = animeData.sortedEpisodes;
 	for (let j = 0; j < sortedEpisodes.length; j++) {
-		// annictのエピソード番号を取得
-		const episodeNumber = sortedEpisodes[j].numberText
-			? episodeNumberExtractor(sortedEpisodes[j].numberText)
-			: sortedEpisodes[j].number;
-
-		if (episodeNumber === normalizedEpisode) {
+		if (sortedEpisodes[j].numberTextNormalized === normalizedEpisode) {
 			if (j === nextEpisodeIndex) createNextEpisodeBorder(i); // 次のエピソードに赤枠をつける
 			return true;
 		}

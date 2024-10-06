@@ -22,7 +22,8 @@ async function main(ctx: ContentScriptContext) {
 
 		const result = await getAnimeDataFromAnnict(animeTitle, document, queryWithEpisodes);
 
-		if (animeData.id || result) createRecordButton(ctx);
+		// エピソード数が100以上の場合は記録ボタンを表示しない
+		if ((result || animeData.id) && animeData.episodes.length <= 100) createRecordButton(ctx);
 	} else if (path == "sc_d_pc") {
 		/* 再生ページ */
 		let currentLocation: string;

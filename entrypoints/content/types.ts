@@ -4,6 +4,7 @@ export type Episode = {
 	id: string;
 	annictId: string;
 	viewerRecordsCount: number;
+	numberTextNormalized?: number | string; // numberTextを数字に変換
 };
 
 export type Work = {

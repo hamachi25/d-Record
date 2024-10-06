@@ -130,20 +130,6 @@ export function updateCurrentEpisode(
 
 // "第5話"のような話数から数字を取得
 export function episodeNumberExtractor(episode: string): number | string {
-	const remakeWords: Record<string, number> = {
-		〇: 0,
-		一: 1,
-		二: 2,
-		三: 3,
-		四: 4,
-		五: 5,
-		六: 6,
-		七: 7,
-		八: 8,
-		九: 9,
-		十: 10,
-	};
-
 	// 全角数字を半角数字に変換
 	function arabicNumberExtractor(): number | undefined {
 		const numbers = episode
@@ -155,21 +141,35 @@ export function episodeNumberExtractor(episode: string): number | string {
 
 	// 漢数字をアラビア数字に変換する
 	function kanjiNumberExtractor(): number | undefined {
-		const arrayKansuuji = [...episode]
-			.flatMap((s) => s.match(new RegExp(Object.keys(remakeWords).join("|"))))
-			.filter(Boolean);
+		// prettier-ignore
+		const kanjiNums: Record<string, number> = {
+			〇: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9,
+			零: 0, 壱: 1, 弐: 2, 参: 3, 伍: 5,
+		};
 
-		if (arrayKansuuji.length >= 1) {
-			let num: number = 0;
-			arrayKansuuji.forEach((kan) => {
-				if (kan) {
-					num += remakeWords[kan];
-				}
-			});
-			return num;
+		// prettier-ignore
+		const kanjiPlace: Record<string, number> = {
+			十: 10, 拾: 10, 百: 100,
+		};
+
+		let result = 0;
+		let temp = 0;
+
+		for (let i = 0; i < episode.length; i++) {
+			const char = episode[i];
+
+			if (Object.prototype.hasOwnProperty.call(kanjiNums, char)) {
+				temp = kanjiNums[char];
+			} else if (Object.prototype.hasOwnProperty.call(kanjiPlace, char)) {
+				if (temp === 0) temp = 1;
+				temp *= kanjiPlace[char];
+				result += temp;
+				temp = 0;
+			}
 		}
+		result += temp;
 
-		return undefined;
+		return result;
 	}
 
 	// 話数が文字列の場合の場合

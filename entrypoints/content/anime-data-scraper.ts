@@ -137,7 +137,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 		const titleRegex = /^(TV|テレビ|劇場|オリジナル)?\s?(アニメーション|アニメ)\s?[｢「『]/;
 		const match = title.match(titleRegex);
 		let trimmedTitle = title;
-		if (match && match.index != undefined) {
+		if (match && match.index !== undefined) {
 			const index = match.index + match[0].length;
 			trimmedTitle = trimmedTitle.substring(index).replace(/[」｣』]/, " ");
 		}
@@ -155,7 +155,7 @@ function remakeString(title: string | undefined, retry: boolean) {
 		const separateWord =
 			/\s+|;|:|・|‐|─|―|－|〜|&|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]|'|’/g;
 		return title
-			.replace(/OVA|劇場版/, "")
+			.replace(/OVA|劇場版|劇場|映画|テレビ|TV|アニメ|アニメーション|オリジナル/g, "")
 			.split(separateWord)
 			.find((title) => title.length >= 2); // 2文字以上
 	}
@@ -272,24 +272,31 @@ function getNextEpisodeIndex(
 
 /******************************************************************************/
 
-// エピソードの順番を、dアニメストアの順番に変える
+// エピソードの順番を、dアニメストアのエピソードの順番に変える
 function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 	if (episodes === undefined || episodes.length === 0) return [];
+	if (episodes.length > 100) return episodes; // 100話以上はそのまま返す
 
 	const targets = doc.querySelectorAll(".textContainer>span>.number");
 	const sortedEpisodeArray = [];
-	for (let i = 0; i < targets.length; i++) {
-		for (let j = 0; j < episodes.length; j++) {
-			const annictEpisodeNumber = episodes[j].numberText
-				? episodeNumberExtractor(episodes[j].numberText)
-				: episodes[j].number;
-			const danimeEpisodeText = targets[i].textContent;
+	const tempEpisodes = [...episodes];
 
-			if (
-				danimeEpisodeText &&
-				episodeNumberExtractor(danimeEpisodeText) === annictEpisodeNumber
-			) {
-				sortedEpisodeArray.push(episodes[j]);
+	for (let i = 0; i < targets.length; i++) {
+		for (let j = 0; j < tempEpisodes.length; j++) {
+			const annictEpisodeNumber = tempEpisodes[j].numberText
+				? episodeNumberExtractor(tempEpisodes[j].numberText)
+				: tempEpisodes[j].number;
+
+			const danimeEpisodeText = targets[i].textContent;
+			const danimeEpisodeNumber =
+				danimeEpisodeText && episodeNumberExtractor(danimeEpisodeText);
+
+			if (danimeEpisodeText && danimeEpisodeNumber === annictEpisodeNumber) {
+				tempEpisodes[j].numberTextNormalized = annictEpisodeNumber;
+
+				sortedEpisodeArray.push(tempEpisodes[j]);
+				tempEpisodes.splice(j, 1); // 一致したものを削除
+
 				break;
 			}
 		}

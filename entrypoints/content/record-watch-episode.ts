@@ -20,14 +20,26 @@ let episodeIndex: number | undefined = undefined; // sortedEpisodesの中のinde
 function sendRecord() {
 	const isAiring = isCurrentlyAiring(danimeDocument);
 
+	// 作品ページの最終話のエピソード番号を取得
+	const danimeNumberElements = danimeDocument.querySelectorAll(".textContainer>span>.number");
+	const danimeLastEpisodeText =
+		danimeNumberElements[danimeNumberElements.length - 1]?.textContent;
+	let danimeLastEpisodeNumber;
+	if (danimeLastEpisodeText)
+		danimeLastEpisodeNumber = episodeNumberExtractor(danimeLastEpisodeText);
+	if (!danimeLastEpisodeNumber) return;
+
+	// annictの最終話のエピソード番号を取得
+	const annictLastEpisodeNumber =
+		animeData.sortedEpisodes[animeData.sortedEpisodes.length - 1].numberTextNormalized;
+
 	let mutation = "mutation{";
 
 	// 視聴ステータスが"見てる"以外だった場合、"見てる"に変更(最終回を除く)
 	if (
-		isAiring === true ||
+		isAiring === true || // アニメが放送中
 		(animeData.sortedEpisodes.length !== 0 &&
-			episodeNumberFromDanime !==
-				animeData.sortedEpisodes[animeData.sortedEpisodes.length - 1].number)
+			danimeLastEpisodeNumber !== episodeNumberFromDanime) // 最終話以外
 	) {
 		mutation = changeStatusToWatching(mutation);
 	}
@@ -44,8 +56,8 @@ function sendRecord() {
 	if (
 		isAiring === false && // アニメが放送終了
 		animeData.sortedEpisodes.length !== 0 &&
-		episodeNumberFromDanime ===
-			animeData.sortedEpisodes[animeData.sortedEpisodes.length - 1].number && // 最終話
+		danimeLastEpisodeNumber === episodeNumberFromDanime && // 最終話
+		episodeNumberFromDanime === annictLastEpisodeNumber && // 最終話
 		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) // 設定
 	) {
 		mutation = changeStatusToWatched(mutation);
@@ -104,19 +116,32 @@ function getEpisodeIndex(episodeNumberFromDanime: number | string) {
 	episodeIndex = undefined; // 初期化
 	const episodeData = animeData.sortedEpisodes;
 
-	if (episodeData[0].numberText) {
-		/* numberTextから取得 */
+	/* numberTextから取得 */
+	if (episodeData[0].numberText && episodeData[0].numberTextNormalized) {
 		for (let i = 0; i < episodeData.length; i++) {
-			const episode = episodeData[i];
-			const num = episodeNumberExtractor(episode.numberText);
-			if (num === episodeNumberFromDanime) {
+			if (episodeData[i].numberTextNormalized === episodeNumberFromDanime) {
 				episodeIndex = i;
 				break;
 			}
 		}
 		return;
-	} else if (episodeData[0].number) {
-		/* numberから取得 */
+	}
+
+	/* numberTextから取得 */
+	// 1000話以上のアニメは、numberTextNormalizedを作成しないため、numberTextから取得
+	if (episodeData[0].numberText && !episodeData[0].numberTextNormalized) {
+		for (let i = 0; i < episodeData.length; i++) {
+			const normalizedEpisode = episodeNumberExtractor(episodeData[i].numberText);
+			if (normalizedEpisode === episodeNumberFromDanime) {
+				episodeIndex = i;
+				break;
+			}
+		}
+		return;
+	}
+
+	/* numberから取得 */
+	if (episodeData[0].number) {
 		for (let i = 0; i < episodeData.length; i++) {
 			const episode = episodeData[i];
 			if (episode.number === episodeNumberFromDanime) {
@@ -125,7 +150,9 @@ function getEpisodeIndex(episodeNumberFromDanime: number | string) {
 			}
 		}
 		return;
-	} else if (episodeData.length === 1) {
+	}
+
+	if (episodeData.length === 1) {
 		episodeIndex = 0;
 		return;
 	}
