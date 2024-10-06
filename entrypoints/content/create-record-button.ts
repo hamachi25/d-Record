@@ -1,6 +1,5 @@
 import { ContentScriptContext } from "wxt/client";
 import RecordButton from "./components/RecordButton";
-
 import { animeData } from "./anime-data-scraper";
 import { settingData } from "./storage";
 import { episodeNumberExtractor, handleUnregisteredNextEpisode } from "./utils";
@@ -41,38 +40,36 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 	);
 	if (isNextEpisodeUnregistered) return; // 最新話まで見たと判断
 
-	if (!settingData || settingData.recordButton) {
-		// nextEpisodeがない・1話しかない場合はindexを0にする
-		let nextEpisodeIndex: number = 0;
-		if (animeData.nextEpisode !== undefined && animeData.episodes.length !== 1) {
-			nextEpisodeIndex = animeData.nextEpisode;
+	// nextEpisodeがない・1話しかない場合はindexを0にする
+	let nextEpisodeIndex: number = 0;
+	if (animeData.nextEpisode !== undefined && animeData.episodes.length !== 1) {
+		nextEpisodeIndex = animeData.nextEpisode;
+	}
+
+	const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
+	let j = 0;
+	for (const [i, insertTarget] of insertTargets.entries()) {
+		// 視聴済みのエピソードはスキップ
+		if (i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0) {
+			continue;
 		}
 
-		const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
-		let j = 0;
-		for (const [i, insertTarget] of insertTargets.entries()) {
-			// 視聴済みのエピソードはスキップ
-			if (i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0) {
-				continue;
-			}
+		// エピソードが存在していなかったらスキップ
+		if (!isEpisodeExist(insertTargets, i)) continue;
 
-			// エピソードが存在していなかったらスキップ
-			if (!isEpisodeExist(insertTargets, i)) continue;
+		const ui = createIntegratedUi(ctx, {
+			position: "inline",
+			anchor: insertTarget,
+			append: "after",
+			onMount: (container) => {
+				return render(() => RecordButton(i, j, insertTargets), container);
+			},
+			onRemove: (unmount) => {
+				if (unmount) unmount();
+			},
+		});
+		if (!settingData || settingData.recordButton) ui.mount();
 
-			const ui = createIntegratedUi(ctx, {
-				position: "inline",
-				anchor: insertTarget,
-				append: "after",
-				onMount: (container) => {
-					return render(() => RecordButton(i, j, insertTargets), container);
-				},
-				onRemove: (unmount) => {
-					if (unmount) unmount();
-				},
-			});
-			ui.mount();
-
-			j++;
-		}
+		j++;
 	}
 }
