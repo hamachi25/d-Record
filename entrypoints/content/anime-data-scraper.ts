@@ -92,11 +92,11 @@ function handleNonSeasonalYear(nonSeasonalYearMatch: RegExpMatchArray, retry: bo
 	const seasons = ["winter", "spring", "summer", "autumn"];
 	const result: string[] = [];
 	const startYear = Number(nonSeasonalYear) - 1;
-	[...Array(3)].forEach((_, i) => {
-		seasons.forEach((season) => {
-			result.push(`${startYear + i}-${season}`);
-		});
-	});
+	for (let i = 0; i < 3; i++) {
+		for (let j = 0; j < seasons.length; j++) {
+			result.push(`${startYear + i}-${seasons[j]}`);
+		}
+	}
 	return result;
 }
 
@@ -168,15 +168,25 @@ function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 	// removeWords関数を行った回数が最もすくないアニメのindexを返す
 	const index = [];
 	const findTime = [];
+	const cache = new Map<string, [string, number]>();
+
+	function cachedRemoveWords(text: string, count: number): [string, number] {
+		const key = `${text}-${count}`;
+		if (cache.has(key)) {
+			return cache.get(key)!;
+		}
+		const result = removeWords(text, count);
+		cache.set(key, result);
+		return result;
+	}
+
 	for (let i = 0; i < data.length; i++) {
-		const count = 8; // removeWords()の回数
 		let annictTitle = data[i].title;
 		let dTitle = titleText;
-		let added = false;
 
-		for (let j = 1; j <= count; j++) {
-			const [removedAnnictTitle, num] = removeWords(annictTitle, j);
-			const [removedDTitle] = removeWords(dTitle, j);
+		for (let j = 1; j <= 8; j++) {
+			const [removedAnnictTitle, num] = cachedRemoveWords(annictTitle, j);
+			const [removedDTitle] = cachedRemoveWords(dTitle, j);
 
 			// 4回目の場合、渡すタイトル置き換えない。
 			if (num !== 4) {
@@ -184,10 +194,10 @@ function findCorrectAnime(titleText: string, data: Work[], doc: Document) {
 				dTitle = removedDTitle;
 			}
 
-			if (removedAnnictTitle === removedDTitle && !added) {
-				added = true;
+			if (removedAnnictTitle === removedDTitle) {
 				index.push(i);
 				findTime.push(j);
+				break;
 			}
 		}
 	}
@@ -212,26 +222,34 @@ function removeWords(text: string, count: number): [string, number] {
         Ⅵ: "VI", Ⅶ: "VII", Ⅷ: "VIII", Ⅸ: "IX", Ⅹ: "X"
     };
 
+	const PATTERNS = {
+        WHITESPACE: /\s|\u00A0|\u3000/g,
+        FULLWIDTH: /[Ａ-Ｚａ-ｚ０-９：＆]/g,
+        NESTED_QUOTES: /「([^」]*?)（([^）]*?)）([^」]*)」/g, // 「」に囲まれた()を削除
+        BRACKETS: /[[［《【＜〈（(｢「『～－─―\-』」｣)）〉＞】》］\]]/g, // カッコなどのみを削除 次には引き継がれない
+        BRACKETED_CONTENT: /[[［《【＜〈].+?[〉＞】》］\]]|[（(｢「『」｣』)）]/g, // カッコなどに囲まれた部分を削除
+        SEASON_INFO: /第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g,
+        DASH_CONTENT: /[～－─―-].+?[-―─－～]/g,
+        ROMAN_NUMERALS: new RegExp(Object.keys(replacements).join('|'), 'g')
+    };
+
     switch (count) {
         case 1:
-            return [text.replace(/\s|\u00A0|\u3000/g, "").replace("OriginalVideoAnimation", "OVA"), count];
+            return [text.replace(PATTERNS.WHITESPACE, "").replace("OriginalVideoAnimation", "OVA"), count];
         case 2:
-            return [text.replace(/[Ａ-Ｚａ-ｚ０-９：＆]/g, s => String.fromCharCode(s.charCodeAt(0) - 65248)), count];
+            return [text.replace(PATTERNS.FULLWIDTH, s => String.fromCharCode(s.charCodeAt(0) - 65248)), count];
         case 3:
-			// 「」に囲まれた()を削除
-            return [text.replace(/「([^」]*?)（([^）]*?)）([^」]*)」/g, "「$1$3」"), count];
+            return [text.replace(PATTERNS.NESTED_QUOTES, "「$1$3」"), count];
         case 4:
-			// カッコなどのみを削除 次には引き継がれない
-            return [text.replace(/[[［《【＜〈（(｢「『～－─―\-』」｣)）〉＞】》］\]]/g, ""), count];
+            return [text.replace(PATTERNS.BRACKETS, ""), count];
         case 5:
-			// カッコなどに囲まれた部分を削除
-            return [text.replace(/[[［《【＜〈].+?[〉＞】》］\]]|[（(｢「『」｣』)）]/g, ""), count];
+            return [text.replace(PATTERNS.BRACKETED_CONTENT, ""), count];
         case 6:
-            return [text.replace(/第?\d{1,2}期|Season\d{1}|映画|劇場版|(TV|テレビ|劇場)(アニメーション|アニメ)|^アニメ|OVA/g, ""), count];
+            return [text.replace(PATTERNS.SEASON_INFO, ""), count];
         case 7:
-            return [text.replace(/[～－─―-].+?[-―─－～]/g, ""), count];
+            return [text.replace(PATTERNS.DASH_CONTENT, ""), count];
         case 8:
-            return [text.replace(new RegExp(Object.keys(replacements).join("|"), "g"), match => replacements[match as keyof typeof replacements]), count];
+            return [text.replace(PATTERNS.ROMAN_NUMERALS, match => replacements[match as keyof typeof replacements]), count];
         default:
             return [text, 0];
     }
@@ -249,7 +267,8 @@ function getNextEpisodeIndex(
 
 	// viewerのannictIDと一致するものを、animeData内で探す
 	let viewIndex: number | undefined; // viewer > libraryEntries内のindex
-	for (let i = 0; i < viewData.length; i++) {
+	const viewDataLength = viewData.length;
+	for (let i = 0; i < viewDataLength; i++) {
 		if (viewData[i].work.annictId == animeData.annictId) {
 			viewIndex = i;
 			break;
@@ -260,8 +279,10 @@ function getNextEpisodeIndex(
 	// nextEpisodeのindex
 	if (viewData[viewIndex].nextEpisode) {
 		// viewerのエピソードのannictIDと一致するものを、sortedEpisodes内で探す
-		for (let i = 0; i < sortedEpisodes.length; i++) {
-			if (sortedEpisodes[i].annictId === viewData[viewIndex].nextEpisode.annictId) {
+		const sortedEpisodesLength = sortedEpisodes.length;
+		const nextEpisodeAnnictId = viewData[viewIndex].nextEpisode.annictId;
+		for (let i = 0; i < sortedEpisodesLength; i++) {
+			if (sortedEpisodes[i].annictId === nextEpisodeAnnictId) {
 				return i;
 			}
 		}
@@ -275,37 +296,35 @@ function getNextEpisodeIndex(
 // エピソードの順番を、dアニメストアのエピソードの順番に変える
 function createSortedEpisodes(doc: Document, episodes: Episode[] | undefined) {
 	if (episodes === undefined || episodes.length === 0) return [];
-	if (episodes.length > 100) return episodes; // 100話以上はそのまま返す
 
-	const targets = doc.querySelectorAll(".textContainer>span>.number");
+	const targets = Array.from(doc.querySelectorAll(".textContainer>span>.number"));
+
+	// エピソード番号をキーとしたマップを作成
+	const episodeMap = new Map(
+		episodes.map((episode) => [
+			episode.numberText ? episodeNumberExtractor(episode.numberText) : episode.number,
+			episode,
+		]),
+	);
+
 	const sortedEpisodeArray = [];
-	const tempEpisodes = [...episodes];
 
-	for (let i = 0; i < targets.length; i++) {
-		for (let j = 0; j < tempEpisodes.length; j++) {
-			const annictEpisodeNumber = tempEpisodes[j].numberText
-				? episodeNumberExtractor(tempEpisodes[j].numberText)
-				: tempEpisodes[j].number;
+	for (const target of targets) {
+		const danimeEpisodeText = target.textContent;
+		if (!danimeEpisodeText) return [];
 
-			const danimeEpisodeText = targets[i].textContent;
-			const danimeEpisodeNumber =
-				danimeEpisodeText && episodeNumberExtractor(danimeEpisodeText);
+		const danimeEpisodeNumber = episodeNumberExtractor(danimeEpisodeText);
+		const matchingEpisode = episodeMap.get(danimeEpisodeNumber);
 
-			if (danimeEpisodeNumber === annictEpisodeNumber) {
-				tempEpisodes[j].numberTextNormalized = annictEpisodeNumber;
-
-				sortedEpisodeArray.push(tempEpisodes[j]);
-				tempEpisodes.splice(j, 1); // 一致したものを削除
-
-				break;
-			}
+		if (matchingEpisode) {
+			matchingEpisode.numberTextNormalized = danimeEpisodeNumber;
+			sortedEpisodeArray.push(matchingEpisode);
+			episodeMap.delete(danimeEpisodeNumber); // 使用済みのエピソードを削除
 		}
 	}
 
-	// 並び替えに失敗した場合はそのまま返す
-	if (sortedEpisodeArray.length === 0) return episodes;
-
-	return sortedEpisodeArray;
+	// マッチングが見つからなかった場合は元の配列を返す
+	return sortedEpisodeArray.length === 0 ? episodes : sortedEpisodeArray;
 }
 
 /******************************************************************************/
