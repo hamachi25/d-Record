@@ -39,7 +39,6 @@ export type NextEpisode = {
 // };
 
 export type Settings = {
-	Token?: string;
 	sendTiming?: string;
 	nextEpisodeLine?: boolean;
 	recordButton?: boolean;
