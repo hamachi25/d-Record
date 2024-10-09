@@ -14,11 +14,9 @@ dアニメストアで視聴したアニメを[Annict](https://annict.com/)に�
 <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/"><img alt="Firefox Browser ADD-ONS" width="172" height="60" src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"></a>
 
 > [!IMPORTANT]
-> 拡張機能を使用するには、Annictのトークン作成する必要があります。
+> 拡張機能を使用するには、Annictのトークンを設定する必要があります。
 >
-> 1. Annictの[アプリケーション設定](https://annict.com/settings/apps)から個人用アクセストークンを作成します。
-> 2. スコープを「読み込み + 書き込み」に変更して登録します。
-> 3. 作成したトークンをブラウザ右上のd-Recordアイコンから保存します。
+> ブラウザ右上のd-Recordアイコンから、「**トークンを取得**」を押して設定します。
 
 ## 機能
 
@@ -44,7 +42,12 @@ dアニメストアで視聴したアニメを[Annict](https://annict.com/)に�
 ![ボタンの種類](https://github.com/hamachi25/d-Record/blob/images/button.png)
 
 **設定項目**  
-![設定](https://github.com/hamachi25/d-Record/blob/images/settings.jpg)
+<picture>
+
+  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings-dark.jpg">
+  <source media="(prefers-color-scheme: light)" srcset="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings.jpg">
+  <img alt="設定" src="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings.jpg">
+</picture>
 
 ## FAQ
 
