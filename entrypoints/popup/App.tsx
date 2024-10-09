@@ -36,14 +36,14 @@ function App() {
 
 	return (
 		<>
-			<TokenInput token={settings().Token} />
+			<TokenInput />
 			<SendTimingOptions sendTiming={settings().sendTiming} />
 			<UIAndOtherOptions
 				title="UIの変更"
 				options={[
 					{ value: "nextEpisodeLine", label: "作品ページの赤い枠線を非表示" },
 					{ value: "recordButton", label: "作品ページの記録ボタンを非表示" },
-					{ value: "animeTitle", label: "再生ページ右下のタイトルを非表示" },
+					{ value: "animeTitle", label: "再生ページのタイトルを非表示" },
 				]}
 				settings={{
 					nextEpisodeLine: settings().nextEpisodeLine ?? defaultSettings.nextEpisodeLine,
@@ -60,7 +60,8 @@ function App() {
 					},
 				]}
 				settings={{
-					autoChangeStatus: settings().autoChangeStatus ?? defaultSettings.autoChangeStatus,
+					autoChangeStatus:
+						settings().autoChangeStatus ?? defaultSettings.autoChangeStatus,
 				}}
 			/>
 		</>
