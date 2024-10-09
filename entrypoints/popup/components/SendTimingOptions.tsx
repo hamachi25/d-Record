@@ -16,13 +16,14 @@ export function SendTimingOptions(props: { sendTiming: string | undefined }) {
 	}
 
 	return (
-		<div class="radio-checkbox-container send-timing-container">
-			<p>視聴データの送信タイミング</p>
-			<div>
+		<div class="radio-checkbox-container send-timing-container px-2 py-4">
+			<p class="font-semibold text-lg m-0">視聴データの送信タイミング</p>
+			<div class="mt-2">
 				<Index each={options()}>
 					{(option) => (
-						<label>
+						<label class="relative flex items-center cursor-pointer [&:not(:last-child)]:mb-1">
 							<input
+								class="min-w-4 min-h-4 mr-3 my-auto cursor-pointer"
 								type="radio"
 								value={option().value}
 								checked={selectedTiming() === option().value}

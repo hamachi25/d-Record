@@ -5,7 +5,6 @@ export let settingData: Settings;
 export async function getSettings() {
 	try {
 		const result = await browser.storage.local.get([
-			"Token",
 			"sendTiming",
 			"nextEpisodeLine",
 			"recordButton",

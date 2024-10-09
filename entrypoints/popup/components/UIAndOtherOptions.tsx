@@ -37,13 +37,14 @@ export function UIAndOtherOptions(props: {
 	}
 
 	return (
-		<div class="radio-checkbox-container">
-			<p>{props.title}</p>
-			<div>
+		<div class="radio-checkbox-container px-2 py-4">
+			<p class="font-semibold text-lg m-0">{props.title}</p>
+			<div class="mt-2">
 				<Index each={props.options}>
 					{(option, i) => (
-						<label>
+						<label class="relative flex items-center cursor-pointer [&:not(:last-child)]:mb-1">
 							<input
+								class="min-w-4 min-h-4 mr-3 my-auto cursor-pointer"
 								type="checkbox"
 								id={option().value}
 								checked={ischecked()[i].checked}
