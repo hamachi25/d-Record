@@ -7,6 +7,7 @@ export function UIAndOtherOptions(props: {
 		props.options.map((option) => ({ value: option.value, checked: false })),
 	);
 
+	// 遅延して取得した設定を反映
 	createEffect(
 		on(
 			() => Object.values(props.settings),
@@ -24,6 +25,7 @@ export function UIAndOtherOptions(props: {
 		),
 	);
 
+	// チェックボックスの状態を変更
 	async function handleChange(value: string) {
 		const newChecked = ischecked().map((check) => ({
 			...check,
@@ -38,13 +40,15 @@ export function UIAndOtherOptions(props: {
 
 	return (
 		<div class="radio-checkbox-container px-2 py-4">
-			<p class="font-semibold text-lg m-0">{props.title}</p>
+			<h2 class="font-semibold text-lg m-0">{props.title}</h2>
 			<div class="mt-2">
 				<Index each={props.options}>
 					{(option, i) => (
-						<label class="relative flex items-center cursor-pointer [&:not(:last-child)]:mb-1">
+						<label class="relative flex items-center cursor-pointer [&:not(:last-child)]:mb-1.5">
 							<input
-								class="min-w-4 min-h-4 mr-3 my-auto cursor-pointer"
+								class="checkbox h-[1.1rem] w-[1.1rem] border-gray-400 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-400 checked:border-none
+								[--chkbg:theme(colors.blue.800)] dark:[--chkbg:theme(colors.blue.600)] checked:hover:[--chkbg:theme(colors.blue.1000)] dark:checked:hover:[--chkbg:theme(colors.blue.400)] 
+								rounded mr-3 my-auto cursor-pointer"
 								type="checkbox"
 								id={option().value}
 								checked={ischecked()[i].checked}

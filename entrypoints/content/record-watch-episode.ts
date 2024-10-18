@@ -1,6 +1,5 @@
-import { setUploadIcon } from "./components/UploadToggleButton";
-import { animeData, danimeDocument, setLoading } from "./anime-data-scraper";
-import { fetchData } from "./fetch";
+import { animeData, danimeDocument, setLoading, websiteInfo } from "./anime-data-scraper";
+import { fetchDataFromAnnict } from "./fetch";
 import { settingData, getNotRecordWork } from "./storage";
 import {
 	changeStatusToWatching,
@@ -8,30 +7,33 @@ import {
 	episodeNumberExtractor,
 	isCurrentlyAiring,
 	handleUnregisteredNextEpisode,
+	NotSupportedAnime,
 	updateCurrentEpisode,
 } from "./utils";
 
 /******************************************************************************/
 
-let episodeNumberFromDanime: number | string | undefined = undefined; // 現在のエピソード(dアニのDOMから取得する)
-let episodeIndex: number | undefined = undefined; // sortedEpisodesの中のindex(データ送信用)
+/*
+ * UploadToggleButton.tsxから、createIntervalOrEvent()を呼ぶので、グローバル変数にする
+ */
+let currentEpisodeFromWebSite: number | string | undefined = undefined; // 現在視聴しているのエピソード(websiteのDOMから取得する)
+let sortedEpisodesIndex: number | number[] | undefined = undefined; // sortedEpisodesの中のindex(データ送信用)
 
-// データ送信
+/**
+ * 視聴データを送信する
+ */
 function sendRecord() {
 	const isAiring = isCurrentlyAiring(danimeDocument);
 
 	// 作品ページの最終話のエピソード番号を取得
-	const danimeNumberElements = danimeDocument.querySelectorAll(".textContainer>span>.number");
-	const danimeLastEpisodeText =
-		danimeNumberElements[danimeNumberElements.length - 1]?.textContent;
 	let danimeLastEpisodeNumber;
-	if (danimeLastEpisodeText)
-		danimeLastEpisodeNumber = episodeNumberExtractor(danimeLastEpisodeText);
-	if (!danimeLastEpisodeNumber) return;
+	if (websiteInfo.lastEpisode) {
+		danimeLastEpisodeNumber = episodeNumberExtractor(websiteInfo.lastEpisode);
+	}
 
 	// annictの最終話のエピソード番号を取得
 	const annictLastEpisodeNumber =
-		animeData.sortedEpisodes[animeData.sortedEpisodes.length - 1].numberTextNormalized;
+		animeData.sortedEpisodes[animeData.sortedEpisodes.length - 1]?.numberTextNormalized;
 
 	let mutation = "mutation{";
 
@@ -39,15 +41,27 @@ function sendRecord() {
 	if (
 		isAiring === true || // アニメが放送中
 		(animeData.sortedEpisodes.length !== 0 &&
-			danimeLastEpisodeNumber !== episodeNumberFromDanime) // 最終話以外
+			danimeLastEpisodeNumber !== currentEpisodeFromWebSite) // 最終話以外
 	) {
 		mutation = changeStatusToWatching(mutation);
 	}
 
-	if (episodeIndex !== undefined) {
+	// エピソードを記録
+	if (sortedEpisodesIndex !== undefined && typeof sortedEpisodesIndex === "object") {
+		// 複数エピソードの場合
+		let count = 0; // クエリのカウント用
+		for (let i = sortedEpisodesIndex[0]; i <= sortedEpisodesIndex[1]; i++) {
+			count++;
+			mutation += `
+				e${count}:createRecord (
+					input: { episodeId:"${animeData.sortedEpisodes[i].id}"}
+				) { clientMutationId }
+			`;
+		}
+	} else if (sortedEpisodesIndex !== undefined) {
 		mutation += `
     	    createRecord (
-    	        input: { episodeId:"${animeData.sortedEpisodes[episodeIndex].id}"}
+    	        input: { episodeId:"${animeData.sortedEpisodes[sortedEpisodesIndex].id}"}
     	    ) { clientMutationId }
     	`;
 	}
@@ -56,54 +70,82 @@ function sendRecord() {
 	if (
 		isAiring === false && // アニメが放送終了
 		animeData.sortedEpisodes.length !== 0 &&
-		danimeLastEpisodeNumber === episodeNumberFromDanime && // 最終話
-		episodeNumberFromDanime === annictLastEpisodeNumber && // 最終話
+		danimeLastEpisodeNumber === currentEpisodeFromWebSite && // 最終話
+		currentEpisodeFromWebSite === annictLastEpisodeNumber && // 最終話
 		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) // 設定
 	) {
 		mutation = changeStatusToWatched(mutation);
 	}
 
 	// 映画などエピソードがない場合、ステータスのみ変更
-	if (episodeIndex === undefined) mutation = changeStatusToWatched(mutation);
+	if (sortedEpisodesIndex === undefined) mutation = changeStatusToWatched(mutation);
 
 	mutation += "}";
 
-	const result = fetchData(JSON.stringify({ query: mutation }));
+	const result = fetchDataFromAnnict(JSON.stringify({ query: mutation }));
 	if (!result) return;
 
-	setUploadIcon("completeUpload");
+	setLoading("icon", "completeUpload");
 	cleanupIntervalOrEvent();
 }
 
-// インターバル・イベントを作成
 let sendInterval: NodeJS.Timeout | undefined = undefined;
 let sendEvent: EventListener | undefined = undefined;
+/**
+ * 視聴データを送信するインターバル・イベントを作成
+ */
 export function createIntervalOrEvent() {
-	const video = document.querySelector("video");
-	if (!video) return;
+	function createIntervalOrEventMain() {
+		const video = document.querySelector("video");
+		if (!video) return false;
 
-	if (settingData.sendTiming == "after-start") {
-		const startTime = Date.now();
-		const startVideoTime = video.currentTime;
+		if (settingData.sendTiming == "after-start") {
+			const startTime = Date.now();
+			const startVideoTime = video.currentTime;
 
-		sendInterval = setInterval(() => {
-			// 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
-			if (
-				video &&
-				Date.now() - startTime > 5 * 60 * 1000 &&
-				video.currentTime - startVideoTime > 5 * 60
-			) {
-				sendRecord();
-				cleanupIntervalOrEvent();
-			}
-		}, 10000);
-	} else if (!settingData.sendTiming || settingData.sendTiming == "after-end") {
-		sendEvent = () => sendRecord();
-		video.addEventListener("ended", sendEvent);
+			sendInterval = setInterval(() => {
+				// 視聴開始からの時間・動作再生時間の両方が5分以上の場合に送信
+				if (
+					video &&
+					Date.now() - startTime > 5 * 60 * 1000 &&
+					video.currentTime - startVideoTime > 5 * 60
+				) {
+					sendRecord();
+					cleanupIntervalOrEvent();
+				}
+			}, 10000);
+		} else if (!settingData.sendTiming || settingData.sendTiming == "after-end") {
+			sendEvent = () => sendRecord();
+			video.addEventListener("ended", sendEvent);
+		}
+	}
+	const result = createIntervalOrEventMain();
+	if (result !== false) return;
+
+	// abemaはvideoの読み込みを待つ必要がある。
+	if (websiteInfo.site === "abema") {
+		const observer = new MutationObserver(() => {
+			const video = document.querySelector("video");
+			if (!video) return;
+
+			if (observer) observer.disconnect();
+			createIntervalOrEventMain();
+		});
+		const observerTarget = document.querySelector(
+			".com-vod-VODRecommendedContentsContainerView",
+		);
+		if (observerTarget) {
+			observer.observe(observerTarget, {
+				childList: true,
+				subtree: true,
+			});
+		}
 	}
 }
 
-// インターバル・イベントを削除
+/**
+ * 視聴データを送信するインターバル・イベントを削除
+ */
 export function cleanupIntervalOrEvent() {
 	if (sendInterval) clearInterval(sendInterval);
 	if (sendEvent) document.querySelector("video")?.removeEventListener("ended", sendEvent);
@@ -111,138 +153,152 @@ export function cleanupIntervalOrEvent() {
 
 /******************************************************************************/
 
-// エピソードのindexを取得(sortedEpisodes)
-function getEpisodeIndex(episodeNumberFromDanime: number | string) {
-	episodeIndex = undefined; // 初期化
-	const episodeData = animeData.sortedEpisodes;
+/**
+ * 現在視聴しているエピソードのindexを、sortedEpisodesから取得
+ * @description indexはグローバル変数に入れる
+ */
+function getCurrentEpisodeIndex() {
+	sortedEpisodesIndex = undefined; // 初期化
+	const annictEpisodeData = animeData.sortedEpisodes;
 
 	/* numberTextから取得 */
-	if (episodeData[0].numberText && episodeData[0].numberTextNormalized) {
-		for (let i = 0; i < episodeData.length; i++) {
-			if (episodeData[i].numberTextNormalized === episodeNumberFromDanime) {
-				episodeIndex = i;
-				break;
-			}
-		}
-		return;
-	}
+	if (annictEpisodeData[0].numberText) {
+		for (let i = 0; i < annictEpisodeData.length; i++) {
+			// abemaの場合は21話以降のエピソードが、エピソード一覧に表示されていないため、numberTextNormalizedを作成していない
+			const normalizedEpisodeBefore = annictEpisodeData[i].numberTextNormalized;
+			const normalizedEpisode = normalizedEpisodeBefore
+				? normalizedEpisodeBefore
+				: episodeNumberExtractor(annictEpisodeData[i].numberText);
 
-	/* numberTextから取得 */
-	// 1000話以上のアニメは、numberTextNormalizedを作成しないため、numberTextから取得
-	if (episodeData[0].numberText && !episodeData[0].numberTextNormalized) {
-		for (let i = 0; i < episodeData.length; i++) {
-			const normalizedEpisode = episodeNumberExtractor(episodeData[i].numberText);
-			if (normalizedEpisode === episodeNumberFromDanime) {
-				episodeIndex = i;
-				break;
+			if (normalizedEpisode === currentEpisodeFromWebSite) {
+				sortedEpisodesIndex = i;
+				return;
 			}
 		}
-		return;
 	}
 
 	/* numberから取得 */
-	if (episodeData[0].number) {
-		for (let i = 0; i < episodeData.length; i++) {
-			const episode = episodeData[i];
-			if (episode.number === episodeNumberFromDanime) {
-				episodeIndex = i;
-				break;
+	if (annictEpisodeData[0].number) {
+		for (let i = 0; i < annictEpisodeData.length; i++) {
+			if (annictEpisodeData[i].number === currentEpisodeFromWebSite) {
+				sortedEpisodesIndex = i;
+				return;
 			}
 		}
-		return;
 	}
 
-	if (episodeData.length === 1) {
-		episodeIndex = 0;
-		return;
+	/*
+	 * 第1話～第4話のような複数エピソードの場合
+	 */
+	const splitMultiEpisodes = websiteInfo.currentEpisode.split("～");
+	if (splitMultiEpisodes.length === 2) {
+		// "～"で分け、それぞれのindexを取得
+		const episodeIndex = splitMultiEpisodes.map((episode) => {
+			return annictEpisodeData.findIndex(
+				(episodeData) =>
+					episodeNumberExtractor(episodeData.numberText) ===
+					episodeNumberExtractor(episode),
+			);
+		});
+
+		if (episodeIndex[1] > episodeIndex[0]) {
+			sortedEpisodesIndex = [episodeIndex[0], episodeIndex[1]];
+			return;
+		}
 	}
 
-	episodeIndex = undefined;
+	// 精度が甘くなるため、一旦コメントアウト
+	/*
+	 * annictとウェブサイトで次シーズンのエピソードが、１話から始まるか途中から始まるかが異なる
+	 * そのためここまでエピソードがない場合は異なっていると判断し、1話から始まるとして扱う
+	 */
+	// if (!annictEpisodeData[0].numberTextNormalized) {
+	// 	sortedEpisodesIndex = websiteInfo.episode.findIndex((episode) => {
+	// 		if (episode) {
+	// 			return (
+	// 				episodeNumberExtractor(episode) ===
+	// 				episodeNumberExtractor(websiteInfo.currentEpisode)
+	// 			);
+	// 		}
+	// 		return undefined;
+	// 	});
+	// 	if (sortedEpisodesIndex !== undefined && sortedEpisodesIndex !== -1) return;
+	// }
+
+	sortedEpisodesIndex = undefined;
 }
 
 /******************************************************************************/
 
+/**
+ * 視聴中のエピソードを記録するための関数
+ */
 export async function handleRecordEpisode() {
 	cleanupIntervalOrEvent(); // 前のイベントを削除
 
-	const partId = location.href.match(/(?<=partId=)\d+/);
-	const workId = partId && partId[0].substring(0, 5);
 	const notRecordWork = await getNotRecordWork();
 	if (!notRecordWork) return;
 
-	// 設定
-	if (settingData.sendTiming && settingData.sendTiming == "not-send") {
-		setUploadIcon("immutableNotUpload");
-		return;
-	}
-
 	if (!animeData.id) {
-		setUploadIcon("immutableNotUpload");
-		setLoading({
-			status: "error",
-			message: "現時点ではこのアニメに対応していません",
-		});
+		NotSupportedAnime();
 		return;
 	}
 
 	// 映画などエピソードがない場合、ステータスのみ変更
 	if (
 		animeData.episodes.length === 0 &&
-		danimeDocument.querySelectorAll("a[id].clearfix").length === 1
+		(websiteInfo.episodesCount === 1 || // 本編のみで分割されていない場合
+			(animeData.media === "MOVIE" && websiteInfo.currentEpisode === websiteInfo.lastEpisode)) // 分割された映画の場合
 	) {
+		// ステータスの自動変更がオフの場合
+		if (settingData.autoChangeStatus === false) {
+			setLoading({
+				status: "success",
+				message: "ステータス変更がオフになっています",
+				icon: "immutableNotUpload",
+			});
+			return;
+		}
+
 		// 送信しない作品の場合
-		if (notRecordWork.includes(Number(workId))) {
-			setUploadIcon("notUpload");
+		if (notRecordWork.includes(websiteInfo.workId)) {
+			setLoading("icon", "notUpload");
 			return;
 		}
 
-		if (settingData.autoChangeStatus === undefined || settingData.autoChangeStatus) {
-			// ステータスの自動変更がオンの場合、イベントを作成
-			createIntervalOrEvent();
-			setUploadIcon("upload");
-			return;
-		} else {
-			// ステータスの自動変更がオフの場合
-			setUploadIcon("immutableNotUpload");
-			return;
-		}
+		// ステータスの自動変更がオンの場合、インターバル・イベントを作成
+		createIntervalOrEvent();
+		setLoading({ status: "success", message: "", icon: "upload" });
+		return;
 	}
 
-	// 複数のチャプターに分かれている映画
+	// 分割された映画で最終話以外の場合は、なにもしない
 	if (animeData.episodes.length === 0) {
-		setUploadIcon("immutableNotUpload");
-		setLoading({
-			status: "error",
-			message: "現時点ではこのアニメに対応していません",
-		});
+		setLoading({ status: "success", message: "", icon: "upload" });
 		return;
 	}
 
-	const episode = document.querySelector(".backInfoTxt2")?.textContent;
-	if (!episode) return;
+	// ウェブサイトのエピソードから、現在視聴している話数を取り出す
+	currentEpisodeFromWebSite = episodeNumberExtractor(websiteInfo.currentEpisode);
 
-	// エピソードから数字を取り出す
-	episodeNumberFromDanime = episodeNumberExtractor(episode);
-
-	// sortedEpisodesの中のindexを取得
-	getEpisodeIndex(episodeNumberFromDanime);
-	if (episodeIndex === undefined) {
-		setLoading({
-			status: "error",
-			message: "現時点ではこのアニメに対応していません",
-		});
-		setUploadIcon("immutableNotUpload");
+	// 現在視聴しているエピソードのindexを、sortedEpisodesから取得
+	getCurrentEpisodeIndex();
+	if (sortedEpisodesIndex === undefined) {
+		NotSupportedAnime();
 		return;
 	}
 
-	// 次のエピソードがAnnictに登録されていない場合
-	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
-		danimeDocument,
-		animeData.nextEpisode,
-		animeData.sortedEpisodes,
-	);
+	// ホバー時の話数表示用のエピソード番号を更新
+	if (typeof currentEpisodeFromWebSite === "number") {
+		updateCurrentEpisode(currentEpisodeFromWebSite, undefined);
+	} else {
+		updateCurrentEpisode(currentEpisodeFromWebSite, websiteInfo.currentEpisode);
+	}
+
+	// 次のエピソードがAnnictに登録されていない場合は、最新話まで視聴済みと判断
+	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(danimeDocument);
 	if (isNextEpisodeUnregistered) {
-		setUploadIcon("completeUpload"); // 最新話まで視聴済みと判断
+		setLoading("icon", "completeUpload");
 		return;
 	}
 
@@ -251,27 +307,18 @@ export async function handleRecordEpisode() {
 	if (animeData.nextEpisode !== undefined && animeData.episodes.length !== 1) {
 		nextEpisodeIndex = animeData.nextEpisode;
 	}
-
 	// 現在のエピソードが記録済みの場合は送信しない
-	// 1話目のnumberが1でない場合は送信しない(長編アニメの場合は139話のように途中から始まる)
-	if (nextEpisodeIndex > episodeIndex && animeData.sortedEpisodes[0].number === 1) {
-		setUploadIcon("completeUpload");
+	if (typeof sortedEpisodesIndex === "number" && nextEpisodeIndex > sortedEpisodesIndex) {
+		setLoading("icon", "completeUpload");
 		return;
 	}
 
-	// 送信しない作品の場合
-	if (notRecordWork.includes(Number(workId))) {
-		setUploadIcon("notUpload");
+	// 設定で送信しない作品の場合
+	if (notRecordWork.includes(websiteInfo.workId)) {
+		setLoading("icon", "notUpload");
 		return;
 	}
 
-	setLoading({ status: "success", message: "" });
-	setUploadIcon("upload");
-	if (typeof episodeNumberFromDanime === "number") {
-		updateCurrentEpisode(episodeNumberFromDanime, undefined);
-	} else {
-		updateCurrentEpisode(episodeNumberFromDanime, episode);
-	}
-
+	setLoading({ status: "success", message: "", icon: "upload" });
 	createIntervalOrEvent();
 }

@@ -2,7 +2,7 @@
 
 import "~/assets/RecordButton.css";
 import { animeData } from "../anime-data-scraper";
-import { fetchData } from "../fetch";
+import { fetchDataFromAnnict } from "../fetch";
 import { settingData } from "../storage";
 import {
 	changeStatusText,
@@ -12,6 +12,9 @@ import {
 } from "../utils";
 import { setStatusAndSvg } from "./StatusDropMenu";
 
+/**
+ * 視聴ステータスを"見てる"に変更するgraphqlのmutationを返す
+ */
 function updateStatusToWatching(
 	mutation: string,
 	isAiring: boolean,
@@ -25,6 +28,9 @@ function updateStatusToWatching(
 	return mutation;
 }
 
+/**
+ * 視聴ステータスを"見た"に変更するgraphqlのmutationを返す
+ */
 function updateStatusToWatched(
 	mutation: string,
 	isAiring: boolean,
@@ -42,13 +48,18 @@ function updateStatusToWatched(
 	return mutation;
 }
 
+/**
+ * 次に視聴するエピソードの赤枠を削除する
+ */
 function deleteNextEpisodeBorder() {
 	if (settingData.nextEpisodeLine) {
 		document.querySelector(".next-episode-border")?.classList.remove("next-episode-border");
 	}
 }
 
-// "記録"ボタン
+/**
+ * "記録"ボタンをクリックしたときのイベント
+ */
 function clickSingleRecordButton(
 	i: number,
 	j: number,
@@ -69,19 +80,21 @@ function clickSingleRecordButton(
 
 	mutation += "}";
 
-	const result = fetchData(JSON.stringify({ query: mutation }));
+	const result = fetchDataFromAnnict(JSON.stringify({ query: mutation }));
 	if (!result) return;
 
+	// クリックしたボタンを非表示
 	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
 		".drecord-record-button-container",
 	);
-	if (recordContainers[j]) recordContainers[j].style.display = "none"; // ボタンを非表示
+	if (recordContainers[j]) recordContainers[j].style.display = "none";
 
+	// クリックしたエピソードが次に視聴するエピソードだった場合、赤枠を削除
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	if (i === nextEpisodeIndex) deleteNextEpisodeBorder();
 }
 
-// "ここまで記録"ボタン
+// "ここまで記録"ボタンをクリックしたときのイベント
 function clickMultiRecordButton(
 	i: number,
 	j: number,
@@ -109,11 +122,13 @@ function clickMultiRecordButton(
 
 	mutation += "}";
 
-	const result = fetchData(JSON.stringify({ query: mutation }));
+	const result = fetchDataFromAnnict(JSON.stringify({ query: mutation }));
 	if (!result) return;
 
 	deleteNextEpisodeBorder();
 }
+
+/******************************************************************************/
 
 export default function RecordButton(i: number, j: number, insertTargets: NodeListOf<HTMLElement>) {
 	const isAiring = isCurrentlyAiring(document); // 現在放送中かどうか
@@ -144,7 +159,7 @@ export default function RecordButton(i: number, j: number, insertTargets: NodeLi
 			</div>
 			<div class="drecord-record-svg-container" onMouseEnter={() => setShowButton(true)}>
 				<svg
-					class="drecord-record-svg"
+					class="drecord-record-svg text-black"
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
 					fill="currentColor"
@@ -162,3 +177,5 @@ export default function RecordButton(i: number, j: number, insertTargets: NodeLi
 		</div>
 	);
 }
+
+/******************************************************************************/

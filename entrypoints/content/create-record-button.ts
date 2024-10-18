@@ -4,15 +4,19 @@ import { animeData } from "./anime-data-scraper";
 import { settingData } from "./storage";
 import { episodeNumberExtractor, handleUnregisteredNextEpisode } from "./utils";
 
-// 次のエピソードに赤枠をつける
+/**
+ * 次に視聴するエピソードに赤枠をつける
+ */
 function createNextEpisodeBorder(i: number) {
-	if (settingData.nextEpisodeLine) {
+	if (settingData.nextEpisodeLine && !document.querySelector(".next-episode-border")) {
 		const targetElements = document.querySelectorAll(".episodeContainer>div>.itemModule.list");
 		if (targetElements[i]) targetElements[i].classList.add("next-episode-border");
 	}
 }
 
-// エピソードが存在しているか確認
+/**
+ * エピソードが存在しているか判定
+ */
 function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	// dアニメストアのエピソード番号を取得
 	const episodeText = targets[i].querySelector(".textContainer>span>.number")?.textContent;
@@ -22,6 +26,7 @@ function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	const sortedEpisodes = animeData.sortedEpisodes;
 	for (let j = 0; j < sortedEpisodes.length; j++) {
+		// Annictのデータと一致するエピソードがあるか
 		if (sortedEpisodes[j].numberTextNormalized === normalizedEpisode) {
 			if (j === nextEpisodeIndex) createNextEpisodeBorder(i); // 次のエピソードに赤枠をつける
 			return true;
@@ -30,15 +35,16 @@ function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	return false;
 }
 
-// 記録ボタンを作成
+/******************************************************************************/
+
+/**
+ * 作品ページの記録ボタンを作成
+ * @description 今のところdアニメストアのみ記録ボタンを表示する
+ */
 export async function createRecordButton(ctx: ContentScriptContext) {
-	// 次のエピソードがAnnictに登録されていない場合
-	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(
-		document,
-		animeData.nextEpisode,
-		animeData.sortedEpisodes,
-	);
-	if (isNextEpisodeUnregistered) return; // 最新話まで見たと判断
+	// 次のエピソードがAnnictに登録されていない場合は、最新話まで見たと判断
+	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(document);
+	if (isNextEpisodeUnregistered) return;
 
 	// nextEpisodeがない・1話しかない場合はindexを0にする
 	let nextEpisodeIndex: number = 0;
@@ -57,7 +63,8 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 		// エピソードが存在していなかったらスキップ
 		if (!isEpisodeExist(insertTargets, i)) continue;
 
-		const ui = createIntegratedUi(ctx, {
+		const ui = await createShadowRootUi(ctx, {
+			name: "dr-record-button",
 			position: "inline",
 			anchor: insertTarget,
 			append: "after",
@@ -73,3 +80,5 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 		j++;
 	}
 }
+
+/******************************************************************************/

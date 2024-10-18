@@ -4,10 +4,12 @@ const WORKER_URL = "https://d-record.hamachi.workers.dev";
 export default defineBackground(() => {
 	browser.runtime.onMessage.addListener(async (message) => {
 		if (message === "startOAuth") {
+			/* OAuth認証 */
 			return startOAuth().then((res) => {
 				return Promise.resolve(res);
 			});
 		} else if (message === "revokeToken") {
+			/* トークンを削除 */
 			return revokeToken().then((res) => {
 				return Promise.resolve(res);
 			});
@@ -22,15 +24,21 @@ async function getToken() {
 	return token;
 }
 
-async function revokeToken() {
-	// トークンが手動入力の場合は、削除するだけ
+async function getTokenMeta() {
 	const tokenMeta = await storage.getMeta("local:Token");
+	return tokenMeta;
+}
+
+async function revokeToken() {
+	// トークンが手動入力の場合は、ストレージから削除するだけ
+	const tokenMeta = await getTokenMeta();
 	if (tokenMeta.length === 0 || tokenMeta.oauth === false) {
 		await storage.setItem("local:Token", "");
 		await storage.removeMeta("local:Token");
 		return true;
 	}
 
+	// トークンがOAuth認証の場合は、サーバーにリクエストを送信して削除
 	try {
 		const token = await getToken();
 		if (!token || token === "") return false;
@@ -45,7 +53,7 @@ async function revokeToken() {
 		});
 
 		if (!response.ok) {
-			throw new Error(`サーバーエラー status: ${response.status}`);
+			throw new Error(`サーバーエラー: ${response.status}`);
 		}
 
 		await storage.setItem("local:Token", "");
@@ -58,7 +66,7 @@ async function revokeToken() {
 }
 
 async function startOAuth() {
-	const redirectURL = browser.identity.getRedirectURL();
+	const redirectURL = browser.identity.getRedirectURL(); // 拡張機能のリダイレクトURL
 	const authUrl =
 		`https://annict.com/oauth/authorize?` +
 		`client_id=${CLIENT_ID}` +
@@ -80,6 +88,9 @@ async function startOAuth() {
 	}
 }
 
+/**
+ * d-Recordのサーバーにリクエストを送信
+ */
 async function exchangeCodeForToken(code: string | null) {
 	try {
 		const response = await fetch(`${WORKER_URL}/token`, {
@@ -94,7 +105,7 @@ async function exchangeCodeForToken(code: string | null) {
 		});
 
 		if (!response.ok) {
-			throw new Error(`サーバーエラー status: ${response.status}`);
+			throw new Error(`サーバーエラー: ${response.status}`);
 		}
 
 		const { access_token } = await response.json();

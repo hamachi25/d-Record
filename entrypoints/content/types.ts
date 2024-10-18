@@ -12,6 +12,7 @@ export type Work = {
 	annictId: string;
 	viewerStatusState: string;
 	title: string;
+	media: string;
 	episodesCount: number;
 	episodes: {
 		nodes: Episode[];
@@ -38,12 +39,27 @@ export type NextEpisode = {
 //     };
 // };
 
+export type WebsiteInfo = {
+	site: string;
+	title: string;
+	year: (string | null)[] | string;
+	anotherYear?: string | undefined;
+	episode: (string | undefined)[];
+	episodesCount: number;
+	currentEpisode: string;
+	lastEpisode: string | undefined;
+	workId: string;
+};
+
 export type Settings = {
 	sendTiming?: string;
 	nextEpisodeLine?: boolean;
 	recordButton?: boolean;
 	animeTitle?: boolean;
 	autoChangeStatus?: boolean;
+	applyWebsite?: {
+		[key: string]: boolean;
+	};
 };
 
 export type AnimeData = {
@@ -51,6 +67,7 @@ export type AnimeData = {
 	annictId: string;
 	title: string;
 	viewerStatusState: string;
+	media: string;
 	episodes: Episode[] | [];
 	sortedEpisodes: Episode[] | [];
 	nextEpisode: number | undefined; // sortedEpisodesの中のindex

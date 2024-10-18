@@ -1,0 +1,33 @@
+/* ドロップメニュ */
+.informationWrap > .actionArea > .btnArea {
+	width: auto !important;
+}
+dr-drop-menu {
+	background-color: transparent;
+	position: relative;
+	width: 100%;
+	height: 50px;
+	margin: 0 5px 0 0;
+}
+@media screen and (min-width: 960px) {
+	dr-drop-menu {
+		width: 133px;
+		height: 44px;
+	}
+}
+
+/* 次のエピソードの赤枠 */
+.next-episode-border {
+	margin-bottom: 6px !important;
+}
+.next-episode-border > section > a.clearfix {
+	border: 2px solid rgb(248, 90, 114) !important;
+}
+
+/* 再生ページ */
+dr-upload-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: transparent;
+}
