@@ -10,6 +10,7 @@ export const queryWithEpisodes = `
                 annictId
                 viewerStatusState
                 title
+                media
                 episodesCount
                 episodes (
                     orderBy: { field: SORT_NUMBER, direction: ASC }

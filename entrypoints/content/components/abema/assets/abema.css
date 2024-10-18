@@ -1,0 +1,14 @@
+/*** ドロップメニュ ***/
+dr-drop-menu {
+	background-color: transparent;
+}
+/* 再生ページ */
+dr-upload-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* width: 44px; */
+	height: 44px;
+	background-color: transparent;
+	margin-right: 4px;
+}

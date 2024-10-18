@@ -1,3 +1,9 @@
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "メイリオ", Meiryo,
+		"ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", Arial, sans-serif;
+	-webkit-text-size-adjust: none;
+	line-height: 1.5;
+}
 /*** 記録 ***/
 .drecord-record-button-container {
 	position: absolute;
@@ -27,6 +33,7 @@
 	border-radius: 2px;
 	white-space: nowrap;
 	margin-right: 4px;
+	padding: 1px 4px;
 	color: #5b5b5b;
 	cursor: pointer;
 	transition: 0.15s ease-in-out;
@@ -53,8 +60,6 @@
 }
 .drecord-record-svg-container {
 	padding: 4px 4px 4px 0;
-	height: 30px;
-	width: 30px;
 	cursor: pointer;
 	transition: transform 0.2s;
 	pointer-events: auto;
@@ -69,10 +74,6 @@
 	z-index: 100;
 }
 @media screen and (min-width: 960px) {
-	.drecord-record-svg-container {
-		height: 25px;
-		width: 25px;
-	}
 	.drecord-record-svg {
 		width: 25px;
 		height: 25px;
@@ -95,12 +96,4 @@
 	width: 17px;
 	height: 17px;
 	margin-right: 1px;
-}
-
-/* 次のエピソードの赤枠 */
-.next-episode-border {
-	margin-bottom: 6px !important;
-}
-.next-episode-border > section > a.clearfix {
-	border: 2px solid rgb(248, 90, 114) !important;
 }

@@ -7,20 +7,19 @@ body {
 	font-size: 1rem;
 	line-height: 1.5rem;
 	padding: 0 1rem;
-	user-select: none;
 }
 @media (prefers-color-scheme: dark) {
 	body {
-		color: rgb(209 213 219);
+		color: rgb(222, 225, 230);
 		background-color: black;
 	}
 }
 
-body > #root > div:not(:last-of-type) {
-	border-bottom: 2px solid #e5e7eb;
+#root > div:not(:last-of-type) {
+	border-bottom: 2px solid #d5d6d8;
 }
 @media (prefers-color-scheme: dark) {
-	body > #root > div:not(:last-of-type) {
+	#root > div:not(:last-of-type) {
 		border-bottom: 2px solid gray !important;
 	}
 }
