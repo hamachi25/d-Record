@@ -1,22 +1,11 @@
 ---
-import config from "virtual:starlight/user-config";
-import { Icon } from "@astrojs/starlight/components";
 import type { Props } from "@astrojs/starlight/props";
-
-type Platform = keyof NonNullable<typeof config.social>;
-type SocialConfig = NonNullable<NonNullable<typeof config.social>[Platform]>;
-const links = Object.entries(config.social || {}) as [Platform, SocialConfig][];
+import Default from "@astrojs/starlight/components/SocialIcons.astro";
 ---
 
 {
     (
-        <a
-            href="https://annict.com/@usotsuki_elf"
-            target="_blank"
-            rel="noopener noreferrer"
-            rel="me"
-            class="sl-flex"
-        >
+        <a href="https://annict.com/@usotsuki_elf" rel="me" class="sl-flex">
             <span class="sr-only">Annict</span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -32,35 +21,7 @@ const links = Object.entries(config.social || {}) as [Platform, SocialConfig][];
         </a>
     )
 }
-{
-    links.length > 0 && (
-        <>
-            {links.map(([platform, { label, url }]) => (
-                <a href={url} target="_blank" rel="noopener noreferrer" rel="me" class="sl-flex">
-                    <span class="sr-only">{label}</span>
-                    <Icon
-                        name={
-                            platform as
-                                | "seti:folder"
-                                | "seti:bsl"
-                                | "seti:mdo"
-                                | "seti:salesforce"
-                                | "seti:asm"
-                                | "seti:bicep"
-                                | "seti:bazel"
-                                | "seti:c"
-                                | "seti:c-sharp"
-                                | "seti:html"
-                                | "seti:cpp"
-                                | "seti:clojure"
-                                | "jsr"
-                        }
-                    />
-                </a>
-            ))}
-        </>
-    )
-}
+<Default {...Astro.props}><slot /></Default>
 
 <style>
     a {
