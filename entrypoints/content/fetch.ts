@@ -1,4 +1,3 @@
-import { setUploadIcon } from "./components/UploadToggleButton";
 import { setLoading } from "./anime-data-scraper";
 
 async function getToken() {
@@ -8,8 +7,11 @@ async function getToken() {
 	return token;
 }
 
+/**
+ * エラーごとにメッセージを表示するメッセージを設定
+ */
 function handleFetchError(error: Error) {
-	setUploadIcon("immutableNotUpload");
+	setLoading("icon", "immutableNotUpload");
 	switch (error.message) {
 		case "Annictトークンエラー":
 			setLoading({ status: "error", message: "Annictのトークンを設定してください" });
@@ -31,7 +33,7 @@ function handleFetchError(error: Error) {
 	}
 }
 
-export async function fetchData(query: string) {
+export async function fetchDataFromAnnict(query: string) {
 	try {
 		const token = await getToken();
 		const response = await fetch("https://api.annict.com/graphql", {

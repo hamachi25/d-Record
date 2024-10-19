@@ -10,6 +10,7 @@ export async function getSettings() {
 			"recordButton",
 			"animeTitle",
 			"autoChangeStatus",
+			"applyWebsite",
 		]);
 
 		if (browser.runtime.lastError) throw new Error(browser.runtime.lastError.message);
@@ -27,7 +28,7 @@ export async function getSettings() {
 }
 
 // 自動送信を行わない作品リストを取得
-export async function getNotRecordWork(): Promise<number[] | false> {
+export async function getNotRecordWork() {
 	try {
 		const result = await browser.storage.local.get("notRecordWork");
 

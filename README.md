@@ -6,7 +6,7 @@
   <img alt="d-Record" src="https://github.com/hamachi25/d-Record/blob/images/logo-white.png">
 </picture>
 
-dアニメストアで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。
+dアニメストア・ABEMAで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。
 
 ## インストール
 
@@ -17,6 +17,7 @@ dアニメストアで視聴したアニメを[Annict](https://annict.com/)に�
 > 拡張機能を使用するには、Annictのトークンを設定する必要があります。
 >
 > ブラウザ右上のd-Recordアイコンから、「**トークンを取得**」を押して設定します。
+> https://hamachi25.github.io/d-Record/guides/install/
 
 ## 機能
 
@@ -36,38 +37,25 @@ dアニメストアで視聴したアニメを[Annict](https://annict.com/)に�
 -   **右下のアップロードアイコンをオフにすることで、送信を停止できる**
     -   オフにした場合その作品は、再度オンにするまで送信されない
 
+https://hamachi25.github.io/d-Record/guides/feature/
+
 &nbsp;
 
-**ボタンの種類**  
+**ボタンの種類**
+
 ![ボタンの種類](https://github.com/hamachi25/d-Record/blob/images/button.png)
 
-**設定項目**  
-<picture>
+**設定項目**
 
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings-dark.jpg">
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings.jpg">
   <img alt="設定" src="https://github.com/hamachi25/d-Record/blob/gh-pages/src/assets/settings.jpg">
 </picture>
 
-## FAQ
+## Q&A
 
-### 間違った作品・シーズンが取得されている
-
-これは dアニメストアと Annict の作品タイトルが異なっていることが原因です。  
-作品によっては対応できますので、見つけたらご報告お願いします。 https://github.com/hamachi25/d-Record/issues/1
-
-### 途中の話数から見ると視聴済みにならない
-
-d-Recordは話数ごとに視聴しているか確認しているのではなく、まだ視聴していないエピソードの最初の話数を取得しています。  
-**つまり 1 話を視聴せずにそれ以降の話数を見ても 、1 話以降は視聴していないという表示になります。**  
-これはd-Recordでの表示上であって、Annictでは視聴したことになっています。
-
-解決するには、作品ページで「ここまで記録」をクリックしてそれまでの話数を視聴済みに変更することで解決できます。
-
-### １話から見てるのに途中の話数から視聴済みにならない
-
-途中の話数に3.5話のような総集編が挟まっているためです。  
-解決するには、Annictでその話数を視聴済みに変更するしかありません。
+https://hamachi25.github.io/d-Record/guides/qa/
 
 ## ビルド
 
@@ -85,4 +73,3 @@ pnpm build
 -   [プリン](https://github.com/kazu3jp) - トークンの保存、視聴ステータスのUIに関するコード（[danict](https://github.com/kazu3jp/danict)）
 -   [家守カホウ](https://twitter.com/y_kahou) - URLからページごとに実行するためのコード（[dアニメストア便利化](https://greasyfork.org/ja/scripts/414008)）
 -   [REMIX ICON](https://remixicon.com/) - アイコン
--   [CSS Stock](https://pote-chil.com/css-stock/ja/loading) - ローディングアイコン

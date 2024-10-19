@@ -1,18 +1,20 @@
-import { ContentScriptContext } from "wxt/client";
+import { ContentScriptAppendMode, ContentScriptContext } from "wxt/client";
 import UploadToggleButton from "./components/UploadToggleButton";
 
-export function createUploadButton(ctx: ContentScriptContext) {
-	const ui = createIntegratedUi(ctx, {
+/**
+ * 再生ページのアップロードボタンを作成
+ */
+export async function createUploadButton(
+	ctx: ContentScriptContext,
+	injectInfo: { site: string; anchor: string; append: string },
+) {
+	const ui = await createShadowRootUi(ctx, {
+		name: "dr-upload-button",
 		position: "inline",
-		anchor: ".buttonArea>.time",
-		append: "after",
+		anchor: injectInfo.anchor,
+		append: injectInfo.append as ContentScriptAppendMode,
 		onMount: (container) => {
-			container.id = "drecord-container";
-
-			return render(UploadToggleButton, container);
-		},
-		onRemove: (unmount) => {
-			if (unmount) unmount();
+			return render(() => UploadToggleButton(injectInfo.site), container);
 		},
 	});
 	ui.mount();

@@ -1,10 +1,14 @@
-/*** ドロップメニュ ***/
-.informationWrap > .actionArea > .btnArea {
-	width: auto !important;
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "メイリオ", Meiryo,
+		"ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", Arial, sans-serif;
+	-webkit-text-size-adjust: none;
+	line-height: 1.5;
 }
+/*** ドロップメニュ ***/
 #annict {
 	position: relative;
 	width: 100%;
+	height: 50px;
 	margin: 0 5px 0 0;
 }
 @media screen and (min-width: 960px) {
@@ -39,12 +43,6 @@
 #annict-button > div {
 	margin-right: 4px;
 }
-#annict-button > span {
-	font-size: 1.4rem !important;
-	font-weight: bold !important;
-	margin-left: 4px;
-}
-
 .dropdown-menu {
 	position: absolute;
 	width: 100%;
@@ -86,12 +84,11 @@ li:last-child > .dropdown-item {
 	font-weight: bold;
 	padding: 9px 0;
 	text-align: center;
-	text-decoration: none;
 	line-height: 1;
 }
 li:not(:last-child) > .dropdown-item:hover {
 	color: #1e2125;
-	background-color: #e9ecef;
+	background-color: #e1e3e6;
 }
 
 .dropdown-item {
@@ -119,21 +116,14 @@ li:not(:last-child) > .dropdown-item:hover {
 
 .dropdown-svg {
 	width: 16px;
+	height: 16px;
 }
 .dropdown-item > svg {
 	margin-right: 20px;
 }
-.dropdown-menu > li:nth-child(3) svg {
-	margin-right: 19px;
-	margin-left: 1px;
-}
 @media screen and (min-width: 960px) {
 	.dropdown-item > svg {
 		margin-right: 13px;
-	}
-	.dropdown-menu > li:nth-child(3) svg {
-		margin-right: 12px;
-		margin-left: 1px;
 	}
 }
 
