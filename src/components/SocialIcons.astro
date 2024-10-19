@@ -1,0 +1,74 @@
+---
+import config from "virtual:starlight/user-config";
+import { Icon } from "@astrojs/starlight/components";
+import type { Props } from "@astrojs/starlight/props";
+
+type Platform = keyof NonNullable<typeof config.social>;
+type SocialConfig = NonNullable<NonNullable<typeof config.social>[Platform]>;
+const links = Object.entries(config.social || {}) as [Platform, SocialConfig][];
+---
+
+{
+    (
+        <a
+            href="https://annict.com/@usotsuki_elf"
+            target="_blank"
+            rel="noopener noreferrer"
+            rel="me"
+            class="sl-flex"
+        >
+            <span class="sr-only">Annict</span>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xml:space="preserve"
+                viewBox="0 0 2600 2600"
+                width="18"
+                height="18"
+                fill="currentColor"
+            >
+                <path d="M2140.9 2267.9c-1.8-.1-3.7-.2-5.5-.2-104.3.1-208.5.1-312.8.4-4.3 0-6.3-1.2-7.9-5.3-19.5-50-38.3-100.4-59.2-149.9-26.7-63.3-56.7-125.1-91.8-184.4-16.4-27.8-33-55.4-53.3-80.8-39.2-49.1-89.8-79-150.3-93.9-41.6-10.3-83.7-13.9-126.2-14.6-47.5-.9-95-.2-142.3 4.3-42.2 4-84.2 10.7-126.2 16.2-1 .1-1.9.2-3.5.4.5-1.7.9-3 1.4-4.3 38.8-93.7 77.6-187.4 116.6-281.1.7-1.7 3-3.6 4.8-3.8 16.7-2 33.3-4.3 50.1-5.3 49.7-3 99.5-5.6 149.3-4.1 39.9 1.2 80 1.9 119.8 5.3 62.4 5.3 122.4 21.5 180.1 45.9 35.7 15 69.2 33.8 101.4 55.4 29.2 19.6 51.8 45.1 69.2 75 32.1 55.2 62.1 111.7 89.6 169.4 27.1 56.7 52.9 114.1 79.8 170.9 29 61.2 52 124.9 77.9 187.5 12.6 30.4 24.6 61.1 36.9 91.6.6 1.5 1.4 3 2.1 4.5v.9z" />
+                <path d="M1256.4 141.1c176.5 421.5 352.3 841.6 528.5 1262.3h-5.7c-104.9-.3-209.9-.7-314.8-.9-4.2 0-6-1.3-7.5-5.2-66.7-169.1-133.6-338.1-200.4-507.1-.6-1.5-1.3-2.9-2.3-5.3-5.4 13.6-10.5 26.1-15.5 38.7-85.9 216.5-171.9 433-257.8 649.6-91 229.4-182.1 458.7-273.1 688.1-1.2 3.1-2.5 4.7-6.3 4.7-105.1-.1-210.2-.1-315.3-.1h-4.4C673.3 1557.7 964.6 850 1256.4 141.1z" />
+            </svg>
+        </a>
+    )
+}
+{
+    links.length > 0 && (
+        <>
+            {links.map(([platform, { label, url }]) => (
+                <a href={url} target="_blank" rel="noopener noreferrer" rel="me" class="sl-flex">
+                    <span class="sr-only">{label}</span>
+                    <Icon
+                        name={
+                            platform as
+                                | "seti:folder"
+                                | "seti:bsl"
+                                | "seti:mdo"
+                                | "seti:salesforce"
+                                | "seti:asm"
+                                | "seti:bicep"
+                                | "seti:bazel"
+                                | "seti:c"
+                                | "seti:c-sharp"
+                                | "seti:html"
+                                | "seti:cpp"
+                                | "seti:clojure"
+                                | "jsr"
+                        }
+                    />
+                </a>
+            ))}
+        </>
+    )
+}
+
+<style>
+    a {
+        color: var(--sl-color-text-accent);
+        padding: 0.5em;
+        margin: -0.5em;
+    }
+    a:hover {
+        opacity: 0.66;
+    }
+</style>

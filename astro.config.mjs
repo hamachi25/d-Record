@@ -21,17 +21,12 @@ export default defineConfig({
                 replacesTitle: true,
             },
             social: {
-                github: "https://github.com/hamachi25/d-Record",
+                twitter: "https://x.com/FisqWclCKB8xtLC",
             },
             sidebar: [
-                {
-                    label: "ガイド",
-                    items: [
-                        { label: "インストール", slug: "guides/install" },
-                        { label: "機能", slug: "guides/feature" },
-                        { label: "Q&A", slug: "guides/qa" },
-                    ],
-                },
+                { label: "インストール", slug: "install" },
+                { label: "機能一覧", slug: "feature" },
+                { label: "Q&A", slug: "qa" },
             ],
             tableOfContents: {
                 minHeadingLevel: 2,
@@ -47,6 +42,9 @@ export default defineConfig({
                     },
                 },
             ],
+            components: {
+                SocialIcons: "./src/components/SocialIcons.astro",
+            },
         }),
     ],
 });

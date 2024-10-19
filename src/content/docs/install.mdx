@@ -7,10 +7,10 @@ tableOfContents: false
 import { Steps } from "@astrojs/starlight/components";
 import { Image } from "astro:assets";
 
-import tokenButtonLight from "../../../assets/token-button.jpg";
-import tokenButtondark from "../../../assets/token-button-dark.jpg";
-import tokenWindowLight from "../../../assets/token-window.jpg";
-import tokenWindowdark from "../../../assets/token-window-dark.jpg";
+import tokenButtonLight from "../../assets/token-button.jpg";
+import tokenButtondark from "../../assets/token-button-dark.jpg";
+import tokenWindowLight from "../../assets/token-window.jpg";
+import tokenWindowdark from "../../assets/token-window-dark.jpg";
 
 <Steps>
 
@@ -61,12 +61,12 @@ import tokenWindowdark from "../../../assets/token-window-dark.jpg";
 
     <Image
         class="dark:sl-hidden"
-        src={tokenWindowLight}
+        src={tokenWindowdark}
         alt="Annictの承認ウィンドウで承認を押す"
     />
     <Image
         class="light:sl-hidden"
-        src={tokenWindowdark}
+        src={tokenWindowLight}
         alt="Annictの承認ウィンドウで承認を押す"
     />
 

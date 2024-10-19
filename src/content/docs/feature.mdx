@@ -1,0 +1,50 @@
+---
+title: 機能一覧
+description: d-Recordの機能一覧
+---
+
+import { Aside } from "@astrojs/starlight/components";
+import { Image } from "astro:assets";
+
+import settingsLight from "../../assets/settings.jpg";
+import settingsDark from "../../assets/settings-dark.jpg";
+
+## 視聴ステータスを変更
+
+![ドロップメニューから、視聴ステータスを変更できます。](../../assets/drop-menu.png)
+
+ボタンをホバーすると取得したアニメが表示されるので、正しいアニメが取得できているか確認することができます。
+
+<Aside type="tip" title="ヒント">
+    アニメを見る前に、手動でステータスを変更する必要はありません。
+    d-Recordはステータスが「見てる」以外の場合、自動でステータスを変更します。
+</Aside>
+
+## エピソードを手動で記録
+
+![各エピソードの＋ボタンをホバーして、エピソードの記録を手動で送信できます。  ](../../assets/record-button.png)
+
+設定から記録ボタンの表示をオフにできます。
+
+## 次に見るエピソード
+
+![次に見るエピソードは赤枠で囲んでいるので、どこまで見たかを簡単に確認できます。 ](../../assets/next-episode.png)
+ 
+設定から枠の表示をオフにできます。
+
+## 再生終了後に自動で記録を送信
+
+エピソードの再生が終了すると、自動で Annict に記録を送信します。設定から「自動送信しない」か「５分後に送信」に変更できます。
+
+## 記録の自動送信を停止
+
+![アップロードボタンを押すことで、自動送信のオンオフを切り替えることができます。](../../assets/upload-button.png)
+
+再生開始直後には横に取得したアニメ名が表示されるので、正しいアニメが取得できているか確認できます。
+
+## 設定項目
+
+拡張機能のポップアップから、自動送信の設定や UI の変更などを行うことができます。
+
+<Image class="dark:sl-hidden" src={settingsLight} alt="d-Recordの設定画面" />
+<Image class="light:sl-hidden" src={settingsDark} alt="d-Recordの設定画面" />
