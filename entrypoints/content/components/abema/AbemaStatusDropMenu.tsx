@@ -116,7 +116,7 @@ export function AbemaStatusDropMenu(props: {
 						href={`https://annict.com/works/${animeData.annictId}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="block w-full pt-[4px] px-[15px] text-[#e6e6e6] text-[0.95rem] font-bold text-center hover:underline"
+						class="block w-full pt-[4px] px-[15px] text-[#e6e6e6] text-[0.95rem] font-bold text-center underline underline-offset-2 hover:decoration-2"
 						title={animeData.title}
 					>
 						Annictを開く

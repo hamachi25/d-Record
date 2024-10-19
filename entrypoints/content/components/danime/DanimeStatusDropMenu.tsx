@@ -79,7 +79,7 @@ export function DanimeStatusDropMenu(props: {
 						href={`https://annict.com/works/${animeData.annictId}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="dropdown-item underline hover:decoration-2"
+						class="dropdown-item underline underline-offset-2 hover:decoration-2"
 						title={animeData.title}
 					>
 						Annictを開く
