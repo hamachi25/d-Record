@@ -36,7 +36,10 @@ function App() {
 	});
 
 	return (
-		<>
+		<div
+			class="w-[340px] px-4 [&_h2]:mb-3
+			[&:not(:last-child)]:[&>div]:border-b-2 [&>div]:border-b-[#d5d6d8] dark:[&>div]:border-b-[gray]"
+		>
 			<TokenInput />
 			<SelectWebsite settings={settings} />
 			<SendTimingOptions sendTiming={settings().sendTiming} />
@@ -66,7 +69,7 @@ function App() {
 						settings().autoChangeStatus ?? defaultSettings.autoChangeStatus,
 				}}
 			/>
-		</>
+		</div>
 	);
 }
 

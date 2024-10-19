@@ -1,25 +1,15 @@
-html {
-	scrollbar-gutter: auto !important;
-}
+html,
 body {
-	width: 20rem;
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
 	margin: 0;
 	font-size: 1rem;
 	line-height: 1.5rem;
-	padding: 0 1rem;
 }
 @media (prefers-color-scheme: dark) {
+	html,
 	body {
 		color: rgb(222, 225, 230);
 		background-color: black;
-	}
-}
-
-#root > div:not(:last-of-type) {
-	border-bottom: 2px solid #d5d6d8;
-}
-@media (prefers-color-scheme: dark) {
-	#root > div:not(:last-of-type) {
-		border-bottom: 2px solid gray !important;
 	}
 }
