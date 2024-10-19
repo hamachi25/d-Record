@@ -1,7 +1,7 @@
 import { fetchDataFromAnnict, fetchDataFromDanime } from "./fetch";
 import { queryWithEpisodes } from "./query";
 import { AnimeData, WebsiteInfo, Episode, NextEpisode, Work } from "./types";
-import { episodeNumberExtractor, NotSupportedAnime } from "./utils";
+import { episodeNumberExtractor } from "./utils";
 
 /******************************************************************************/
 
@@ -404,7 +404,11 @@ export function getInfoFromDanime(doc: Document | undefined): WebsiteInfo | bool
 	const workId = location.search.replace("?partId=", "").substring(0, 5);
 
 	if (!animeTitle) {
-		NotSupportedAnime();
+		setLoading({
+			status: "error",
+			message: "現時点ではこのアニメに対応していません",
+			icon: "immutableNotUpload",
+		});
 		return false;
 	}
 
@@ -483,7 +487,11 @@ export async function getInfoFromAbemaPlayerPage(
 					!currentEpisode ||
 					!lastEpisode
 				) {
-					NotSupportedAnime();
+					setLoading({
+						status: "error",
+						message: "現時点ではこのアニメに対応していません",
+						icon: "immutableNotUpload",
+					});
 					return resolve(false);
 				}
 
@@ -542,7 +550,11 @@ export async function getInfoFromAbemaWorkPage(
 				const episodeCount = episodeElements.length;
 
 				if (!animeTitle || !boradcastYear) {
-					NotSupportedAnime();
+					setLoading({
+						status: "error",
+						message: "現時点ではこのアニメに対応していません",
+						icon: "immutableNotUpload",
+					});
 					return resolve(false);
 				}
 
@@ -680,7 +692,11 @@ export async function getAnimeDataFromAnnict() {
 	/* 再検索 */
 	const remakeTitle2 = remakeString(remakeTitle, true);
 	if (!remakeTitle2 || remakeTitle2 === "") {
-		NotSupportedAnime();
+		setLoading({
+			status: "error",
+			message: "現時点ではこのアニメに対応していません",
+			icon: "immutableNotUpload",
+		});
 		return false;
 	}
 	const variables2 = {
@@ -725,7 +741,11 @@ export async function getAnimeDataFromAnnict() {
 		return true;
 	} else {
 		// 30以上の場合はありふれた単語と判断
-		NotSupportedAnime();
+		setLoading({
+			status: "error",
+			message: "現時点ではこのアニメに対応していません",
+			icon: "immutableNotUpload",
+		});
 		return false;
 	}
 }

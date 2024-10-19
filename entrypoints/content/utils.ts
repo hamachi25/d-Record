@@ -1,4 +1,4 @@
-import { animeData, setAnimeData, setLoading } from "./anime-data-scraper";
+import { animeData, setAnimeData } from "./anime-data-scraper";
 
 // annictメニューのsvg
 const noStateD =
@@ -227,14 +227,3 @@ export function episodeNumberExtractor(episode: string): number | string {
 }
 
 /******************************************************************************/
-
-/**
- * サポートされていないアニメの場合に、エラーメッセージを表示
- */
-export function NotSupportedAnime() {
-	setLoading({
-		status: "error",
-		message: "現時点ではこのアニメに対応していません",
-		icon: "immutableNotUpload",
-	});
-}

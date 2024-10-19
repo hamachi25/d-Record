@@ -7,7 +7,6 @@ import {
 	episodeNumberExtractor,
 	isCurrentlyAiring,
 	handleUnregisteredNextEpisode,
-	NotSupportedAnime,
 	updateCurrentEpisode,
 } from "./utils";
 
@@ -240,7 +239,11 @@ export async function handleRecordEpisode() {
 	if (!notRecordWork) return;
 
 	if (!animeData.id) {
-		NotSupportedAnime();
+		setLoading({
+			status: "error",
+			message: "現時点ではこのアニメに対応していません",
+			icon: "immutableNotUpload",
+		});
 		return;
 	}
 
@@ -262,7 +265,11 @@ export async function handleRecordEpisode() {
 
 		// 送信しない作品の場合
 		if (notRecordWork.includes(websiteInfo.workId)) {
-			setLoading("icon", "notUpload");
+			setLoading({
+				status: "success",
+				message: "",
+				icon: "notUpload",
+			});
 			return;
 		}
 
@@ -274,6 +281,16 @@ export async function handleRecordEpisode() {
 
 	// 分割された映画で最終話以外の場合は、なにもしない
 	if (animeData.episodes.length === 0) {
+		// ステータスの自動変更がオフの場合
+		if (settingData.autoChangeStatus === false) {
+			setLoading({
+				status: "success",
+				message: "ステータス変更がオフになっています",
+				icon: "immutableNotUpload",
+			});
+			return;
+		}
+
 		setLoading({ status: "success", message: "", icon: "upload" });
 		return;
 	}
@@ -284,7 +301,11 @@ export async function handleRecordEpisode() {
 	// 現在視聴しているエピソードのindexを、sortedEpisodesから取得
 	getCurrentEpisodeIndex();
 	if (sortedEpisodesIndex === undefined) {
-		NotSupportedAnime();
+		setLoading({
+			status: "error",
+			message: "現時点ではこのアニメに対応していません",
+			icon: "immutableNotUpload",
+		});
 		return;
 	}
 
@@ -298,7 +319,11 @@ export async function handleRecordEpisode() {
 	// 次のエピソードがAnnictに登録されていない場合は、最新話まで視聴済みと判断
 	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(danimeDocument);
 	if (isNextEpisodeUnregistered) {
-		setLoading("icon", "completeUpload");
+		setLoading({
+			status: "success",
+			message: "",
+			icon: "completeUpload",
+		});
 		return;
 	}
 
@@ -309,13 +334,21 @@ export async function handleRecordEpisode() {
 	}
 	// 現在のエピソードが記録済みの場合は送信しない
 	if (typeof sortedEpisodesIndex === "number" && nextEpisodeIndex > sortedEpisodesIndex) {
-		setLoading("icon", "completeUpload");
+		setLoading({
+			status: "success",
+			message: "",
+			icon: "completeUpload",
+		});
 		return;
 	}
 
 	// 設定で送信しない作品の場合
 	if (notRecordWork.includes(websiteInfo.workId)) {
-		setLoading("icon", "notUpload");
+		setLoading({
+			status: "success",
+			message: "",
+			icon: "notUpload",
+		});
 		return;
 	}
 
