@@ -1,11 +1,10 @@
-import styleText from "./assets/abema.css?inline";
 import { Accessor, Setter } from "solid-js";
-import { animeData, loading } from "../../anime-data-scraper";
+import { animeData, loading } from "../../core/anime-data-scraper";
 
 export function AbemaStatusDropMenu(props: {
 	show: Accessor<boolean>;
 	setShow: Setter<boolean>;
-	statusArray: Accessor<{ state: string; icon: string[]; label: string }[]>;
+	statusArray: { state: string; icon: string[]; label: string }[];
 	updateStatus: (status: string) => Promise<void>;
 	statusAndSvg: Accessor<{ svgPathD: string; svgViewBox: string; statusText: string }>;
 	setAnnictButtonElement: Setter<HTMLButtonElement | undefined>;
@@ -15,11 +14,6 @@ export function AbemaStatusDropMenu(props: {
 			props.setShow((prev) => !prev);
 		}
 	}
-
-	// スタイルをheaderに追加
-	const style = document.createElement("style");
-	style.textContent = styleText;
-	document.head.append(style);
 
 	return (
 		<div class="font-abema relative flex flex-col w-[80px] items-center">
@@ -91,7 +85,7 @@ export function AbemaStatusDropMenu(props: {
 					[&.show]:opacity-100 [&.show]:visible [&.show]:translate-y-0"
 				classList={{ show: props.show() }}
 			>
-				<Index each={props.statusArray()}>
+				<Index each={props.statusArray}>
 					{(status) => (
 						<li>
 							<button
@@ -116,7 +110,7 @@ export function AbemaStatusDropMenu(props: {
 						href={`https://annict.com/works/${animeData.annictId}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="block w-full pt-[4px] px-[15px] text-[#e6e6e6] text-[0.95rem] font-bold text-center hover:underline"
+						class="block w-full pt-[4px] px-[15px] text-[#e6e6e6] text-[0.95rem] font-bold text-center underline underline-offset-2 hover:decoration-2"
 						title={animeData.title}
 					>
 						Annictを開く

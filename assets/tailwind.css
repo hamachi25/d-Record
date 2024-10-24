@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	.font-abema {
+		font-family:
+			CopyRight,
+			Emoji,
+			Hiragino Sans,
+			BIZ UDPGothic Alphabet,
+			BIZ UDGothic,
+			Meiryo,
+			sans-serif;
+	}
+
+	.font-danime {
+		font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "メイリオ", Meiryo,
+			"ヒラギノ角ゴ ProN W3", "Hiragino Kaku Gothic ProN", Arial, sans-serif;
+	}
+}

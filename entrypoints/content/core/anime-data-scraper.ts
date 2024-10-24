@@ -1,7 +1,45 @@
-import { fetchDataFromAnnict, fetchDataFromDanime } from "./fetch";
-import { queryWithEpisodes } from "./query";
-import { AnimeData, WebsiteInfo, Episode, NextEpisode, Work } from "./types";
-import { episodeNumberExtractor } from "./utils";
+import { fetchDataFromAnnict, fetchDataFromDanime } from "../utils/api/fetch";
+import { queryWithEpisodes } from "../utils/api/query";
+import { AnimeData, Episode, NextEpisode, WebsiteInfo, Work } from "../utils/types";
+import { episodeNumberExtractor } from "../utils/episode";
+
+// webサイトから取得したアニメ情報
+export const [websiteInfo, setWebsiteInfo] = createStore<WebsiteInfo>({
+	site: "",
+	title: "",
+	year: [],
+	anotherYear: undefined,
+	episode: [],
+	episodesCount: 0,
+	currentEpisode: "",
+	lastEpisode: undefined,
+	workId: "",
+});
+
+// dアニメストアのDOM
+export const [danimeDocument, setDanimeDocument] = createSignal<Document | undefined>(undefined);
+
+// 現在のステータス
+export const [loading, setLoading] = createStore({
+	status: "loading",
+	message: "Annictからデータを取得しています",
+	icon: "loading",
+});
+
+export const [animeData, setAnimeData] = createStore<AnimeData>({
+	id: "",
+	annictId: "",
+	title: "",
+	viewerStatusState: "",
+	media: "",
+	episodes: [],
+	sortedEpisodes: [],
+	nextEpisode: undefined,
+	currentEpisode: {
+		normalized: undefined,
+		raw: undefined,
+	},
+});
 
 /******************************************************************************/
 
@@ -164,8 +202,10 @@ function remakeString(title: string | undefined, retry: boolean) {
 				(match) => remakeWords[match as keyof typeof remakeWords],
 			)
 			.trim();
-	} else {
-		// 単語をわけて再検索
+	}
+
+	// 単語をわけて再検索
+	if (retry) {
 		const separateWord =
 			/\s+|;|:|・|‐|─|―|－|〜|&|＋|#|＃|＊|!|！|\?|？|…|『|』|「|」|｢|｣|［|］|[|]|'|’/g;
 		return title
@@ -364,8 +404,6 @@ function createSortedEpisodes(
 
 /******************************************************************************/
 
-// dアニメストアのDOM
-export let danimeDocument: Document | undefined = undefined;
 /**
  * dアニメストアから作品ページのhtmlを取得
  */
@@ -376,210 +414,10 @@ export async function getAnimeDataFromDanime() {
 	const html = await fetchDataFromDanime(Number(partIdMatch[0].substring(0, 5)));
 	if (!html) return;
 
-	danimeDocument = new DOMParser().parseFromString(html, "text/html");
-	return danimeDocument;
-}
+	const doc = new DOMParser().parseFromString(html, "text/html");
+	setDanimeDocument(doc);
 
-/******************************************************************************/
-
-// webサイトから取得したアニメ情報のオブジェクト
-export let websiteInfo: WebsiteInfo;
-
-/**
- * dアニメストアのDOMからアニメの情報を取得
- */
-export function getInfoFromDanime(doc: Document | undefined): WebsiteInfo | boolean {
-	if (!doc) return false;
-
-	const animeTitle = doc.querySelector(".titleWrap > h1")?.firstChild?.textContent;
-	const yearTagElements = Array.from(doc.querySelectorAll(".tagArea>ul.tagWrapper > li > a"));
-	const anotherYearElement =
-		doc.querySelector(".castContainer>p:nth-of-type(3)")?.lastChild?.textContent ?? undefined;
-	const episodeElements = Array.from(doc.querySelectorAll(".textContainer>span>.number")).map(
-		(element) => element?.textContent ?? undefined,
-	);
-	const episodeCount = doc.querySelectorAll("a[id].clearfix").length;
-	const currentEpisode = document.querySelector(".backInfoTxt2")?.textContent ?? "";
-	const lastEpisode = episodeElements[episodeElements.length - 1];
-	const workId = location.search.replace("?partId=", "").substring(0, 5);
-
-	if (!animeTitle) {
-		setLoading({
-			status: "error",
-			message: "現時点ではこのアニメに対応していません",
-			icon: "immutableNotUpload",
-		});
-		return false;
-	}
-
-	websiteInfo = {
-		site: "danime",
-		title: animeTitle,
-		year: yearTagElements.map((element) => element.textContent),
-		anotherYear: anotherYearElement,
-		episode: episodeElements,
-		episodesCount: episodeCount,
-		currentEpisode: currentEpisode,
-		lastEpisode: lastEpisode,
-		workId: workId,
-	};
-
-	return true;
-}
-
-/**
- * Abema再生ページのDOMからアニメの情報を取得
- */
-export async function getInfoFromAbemaPlayerPage(
-	doc: Document | undefined,
-): Promise<WebsiteInfo | boolean> {
-	return new Promise((resolve) => {
-		if (!doc) return resolve(false);
-
-		/*
-		 * レンダリングが遅延するので、MutationObserverで監視
-		 */
-		const observer = new MutationObserver(() => {
-			const episodeElements = Array.from(
-				doc.querySelectorAll(
-					".com-content-list-ContentListEpisodeItem-BroadcastDateOrReleasedYear",
-				),
-			);
-			if (episodeElements && episodeElements.length !== 0) {
-				observer.disconnect();
-
-				const isAnime = doc.querySelector(
-					'.com-m-BreadcrumbList__item>[href="/video/genre/animation"]',
-				);
-				if (!isAnime) return resolve(false);
-
-				const animeTitle = doc.querySelector(
-					".com-video-EpisodeTitle__series-info",
-				)?.textContent;
-
-				const boradcastYear = doc.querySelectorAll(
-					".com-video-EpisodeTitleBlock__supplement-item",
-				)[1]?.textContent;
-
-				const episodeElements = Array.from(
-					doc.querySelectorAll(
-						".com-content-list-ContentListEpisodeItem__title>.com-a-CollapsedText__container",
-					),
-				);
-				const episodeText = episodeElements.map(
-					(element) => element?.textContent?.split(" ")[0],
-				);
-				const episodeCount = doc.querySelectorAll(
-					".com-content-list-ContentListItem",
-				).length;
-				const currentEpisode = doc
-					.querySelector(".com-video-EpisodeTitle__episode-title")
-					?.textContent?.split(" ")[0];
-				const lastEpisode = episodeText[episodeText.length - 1];
-
-				const path = location.pathname.replace("/video/episode/", "").split("_");
-
-				if (
-					!animeTitle ||
-					!boradcastYear ||
-					!episodeText ||
-					!episodeCount ||
-					!currentEpisode ||
-					!lastEpisode
-				) {
-					setLoading({
-						status: "error",
-						message: "現時点ではこのアニメに対応していません",
-						icon: "immutableNotUpload",
-					});
-					return resolve(false);
-				}
-
-				websiteInfo = {
-					site: "abema",
-					title: animeTitle.split("|")[0].trim(),
-					year: boradcastYear,
-					episode: episodeText,
-					episodesCount: episodeCount,
-					currentEpisode: currentEpisode,
-					lastEpisode: lastEpisode,
-					workId: `${path[0]}+${path[1]}`,
-				};
-
-				return resolve(true);
-			}
-		});
-
-		observer.observe(doc.body, { childList: true, subtree: true, attributes: true });
-
-		setTimeout(() => {
-			observer.disconnect();
-			resolve(false);
-		}, 5000);
-	});
-}
-
-/**
- * Abema作品ページのDOMからアニメの情報を取得
- */
-export async function getInfoFromAbemaWorkPage(
-	doc: Document | undefined,
-): Promise<WebsiteInfo | boolean> {
-	return new Promise((resolve) => {
-		if (!doc) return resolve(false);
-
-		/*
-		 * レンダリングが遅延するので、MutationObserverで監視
-		 */
-		const observer = new MutationObserver(() => {
-			const episodeElements = Array.from(
-				doc.querySelectorAll(
-					".com-content-list-ContentListEpisodeItem-BroadcastDateOrReleasedYear",
-				),
-			);
-			if (episodeElements && episodeElements.length !== 0) {
-				observer.disconnect();
-
-				const isAnime = doc.querySelector(
-					'.com-m-BreadcrumbList__item>[href="/video/genre/animation"]',
-				);
-				if (!isAnime) return resolve(false);
-
-				const animeTitle = doc.querySelector(".com-video-TitleSection__title")?.textContent;
-				const boradcastYear = episodeElements[0]?.textContent;
-				const episodeCount = episodeElements.length;
-
-				if (!animeTitle || !boradcastYear) {
-					setLoading({
-						status: "error",
-						message: "現時点ではこのアニメに対応していません",
-						icon: "immutableNotUpload",
-					});
-					return resolve(false);
-				}
-
-				websiteInfo = {
-					site: "abema",
-					title: animeTitle.trim(),
-					year: boradcastYear,
-					episode: [],
-					episodesCount: episodeCount,
-					currentEpisode: "",
-					lastEpisode: "",
-					workId: "",
-				};
-
-				return resolve(true);
-			}
-		});
-
-		observer.observe(doc.body, { childList: true, subtree: true, attributes: true });
-
-		setTimeout(() => {
-			observer.disconnect();
-			resolve(false);
-		}, 5000);
-	});
+	return doc;
 }
 
 /******************************************************************************/
@@ -617,53 +455,10 @@ function createAnimeDataObject(
 
 /******************************************************************************/
 
-export const [loading, setLoading] = createStore({
-	status: "loading",
-	message: "Annictからデータを取得しています",
-	icon: "loading",
-});
-
-export const [animeData, setAnimeData] = createStore<AnimeData>({
-	id: "",
-	annictId: "",
-	title: "",
-	viewerStatusState: "",
-	media: "",
-	episodes: [],
-	sortedEpisodes: [],
-	nextEpisode: undefined,
-	currentEpisode: {
-		normalized: undefined,
-		raw: undefined,
-	},
-});
-
-export function resetAnimeData() {
-	setAnimeData({
-		id: "",
-		annictId: "",
-		title: "",
-		viewerStatusState: "",
-		episodes: [],
-		sortedEpisodes: [],
-		nextEpisode: undefined,
-		currentEpisode: {
-			normalized: undefined,
-			raw: undefined,
-		},
-	});
-}
-
-/******************************************************************************/
-
 /**
- * アニメデータを取得
+ *  Annictからデータ取得し、正しいアニメを選択
  */
-export async function getAnimeDataFromAnnict() {
-	setLoading({ status: "loading", message: "Annictからデータを取得しています", icon: "loading" });
-
-	let remakeTitle = remakeString(websiteInfo.title, false);
-	if (remakeTitle === "") remakeTitle = websiteInfo.title;
+async function initialSearchAnimeData(remakeTitle: string) {
 	const variables = {
 		titles: remakeTitle,
 		seasons: getBroadcastYear(false),
@@ -672,7 +467,7 @@ export async function getAnimeDataFromAnnict() {
 	const response = await fetchDataFromAnnict(
 		JSON.stringify({ query: queryWithEpisodes, variables: variables }),
 	);
-	if (!response) return false;
+	if (!response) return;
 	const json = await response.json();
 
 	const allAnimeData: Work[] = json.data.searchWorks.nodes;
@@ -688,10 +483,14 @@ export async function getAnimeDataFromAnnict() {
 			return true;
 		}
 	}
+}
 
-	/* 再検索 */
-	const remakeTitle2 = remakeString(remakeTitle, true);
-	if (!remakeTitle2 || remakeTitle2 === "") {
+/**
+ * 再度Annictからデータ取得し、正しいアニメを選択
+ */
+async function retrySearchAnimeData(prevTitle: string) {
+	const remakeTitle = remakeString(prevTitle, true);
+	if (!remakeTitle || remakeTitle === "") {
 		setLoading({
 			status: "error",
 			message: "現時点ではこのアニメに対応していません",
@@ -699,45 +498,45 @@ export async function getAnimeDataFromAnnict() {
 		});
 		return false;
 	}
-	const variables2 = {
-		titles: remakeTitle2,
+	const variables = {
+		titles: remakeTitle,
 		seasons: getBroadcastYear(true),
 	};
 
-	const response2 = await fetchDataFromAnnict(
-		JSON.stringify({ query: queryWithEpisodes, variables: variables2 }),
+	const response = await fetchDataFromAnnict(
+		JSON.stringify({ query: queryWithEpisodes, variables: variables }),
 	);
-	if (!response2) return false;
-	const json2 = await response2.json();
+	if (!response) return false;
+	const json = await response.json();
 
-	const allAnimeData2 = json2.data.searchWorks.nodes;
-	if (allAnimeData2.length === 1) {
+	const allAnimeData = json.data.searchWorks.nodes;
+	if (allAnimeData.length === 1) {
 		// 成功
-		createAnimeDataObject(allAnimeData2[0], json);
+		createAnimeDataObject(allAnimeData[0], json);
 		return true;
-	} else if (allAnimeData2.length >= 2 && allAnimeData2.length <= 30) {
+	} else if (allAnimeData.length >= 2 && allAnimeData.length <= 30) {
 		// 複数あるので正しいものを選択
-		const index = findCorrectAnime(allAnimeData2);
+		const index = findCorrectAnime(allAnimeData);
 
 		if (index !== false) {
-			createAnimeDataObject(allAnimeData2[index], json2);
+			createAnimeDataObject(allAnimeData[index], json);
 			return true;
 		}
 
 		// incluedsで検索
-		for (let i = 0; i < allAnimeData2.length; i++) {
-			if (allAnimeData2[i].title.includes(remakeTitle)) {
-				createAnimeDataObject(allAnimeData2[i], json2);
+		for (let i = 0; i < allAnimeData.length; i++) {
+			if (allAnimeData[i].title.includes(remakeTitle)) {
+				createAnimeDataObject(allAnimeData[i], json);
 				return true;
 			}
 		}
 
 		// 見つからない場合は、エピソード数が一番近いものを選択
-		const arrayDiff = allAnimeData2.map((eachAnimeData: Work) =>
+		const arrayDiff = allAnimeData.map((eachAnimeData: Work) =>
 			Math.abs(websiteInfo.episodesCount - eachAnimeData.episodes.nodes.length),
 		);
 		const miniDiffIndex = arrayDiff.indexOf(Math.min(...arrayDiff));
-		createAnimeDataObject(allAnimeData2[miniDiffIndex], json2);
+		createAnimeDataObject(allAnimeData[miniDiffIndex], json);
 		return true;
 	} else {
 		// 30以上の場合はありふれた単語と判断
@@ -748,6 +547,23 @@ export async function getAnimeDataFromAnnict() {
 		});
 		return false;
 	}
+}
+
+/**
+ * アニメデータを取得
+ */
+export async function fetchAnimeDataFromAnnict() {
+	setLoading({ status: "loading", message: "Annictからデータを取得しています", icon: "loading" });
+
+	let remakeTitle = remakeString(websiteInfo.title, false);
+	if (!remakeTitle || remakeTitle === "") remakeTitle = websiteInfo.title;
+
+	/* 初回検索 */
+	const isAnimeSearched = await initialSearchAnimeData(remakeTitle);
+	if (isAnimeSearched) return isAnimeSearched;
+
+	/* 再検索 */
+	return await retrySearchAnimeData(remakeTitle);
 }
 
 /******************************************************************************/

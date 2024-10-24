@@ -1,10 +1,10 @@
 import { ContentScriptAppendMode, ContentScriptContext } from "wxt/client";
-import UploadToggleButton from "./components/UploadToggleButton";
+import UploadToggleButton from "../components/common/UploadToggleButton";
 
 /**
  * 再生ページのアップロードボタンを作成
  */
-export async function createUploadButton(
+export async function appendUploadButton(
 	ctx: ContentScriptContext,
 	injectInfo: { site: string; anchor: string; append: string },
 ) {

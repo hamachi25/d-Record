@@ -1,6 +1,18 @@
 import { Settings } from "./types";
 
-// d-Recordの設定を取得
+// 初期値
+const defaultSettings: Settings = {
+	sendTiming: "after-end",
+	nextEpisodeLine: false,
+	recordButton: false,
+	animeTitle: false,
+	autoChangeStatus: true,
+	applyWebsite: {
+		danime: true,
+		abema: true,
+	},
+};
+
 export let settingData: Settings;
 export async function getSettings() {
 	try {
@@ -13,14 +25,13 @@ export async function getSettings() {
 			"applyWebsite",
 		]);
 
-		if (browser.runtime.lastError) throw new Error(browser.runtime.lastError.message);
+		settingData = { ...defaultSettings, ...result };
 
 		// 非表示にするかのbool値が入っているので、反転させる
-		result.nextEpisodeLine = !result.nextEpisodeLine;
-		result.recordButton = !result.recordButton;
-		result.animeTitle = !result.animeTitle;
+		settingData.nextEpisodeLine = !settingData.nextEpisodeLine;
+		settingData.recordButton = !settingData.recordButton;
+		settingData.animeTitle = !settingData.animeTitle;
 
-		settingData = result;
 		return true;
 	} catch {
 		return false;
@@ -31,9 +42,6 @@ export async function getSettings() {
 export async function getNotRecordWork() {
 	try {
 		const result = await browser.storage.local.get("notRecordWork");
-
-		if (browser.runtime.lastError) throw new Error(browser.runtime.lastError.message);
-
 		return result.notRecordWork || [];
 	} catch {
 		return false;

@@ -1,10 +1,10 @@
 import { ContentScriptAppendMode, ContentScriptContext } from "wxt/client";
-import StatusDropMenu from "./components/StatusDropMenu";
+import StatusDropMenu from "../components/common/StatusDropMenu";
 
 /**
  * 視聴ステータスを変更するドロップメニューを作成
  */
-export async function createDropMenu(
+export async function appendDropMenu(
 	ctx: ContentScriptContext,
 	injectInfo: { site: string; anchor: string; append: string },
 ) {
@@ -14,12 +14,7 @@ export async function createDropMenu(
 		anchor: injectInfo.anchor,
 		append: injectInfo.append as ContentScriptAppendMode,
 		onMount: (container) => {
-			if (injectInfo.site === "danime") container.id = "annict";
-
 			return render(() => StatusDropMenu(injectInfo.site), container);
-		},
-		onRemove: (unmount) => {
-			if (unmount) unmount();
 		},
 	});
 	ui.mount();

@@ -37,17 +37,6 @@ export default {
 					1200: "#541E00",
 				},
 			},
-			fontFamily: {
-				abema: [
-					"CopyRight",
-					"Emoji",
-					"Hiragino Sans",
-					"BIZ UDPGothic Alphabet",
-					"BIZ UDGothic",
-					"Meiryo",
-					"sans-serif",
-				],
-			},
 		},
 	},
 	plugins: [daisyui],

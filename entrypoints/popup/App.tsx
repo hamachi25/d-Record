@@ -7,7 +7,6 @@ import { UIAndOtherOptions } from "./components/UIAndOtherOptions";
 
 // 初期値
 const defaultSettings: Settings = {
-	Token: "",
 	sendTiming: "after-end",
 	nextEpisodeLine: false,
 	recordButton: false,
@@ -20,11 +19,11 @@ const defaultSettings: Settings = {
 };
 
 function App() {
-	const [settings, setSettings] = createSignal<Settings>(defaultSettings);
+	const [settings, setSettings] = createStore<Settings>(defaultSettings);
+	console.log(settings.applyWebsite);
 
 	onMount(async () => {
 		const data = await browser.storage.local.get([
-			"Token",
 			"sendTiming",
 			"nextEpisodeLine",
 			"recordButton",
@@ -32,14 +31,22 @@ function App() {
 			"autoChangeStatus",
 			"applyWebsite",
 		]);
-		setSettings(data);
+		const newSettings = { ...settings, ...data }; // 初期値を上書き
+		setSettings(newSettings);
 	});
 
 	return (
-		<>
+		<div class="w-[340px] px-4 [&_h2]:mb-3 [&:not(:last-child)]:[&>div]:border-b-2 [&>div]:border-b-[#d5d6d8] dark:[&>div]:border-b-[gray]">
 			<TokenInput />
-			<SelectWebsite settings={settings} />
-			<SendTimingOptions sendTiming={settings().sendTiming} />
+			<SelectWebsite
+				title="使用するウェブサイト"
+				options={[
+					{ value: "danime", label: "dアニメストア" },
+					{ value: "abema", label: "ABEMA" },
+				]}
+				applyWebsite={settings.applyWebsite}
+			/>
+			<SendTimingOptions sendTiming={settings.sendTiming} />
 			<UIAndOtherOptions
 				title="UIの変更"
 				options={[
@@ -48,9 +55,9 @@ function App() {
 					{ value: "animeTitle", label: "アニメタイトルを非表示" },
 				]}
 				settings={{
-					nextEpisodeLine: settings().nextEpisodeLine ?? defaultSettings.nextEpisodeLine,
-					recordButton: settings().recordButton ?? defaultSettings.recordButton,
-					animeTitle: settings().animeTitle ?? defaultSettings.animeTitle,
+					nextEpisodeLine: settings.nextEpisodeLine,
+					recordButton: settings.recordButton,
+					animeTitle: settings.animeTitle,
 				}}
 			/>
 			<UIAndOtherOptions
@@ -62,11 +69,10 @@ function App() {
 					},
 				]}
 				settings={{
-					autoChangeStatus:
-						settings().autoChangeStatus ?? defaultSettings.autoChangeStatus,
+					autoChangeStatus: settings.autoChangeStatus,
 				}}
 			/>
-		</>
+		</div>
 	);
 }
 
