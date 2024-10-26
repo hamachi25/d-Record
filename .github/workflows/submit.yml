@@ -80,7 +80,3 @@ jobs:
                   git push --tags
               env:
                   NEW_VERSION: ${{ steps.version.outputs.newVersion }}
-
-            - name: Release
-              if: ${{ !inputs.dryRun }}
-              run: pnpx changelogen@latest gh release ${{ steps.version.outputs.newVersion }} --token ${{ github.token }}
