@@ -50,14 +50,16 @@ function App() {
 		<div class="w-[340px] px-4">
 			<div role="tablist" class="relative tabs tabs-boxed mt-3 [&>a]:font-bold [&>a]:gap-1">
 				<Show when={settings.activeTab}>
-					<div
-						class="absolute h-full w-1/2 py-1 top-0 bottom-0 my-auto transition-transform ease-in-out"
-						classList={{
-							"translate-x-0 pl-1": settings.activeTab === 1,
-							"translate-x-full pr-1": settings.activeTab === 2,
-						}}
-					>
-						<div class="bg-primary rounded-lg w-full h-full"></div>
+					<div class="absolute w-full h-full p-1">
+						<div
+							class="h-full w-1/2 top-0 bottom-0 my-auto transition-transform ease-in-out"
+							classList={{
+								"translate-x-0": settings.activeTab === 1,
+								"translate-x-full": settings.activeTab === 2,
+							}}
+						>
+							<div class="bg-primary rounded-lg w-full h-full"></div>
+						</div>
 					</div>
 				</Show>
 				<a
