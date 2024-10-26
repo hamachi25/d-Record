@@ -44,8 +44,6 @@ function App() {
 		setSettings(newSettings);
 	});
 
-	console.log(settings.activeTab);
-
 	return (
 		<div class="w-[340px] px-4">
 			<div role="tablist" class="relative tabs tabs-boxed mt-3 [&>a]:font-bold [&>a]:gap-1">

@@ -583,7 +583,6 @@ async function fetchDataWithAnnictId() {
 
 		if (workId) {
 			const annictId = await getAnnictId(workId);
-			console.log(annictId);
 			if (!annictId) return;
 
 			const variables = {
@@ -597,7 +596,6 @@ async function fetchDataWithAnnictId() {
 			if (!response) return;
 			const json = await response.json();
 
-			console.log(json);
 			const allAnimeData: Work[] = json.data.searchWorks.nodes;
 			if (allAnimeData.length === 1) {
 				createAnimeDataObject(allAnimeData[0], json);
