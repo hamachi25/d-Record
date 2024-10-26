@@ -1,5 +1,5 @@
 export function TokenInput() {
-	const [tokenStatus, setTokenStatus] = createSignal<"idle" | "loading" | "fetched">("idle");
+	const [tokenStatus, setTokenStatus] = createSignal<"idle" | "loading" | "fetched">("fetched");
 
 	async function fetchToken() {
 		setTokenStatus("loading");
@@ -74,7 +74,7 @@ export function TokenInput() {
 	});
 
 	return (
-		<div class="px-2 py-4">
+		<div class="px-2 pb-4">
 			<h2 class="font-semibold text-lg m-0">トークン</h2>
 			<div class="flex items-end justify-between">
 				<Switch>
@@ -177,7 +177,7 @@ export function TokenInput() {
 						/>
 						<div class="flex justify-end mt-1">
 							<a
-								class="flex link text-sm text-blue-1000 dark:text-blue-600 underline-offset-2 hover:decoration-2"
+								class="flex link text-sm text-blue-1000 dark:text-blue-500 underline-offset-2 hover:decoration-2"
 								onClick={openNewTab}
 								href="#"
 							>
@@ -194,7 +194,7 @@ export function TokenInput() {
 						</div>
 						<div class="modal-action flex justify-between mt-6">
 							<form method="dialog">
-								<button class="btn btn-link px-2 underline-offset-2 text-blue-800 dark:text-blue-600 hover:text-blue-1000 dark:hover:text-blue-500 active:text-blue-1200 dark:active:text-blue-400 h-9 min-h-9">
+								<button class="btn btn-link px-2 underline-offset-2 text-blue-800 dark:text-blue-500 hover:text-blue-1000 dark:hover:text-blue-400 active:text-blue-1200 dark:active:text-blue-300 h-9 min-h-9">
 									閉じる
 								</button>
 							</form>

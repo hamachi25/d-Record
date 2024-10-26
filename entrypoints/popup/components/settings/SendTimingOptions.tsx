@@ -25,7 +25,7 @@ export function SendTimingOptions(props: { sendTiming: string }) {
 							<input
 								class="radio w-[1.1rem] h-[1.1rem] mr-3 my-auto cursor-pointer
                                     border-gray-400 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-400
-									checked:bg-blue-800 dark:checked:bg-blue-600 checked:border-blue-800 dark:checked:border-blue-600
+									checked:bg-blue-800 dark:checked:bg-blue-500 checked:border-blue-800 dark:checked:border-blue-500
 									checked:hover:bg-blue-1000 dark:checked:hover:bg-blue-400 checked:hover:border-blue-1000 dark:checked:hover:border-blue-400"
 								type="radio"
 								value={option().value}

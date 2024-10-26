@@ -7,7 +7,7 @@ import { appendUploadButton } from "../../ui/append-upload-button";
 import { handleRecordEpisode } from "../../core/record-watch-episode";
 import { settingData } from "../../utils/storage";
 import { getInfoFromDanime } from "./web-scraper";
-import { websiteInfo } from "../../core/anime-data-scraper";
+import { setWebsiteInfo } from "../../core/anime-data-scraper";
 
 /**
  * スタイルをheaderに追加
@@ -90,7 +90,7 @@ export async function handleDAnime(ctx: ContentScriptContext) {
 				if (!isFirstRun) {
 					const currentEpisode =
 						document.querySelector(".backInfoTxt2")?.textContent ?? "";
-					websiteInfo.currentEpisode = currentEpisode;
+					setWebsiteInfo("currentEpisode", currentEpisode);
 				}
 
 				isFirstRun = false;

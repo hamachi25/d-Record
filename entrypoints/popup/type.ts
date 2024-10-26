@@ -7,4 +7,5 @@ export type Settings = {
 	applyWebsite: {
 		[key: string]: boolean;
 	};
+	activeTab: number | undefined;
 };

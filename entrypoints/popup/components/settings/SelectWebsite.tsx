@@ -1,10 +1,13 @@
 import { CheckboxGroup } from "./CheckboxGroup";
 
 type Props = {
-	title: string;
-	options: { value: string; label: string }[];
 	applyWebsite: { [key: string]: boolean };
 };
+
+const options = [
+	{ value: "danime", label: "dアニメストア" },
+	{ value: "abema", label: "ABEMA" },
+];
 
 export function SelectWebsite(props: Props) {
 	const [applyWebsite, setApplyWebsite] = createStore(props.applyWebsite);
@@ -23,8 +26,8 @@ export function SelectWebsite(props: Props) {
 
 	return (
 		<CheckboxGroup
-			title={props.title}
-			options={props.options}
+			title={"使用するウェブサイト"}
+			options={options}
 			ischecked={applyWebsite}
 			handleChange={handleChange}
 		/>

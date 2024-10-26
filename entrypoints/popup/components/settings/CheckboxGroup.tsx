@@ -16,7 +16,7 @@ export function CheckboxGroup(props: Props) {
 							<input
 								class="checkbox h-[1.1rem] w-[1.1rem] rounded mr-3 my-auto cursor-pointer
                                     border-gray-400 dark:border-gray-600 hover:border-gray-600 dark:hover:border-gray-400 checked:border-none
-                                    [--chkbg:theme(colors.blue.800)] dark:[--chkbg:theme(colors.blue.600)]
+                                    [--chkbg:theme(colors.blue.800)] dark:[--chkbg:theme(colors.blue.500)]
                                     checked:hover:[--chkbg:theme(colors.blue.1000)] dark:checked:hover:[--chkbg:theme(colors.blue.400)]"
 								type="checkbox"
 								id={option().value}

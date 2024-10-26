@@ -6,7 +6,7 @@ import { appendUploadButton } from "../../ui/append-upload-button";
 import { handleRecordEpisode } from "../../core/record-watch-episode";
 import { settingData } from "../../utils/storage";
 import { getInfoFromAbemaWorkPage, getInfoFromAbemaPlayerPage } from "./web-scraper";
-import { websiteInfo } from "../../core/anime-data-scraper";
+import { setWebsiteInfo } from "../../core/anime-data-scraper";
 
 let currentWorkId: string | undefined = undefined;
 
@@ -106,6 +106,21 @@ function createWaitPlayerObserver(ctx: ContentScriptContext) {
 /******************************************************************************/
 
 /**
+ * プレミアムかどうかをチェック
+ * @description プレミアムの場合createWaitPlayerObserverが溜まって、アップロードボタンが複数追加されてしまう
+ */
+function checkPremium() {
+	const premium = document.querySelector(".c-vod-EpisodePlayerContainer__appeal-plan-overlay");
+	if (premium) {
+		return true;
+	}
+
+	return false;
+}
+
+/******************************************************************************/
+
+/**
  * URLから作品IDを取得
  */
 function extractWorkId(path: string) {
@@ -155,13 +170,13 @@ export async function handleAbema(ctx: ContentScriptContext) {
 		if (!currentWorkId && currentWorkId !== newWorkId) {
 			resetAnimeData();
 
-			const infoPromise = getInfoFromAbemaPlayerPage(document);
+			const isWebsiteInfo = await getInfoFromAbemaPlayerPage(document);
+			if (!isWebsiteInfo) return;
 
 			createWaitButtonObserver(ctx);
-			createWaitPlayerObserver(ctx);
 
-			const isWebsiteInfo = await infoPromise;
-			if (!isWebsiteInfo) return;
+			const isPremium = checkPremium();
+			if (!isPremium) createWaitPlayerObserver(ctx);
 
 			const isFetchedAnimeData = await fetchAnimeDataFromAnnict();
 			if (!isFetchedAnimeData) return;
@@ -189,7 +204,7 @@ export async function handleAbema(ctx: ContentScriptContext) {
 			const currentEpisode = document
 				.querySelector(".com-video-EpisodeTitle__episode-title")
 				?.textContent?.split(" ")[0];
-			if (currentEpisode) websiteInfo.currentEpisode = currentEpisode;
+			if (currentEpisode) setWebsiteInfo("currentEpisode", currentEpisode);
 		}
 
 		currentWorkId = newWorkId;
@@ -200,7 +215,8 @@ export async function handleAbema(ctx: ContentScriptContext) {
 
 	/* 作品ページ */
 	if (abemaPath.startsWith("title")) {
-		const infoPromise = getInfoFromAbemaWorkPage(document);
+		const isWebsiteInfo = await getInfoFromAbemaWorkPage(document);
+		if (!isWebsiteInfo) return;
 
 		if (!document.querySelector("dr-drop-menu")) {
 			appendDropMenu(ctx, {
@@ -211,9 +227,6 @@ export async function handleAbema(ctx: ContentScriptContext) {
 		}
 
 		createWaitButtonObserver(ctx);
-
-		const isWebsiteInfo = await infoPromise;
-		if (!isWebsiteInfo) return;
 
 		await fetchAnimeDataFromAnnict();
 	}

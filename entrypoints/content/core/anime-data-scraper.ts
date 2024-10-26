@@ -1,6 +1,13 @@
 import { fetchDataFromAnnict, fetchDataFromDanime } from "../utils/api/fetch";
-import { queryWithEpisodes } from "../utils/api/query";
-import { AnimeData, Episode, NextEpisode, WebsiteInfo, Work } from "../utils/types";
+import { queryWithAnnictId, queryWithEpisodes } from "../utils/api/query";
+import {
+	AnimeData,
+	Episode,
+	NextEpisode,
+	WebsiteInfo,
+	WebsitePageMappings,
+	Work,
+} from "../utils/types";
 import { episodeNumberExtractor } from "../utils/episode";
 
 // webサイトから取得したアニメ情報
@@ -549,11 +556,65 @@ async function retrySearchAnimeData(prevTitle: string) {
 	}
 }
 
+/*
+ * ストレージからworkIdに一致するannictIDを取得
+ */
+async function getAnnictId(workId: string) {
+	const websitePageMappings: WebsitePageMappings | null = await storage.getItem(
+		"local:websitePageMappings",
+	);
+	if (!websitePageMappings) return;
+
+	return websitePageMappings.danime[workId];
+}
+
+/*
+ * AnnictIdを使ってデータを取得
+ */
+async function fetchDataWithAnnictId() {
+	if (websiteInfo.site === "danime") {
+		const params = new URLSearchParams(location.search);
+		const partId = params.get("partId");
+		let workId = params.get("workId");
+
+		if (partId) {
+			workId = partId.substring(0, 5);
+		}
+
+		if (workId) {
+			const annictId = await getAnnictId(workId);
+			console.log(annictId);
+			if (!annictId) return;
+
+			const variables = {
+				annictIds: [annictId],
+				seasons: getBroadcastYear(true),
+			};
+
+			const response = await fetchDataFromAnnict(
+				JSON.stringify({ query: queryWithAnnictId, variables: variables }),
+			);
+			if (!response) return;
+			const json = await response.json();
+
+			console.log(json);
+			const allAnimeData: Work[] = json.data.searchWorks.nodes;
+			if (allAnimeData.length === 1) {
+				createAnimeDataObject(allAnimeData[0], json);
+				return true;
+			}
+		}
+	}
+}
+
 /**
  * アニメデータを取得
  */
 export async function fetchAnimeDataFromAnnict() {
 	setLoading({ status: "loading", message: "Annictからデータを取得しています", icon: "loading" });
+
+	const isAnimeSearchedWithAnnictId = await fetchDataWithAnnictId();
+	if (isAnimeSearchedWithAnnictId) return isAnimeSearchedWithAnnictId;
 
 	let remakeTitle = remakeString(websiteInfo.title, false);
 	if (!remakeTitle || remakeTitle === "") remakeTitle = websiteInfo.title;

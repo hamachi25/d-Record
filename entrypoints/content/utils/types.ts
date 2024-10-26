@@ -76,3 +76,9 @@ export type Settings = {
 		[key: string]: boolean;
 	};
 };
+
+export type WebsitePageMappings = {
+	danime: {
+		[key: string]: number; // key: WorkId, value: annictId
+	};
+};

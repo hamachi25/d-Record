@@ -1,6 +1,5 @@
 html,
 body {
-	scrollbar-gutter: stable;
 	scrollbar-width: thin;
 	margin: 0;
 	font-size: 1rem;
@@ -10,6 +9,6 @@ body {
 	html,
 	body {
 		color: rgb(222, 225, 230);
-		background-color: black;
+		background-color: black !important;
 	}
 }
