@@ -201,6 +201,7 @@ export async function handleAbema(ctx: ContentScriptContext) {
 		 * エピソードが変わった時に実行
 		 */
 		if (newWorkId === currentWorkId) {
+			await new Promise((resolve) => setTimeout(resolve, 200)); // ページ遷移時にレンダリングが遅れるため待機
 			const currentEpisode = document
 				.querySelector(".com-video-EpisodeTitle__episode-title")
 				?.textContent?.split(" ")[0];

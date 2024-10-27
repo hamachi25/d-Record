@@ -25,9 +25,19 @@ export default defineContentScript({
 
 		/* Abema */
 		if (applyAbema && location.hostname === "abema.tv") {
+			let location = window.location.href;
+
 			handleAbema(ctx); // 初回実行
-			ctx.addEventListener(window, "wxt:locationchange", () => {
-				handleAbema(ctx);
+
+			const observer = new MutationObserver(() => {
+				if (location !== window.location.href) {
+					location = window.location.href;
+					handleAbema(ctx);
+				}
+			});
+			observer.observe(document.body, {
+				childList: true,
+				subtree: true,
 			});
 		}
 	},
