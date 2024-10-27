@@ -60,6 +60,8 @@ function createWaitButtonObserver(ctx: ContentScriptContext) {
  * アップロードボタンを追加するobserverを作成
  */
 function createWaitPlayerObserver(ctx: ContentScriptContext) {
+	let isMainPlayerObserver = false;
+
 	/**
 	 * 初回読み込み時にアップロードボタンの追加と、mainPlayerObserverの監視を開始
 	 */
@@ -75,7 +77,9 @@ function createWaitPlayerObserver(ctx: ContentScriptContext) {
 			});
 
 			const target = document.querySelector(".c-vod-EpisodePlayerContainer-wrapper");
-			if (target) mainPlayerObserver.observe(target, { childList: true });
+			if (target && !isMainPlayerObserver)
+				mainPlayerObserver.observe(target, { childList: true });
+			isMainPlayerObserver = true;
 		}
 	});
 
@@ -109,12 +113,11 @@ function createWaitPlayerObserver(ctx: ContentScriptContext) {
  * プレミアムかどうかをチェック
  * @description プレミアムの場合createWaitPlayerObserverが溜まって、アップロードボタンが複数追加されてしまう
  */
-function checkPremium() {
-	const premium = document.querySelector(".c-vod-EpisodePlayerContainer__appeal-plan-overlay");
-	if (premium) {
-		return true;
-	}
+async function checkPremium() {
+	await new Promise((resolve) => setTimeout(resolve, 100));
 
+	const premium = document.querySelector(".c-vod-EpisodePlayerContainer__appeal-plan-overlay");
+	if (premium) return true;
 	return false;
 }
 
@@ -175,7 +178,7 @@ export async function handleAbema(ctx: ContentScriptContext) {
 
 			createWaitButtonObserver(ctx);
 
-			const isPremium = checkPremium();
+			const isPremium = await checkPremium();
 			if (!isPremium) createWaitPlayerObserver(ctx);
 
 			const isFetchedAnimeData = await fetchAnimeDataFromAnnict();
