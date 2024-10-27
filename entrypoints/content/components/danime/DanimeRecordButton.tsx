@@ -83,9 +83,7 @@ function clickSingleRecordButton(
 	if (!result) return;
 
 	// クリックしたボタンを非表示
-	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
-		".drecord-record-button-container",
-	);
+	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll("dr-record-button");
 	if (recordContainers[j]) recordContainers[j].style.display = "none";
 
 	// クリックしたエピソードが次に視聴するエピソードだった場合、赤枠を削除
@@ -104,9 +102,7 @@ function clickMultiRecordButton(
 
 	mutation = updateStatusToWatching(mutation, isAiring, i, insertTargets);
 
-	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll(
-		".drecord-record-button-container",
-	);
+	const recordContainers: NodeListOf<HTMLElement> = document.querySelectorAll("dr-record-button");
 	for (let k = 0; k <= j; k++) {
 		mutation += `
             e${k}:createRecord(

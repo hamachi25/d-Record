@@ -26,7 +26,7 @@ function LoadingSkeleton() {
 			<figure class="flex-[2] mr-2">
 				<div class="skeleton w-[102px] h-[53px] rounded"></div>
 			</figure>
-			<div class="card-body flex-[3] p-0 justify-center">
+			<div class="card-body gap-4 flex-[3] p-0 justify-center">
 				<h2 class="skeleton card-title text-sm overflow-y-auto w-36 h-4"></h2>
 				<div class="card-actions justify-end">
 					<div class="skeleton badge w-8"></div>
@@ -50,7 +50,7 @@ export function AnnictSearch(props: { activeTabUrl: Accessor<string> }) {
 	const [data, setData] = createStore<Work[]>([]);
 	const [selectedIndex, setSelectedIndex] = createSignal<number | undefined>(undefined);
 
-	async function handleClick(index: number) {
+	async function updateSelectedIndex(index: number) {
 		const websitePageMappings: WebsitePageMappings | null = await storage.getItem(
 			"local:websitePageMappings",
 		);
@@ -60,7 +60,6 @@ export function AnnictSearch(props: { activeTabUrl: Accessor<string> }) {
 		 */
 		function deleteWebsitePageMappings() {
 			setSelectedIndex(undefined);
-
 			if (websitePageMappings) {
 				delete websitePageMappings.danime[props.activeTabUrl()];
 				storage.setItem("local:websitePageMappings", websitePageMappings);
@@ -238,7 +237,7 @@ export function AnnictSearch(props: { activeTabUrl: Accessor<string> }) {
                                         dark:border-gray-600 dark:hover:bg-gray-600 dark:active:bg-gray-500 dark:[&.check]:border-gray-400
                                         dark:[&.check]:bg-orange-700 dark:[&.check]:hover:bg-orange-600 dark:[&.check]:active:bg-orange-500"
 									classList={{ check: selectedIndex() === index() }}
-									onClick={() => handleClick(index())}
+									onClick={() => updateSelectedIndex(index())}
 								>
 									<figure class="relative flex-[2] mr-2">
 										<Show
