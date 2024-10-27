@@ -230,8 +230,6 @@ export async function handleAbema(ctx: ContentScriptContext) {
 			});
 		}
 
-		createWaitButtonObserver(ctx);
-
 		await fetchAnimeDataFromAnnict();
 	}
 
