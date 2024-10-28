@@ -40,6 +40,13 @@ function App() {
 			"applyWebsite",
 			"activeTab",
 		]);
+
+		// activeTabがない場合は、初期値を入れる
+		// defaultSettingsに入れると、popupが開いた時にアニメーションが発生してしまう
+		if (!data.activeTab) {
+			setSettings({ ...settings, activeTab: 1 });
+		}
+
 		const newSettings = { ...settings, ...data }; // 初期値を上書き
 		setSettings(newSettings);
 	});
@@ -62,7 +69,7 @@ function App() {
 				</Show>
 				<a
 					role="tab"
-					class="tab [&.active]:text-gray-200 transition-colors"
+					class="tab [&.active]:text-gray-100 transition-colors"
 					classList={{ active: settings.activeTab === 1 }}
 					onClick={() => updateActiveTab(1)}
 				>
@@ -83,7 +90,7 @@ function App() {
 				</a>
 				<a
 					role="tab"
-					class="tab [&.active]:text-gray-200 transition-colors"
+					class="tab [&.active]:text-gray-100 transition-colors"
 					classList={{ active: settings.activeTab === 2 }}
 					onClick={() => updateActiveTab(2)}
 				>

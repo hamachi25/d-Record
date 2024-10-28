@@ -21,9 +21,8 @@ export function AnimeInfoFromWebsite(props: { setActiveTabUrl: Setter<string> })
 
 			if (tabs[0].url) {
 				return tabs[0].url;
-			} else {
-				return false;
 			}
+			return false;
 		} catch {
 			return false;
 		}
