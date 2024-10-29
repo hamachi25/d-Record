@@ -5,11 +5,24 @@ import { fetchDataFromAnnict } from "../../utils/api/fetch";
 import { settingData } from "../../utils/storage";
 import { isCurrentlyAiring } from "../../utils/episode";
 import {
-	changeStatusText,
 	changeStatusToWatched,
 	changeStatusToWatching,
+	convertStatusToJapanese,
 } from "../../utils/status";
 import { setStatusAndSvg } from "../common/StatusDropMenu";
+
+/**
+ * 視聴ステータスのテキストを更新する
+ */
+function changeStatusText(status: string) {
+	const [statusText, svgPathD, svgViewBox] = convertStatusToJapanese(status);
+
+	setStatusAndSvg({
+		svgPathD: svgPathD,
+		svgViewBox: svgViewBox,
+		statusText: statusText,
+	});
+}
 
 /**
  * 視聴ステータスを"見てる"に変更するgraphqlのmutationを返す
@@ -22,7 +35,7 @@ function updateStatusToWatching(
 ): string {
 	if (isAiring === true || i !== insertTargets.length - 1) {
 		mutation = changeStatusToWatching(mutation);
-		changeStatusText("WATCHING", setStatusAndSvg);
+		changeStatusText("WATCHING");
 	}
 	return mutation;
 }
@@ -42,7 +55,7 @@ function updateStatusToWatched(
 		(settingData.autoChangeStatus === undefined || settingData.autoChangeStatus === true)
 	) {
 		mutation = changeStatusToWatched(mutation);
-		changeStatusText("WATCHED", setStatusAndSvg);
+		changeStatusText("WATCHED");
 	}
 	return mutation;
 }

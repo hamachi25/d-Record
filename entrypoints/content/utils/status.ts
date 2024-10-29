@@ -23,22 +23,6 @@ export function convertStatusToJapanese(status: string) {
 	}
 }
 
-/**
- * 視聴ステータスのテキストを更新する
- */
-export function changeStatusText(
-	status: string,
-	setStatusAndSvg: (status: { svgPathD: string; svgViewBox: string; statusText: string }) => void,
-) {
-	const [statusText, svgPathD, svgViewBox] = convertStatusToJapanese(status);
-
-	setStatusAndSvg({
-		svgPathD: svgPathD,
-		svgViewBox: svgViewBox,
-		statusText: statusText,
-	});
-}
-
 /******************************************************************************/
 
 /**
