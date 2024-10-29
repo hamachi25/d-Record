@@ -39,6 +39,21 @@ export type NextEpisode = {
 //     };
 // };
 
+export type AnimeData = {
+	id: string;
+	annictId: string;
+	title: string;
+	viewerStatusState: string;
+	media: string;
+	episodes: Episode[] | [];
+	sortedEpisodes: Episode[] | [];
+	nextEpisode: number | undefined; // sortedEpisodesの中のindex
+	currentEpisode: {
+		normalized: number | string | undefined;
+		raw: number | string | undefined;
+	};
+};
+
 export type WebsiteInfo = {
 	site: string;
 	title: string;
@@ -52,27 +67,18 @@ export type WebsiteInfo = {
 };
 
 export type Settings = {
-	sendTiming?: string;
-	nextEpisodeLine?: boolean;
-	recordButton?: boolean;
-	animeTitle?: boolean;
-	autoChangeStatus?: boolean;
-	applyWebsite?: {
+	sendTiming: string;
+	nextEpisodeLine: boolean;
+	recordButton: boolean;
+	animeTitle: boolean;
+	autoChangeStatus: boolean;
+	applyWebsite: {
 		[key: string]: boolean;
 	};
 };
 
-export type AnimeData = {
-	id: string;
-	annictId: string;
-	title: string;
-	viewerStatusState: string;
-	media: string;
-	episodes: Episode[] | [];
-	sortedEpisodes: Episode[] | [];
-	nextEpisode: number | undefined; // sortedEpisodesの中のindex
-	currentEpisode: {
-		normalized: number | string | undefined;
-		raw: number | string | undefined;
+export type WebsitePageMappings = {
+	danime: {
+		[key: string]: number; // key: WorkId, value: annictId
 	};
 };

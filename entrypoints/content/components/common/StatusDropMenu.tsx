@@ -1,14 +1,16 @@
 /* 作品ページのドロップメニュー */
+import { AbemaStatusDropMenu } from "../abema/AbemaStatusDropMenu";
+import { DanimeStatusDropMenu } from "../danime/DanimeStatusDropMenu";
+import { animeData } from "../../core/anime-data-scraper";
+import { fetchDataFromAnnict } from "../../utils/api/fetch";
+import { convertStatusToJapanese, updateViewerStatus } from "../../utils/status";
+import { stateIcons } from "../../utils/svg";
 
-import { AbemaStatusDropMenu } from "./abema/AbemaStatusDropMenu";
-import { DanimeStatusDropMenu } from "./danime/DanimeStatusDropMenu";
-import { animeData } from "../anime-data-scraper";
-import { fetchDataFromAnnict } from "../fetch";
-import { convertStatusToJapanese, svgPaths, updateViewerStatus } from "../utils";
+const { noState, wannaWatch, watching, watched, hold, stopWatching } = stateIcons;
 
 const [statusAndSvg, setStatusAndSvg] = createSignal({
-	svgPathD: svgPaths.noState[0],
-	svgViewBox: svgPaths.noState[1],
+	svgPathD: noState[0],
+	svgViewBox: noState[1],
 	statusText: "未選択",
 });
 export { setStatusAndSvg };
@@ -45,14 +47,14 @@ async function updateStatus(status: string) {
 
 export default function StatusDropMenu(webSite: string) {
 	// メニューを作成するためのsignal
-	const [statusArray] = createSignal([
-		{ state: "NO_STATE", icon: svgPaths.noState, label: "未選択" },
-		{ state: "WANNA_WATCH", icon: svgPaths.wannaWatch, label: "見たい" },
-		{ state: "WATCHING", icon: svgPaths.watching, label: "見てる" },
-		{ state: "WATCHED", icon: svgPaths.watched, label: "見た" },
-		{ state: "ON_HOLD", icon: svgPaths.stopWatching, label: "一時中断" },
-		{ state: "STOP_WATCHING", icon: svgPaths.hold, label: "視聴中止" },
-	]);
+	const statusArray = [
+		{ state: "NO_STATE", icon: noState, label: "未選択" },
+		{ state: "WANNA_WATCH", icon: wannaWatch, label: "見たい" },
+		{ state: "WATCHING", icon: watching, label: "見てる" },
+		{ state: "WATCHED", icon: watched, label: "見た" },
+		{ state: "ON_HOLD", icon: stopWatching, label: "一時中断" },
+		{ state: "STOP_WATCHING", icon: hold, label: "視聴中止" },
+	];
 	const [show, setShow] = createSignal(false); // ドロップメニューの表示・非表示の状態
 
 	// 遅延して取得したステータスを反映

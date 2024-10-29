@@ -1,8 +1,8 @@
 import { ContentScriptContext } from "wxt/client";
-import RecordButton from "./components/RecordButton";
-import { animeData } from "./anime-data-scraper";
-import { settingData } from "./storage";
-import { episodeNumberExtractor, handleUnregisteredNextEpisode } from "./utils";
+import RecordButton from "../components/danime/DanimeRecordButton";
+import { animeData } from "../core/anime-data-scraper";
+import { settingData } from "../utils/storage";
+import { episodeNumberExtractor, checkNextEpisodeRegistered } from "../utils/episode";
 
 /**
  * 次に視聴するエピソードに赤枠をつける
@@ -14,9 +14,19 @@ function createNextEpisodeBorder(i: number) {
 	}
 }
 
+/******************************************************************************/
+
 /**
- * エピソードが存在しているか判定
+ * @description 取得したデータにnextEpisodeがない・1話しかない場合はindexを0にする
  */
+function getNextEpisodeIndex(): number {
+	return animeData.nextEpisode !== undefined && animeData.episodes.length !== 1
+		? animeData.nextEpisode
+		: 0;
+}
+
+/******************************************************************************/
+
 function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	// dアニメストアのエピソード番号を取得
 	const episodeText = targets[i].querySelector(".textContainer>span>.number")?.textContent;
@@ -25,6 +35,7 @@ function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 
 	const nextEpisodeIndex = animeData.nextEpisode ? animeData.nextEpisode : 0;
 	const sortedEpisodes = animeData.sortedEpisodes;
+
 	for (let j = 0; j < sortedEpisodes.length; j++) {
 		// Annictのデータと一致するエピソードがあるか
 		if (sortedEpisodes[j].numberTextNormalized === normalizedEpisode) {
@@ -35,33 +46,29 @@ function isEpisodeExist(targets: NodeListOf<HTMLElement>, i: number) {
 	return false;
 }
 
+function isWatchedEpisode(i: number, nextEpisodeIndex: number) {
+	return i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0;
+}
+
 /******************************************************************************/
 
 /**
  * 作品ページの記録ボタンを作成
- * @description 今のところdアニメストアのみ記録ボタンを表示する
+ * @description 今のところdアニメストアにのみ記録ボタンを表示する
  */
-export async function createRecordButton(ctx: ContentScriptContext) {
+export async function injectRecordButton(ctx: ContentScriptContext) {
 	// 次のエピソードがAnnictに登録されていない場合は、最新話まで見たと判断
-	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(document);
-	if (isNextEpisodeUnregistered) return;
+	const isNextEpisodeRegistered = checkNextEpisodeRegistered(document);
+	if (!isNextEpisodeRegistered) return;
 
-	// nextEpisodeがない・1話しかない場合はindexを0にする
-	let nextEpisodeIndex: number = 0;
-	if (animeData.nextEpisode !== undefined && animeData.episodes.length !== 1) {
-		nextEpisodeIndex = animeData.nextEpisode;
-	}
+	const nextEpisodeIndex = getNextEpisodeIndex();
 
 	const insertTargets: NodeListOf<HTMLElement> = document.querySelectorAll("a[id].clearfix");
-	let j = 0;
-	for (const [i, insertTarget] of insertTargets.entries()) {
-		// 視聴済みのエピソードはスキップ
-		if (i < nextEpisodeIndex && animeData.sortedEpisodes[i].viewerRecordsCount !== 0) {
-			continue;
-		}
+	let insertedCount = 0;
 
-		// エピソードが存在していなかったらスキップ
-		if (!isEpisodeExist(insertTargets, i)) continue;
+	for (const [i, insertTarget] of insertTargets.entries()) {
+		if (isWatchedEpisode(i, nextEpisodeIndex)) continue; // 視聴済みのエピソードはスキップ
+		if (!isEpisodeExist(insertTargets, i)) continue; // エピソードが存在していなかったらスキップ
 
 		const ui = await createShadowRootUi(ctx, {
 			name: "dr-record-button",
@@ -69,16 +76,11 @@ export async function createRecordButton(ctx: ContentScriptContext) {
 			anchor: insertTarget,
 			append: "after",
 			onMount: (container) => {
-				return render(() => RecordButton(i, j, insertTargets), container);
-			},
-			onRemove: (unmount) => {
-				if (unmount) unmount();
+				return render(() => RecordButton(i, insertedCount, insertTargets), container);
 			},
 		});
 		if (!settingData || settingData.recordButton) ui.mount();
 
-		j++;
+		insertedCount++;
 	}
 }
-
-/******************************************************************************/

@@ -1,4 +1,5 @@
-import { animeData, loading, websiteInfo } from "../../anime-data-scraper";
+import { animeData, loading } from "../../core/anime-data-scraper";
+import { websiteInfo } from "../../core/anime-data-scraper";
 
 export function AbemaUploadToggleButton(props: {
 	updateIcon: () => string;

@@ -1,7 +1,7 @@
 export function TokenInput() {
-	const [tokenStatus, setTokenStatus] = createSignal<"idle" | "loading" | "fetched">("idle");
+	const [tokenStatus, setTokenStatus] = createSignal<"idle" | "loading" | "fetched">("fetched");
 
-	async function getToken() {
+	async function fetchToken() {
 		setTokenStatus("loading");
 		const response = await browser.runtime.sendMessage("startOAuth");
 		if (response) {
@@ -22,23 +22,23 @@ export function TokenInput() {
 	}
 
 	// モーダルを開く
-	let dialogElement: HTMLDialogElement | undefined;
+	let dialogElement!: HTMLDialogElement;
 	function openModal() {
-		if (dialogElement) dialogElement.showModal();
+		dialogElement.showModal();
 	}
 
 	// オプションのドロップメニューを閉じる
-	let detailsElement: HTMLDetailsElement | undefined;
+	let detailsElement!: HTMLDetailsElement;
 	function closeDropDown(event: Event) {
 		const target = event.target as Node;
-		if (detailsElement && !detailsElement.contains(target))
+		if (!detailsElement.contains(target)) {
 			detailsElement.removeAttribute("open");
+		}
 	}
 	createEffect(() => {
 		if (detailsElement) {
 			window.addEventListener("click", closeDropDown);
 		}
-
 		onCleanup(() => {
 			window.addEventListener("click", closeDropDown);
 		});
@@ -50,25 +50,22 @@ export function TokenInput() {
 		});
 	}
 
-	let tokenInputElement: HTMLInputElement | undefined;
-	/**
-	 * 手動入力したトークンを保存
-	 */
+	let tokenInputElement!: HTMLInputElement;
 	async function saveToken() {
-		const trimedToken = tokenInputElement?.value.trim();
-		if (!tokenInputElement || !trimedToken) return;
+		const trimedToken = tokenInputElement.value.trim();
+		if (!trimedToken) return;
+
+		setTokenStatus("fetched");
+		tokenInputElement.value = "";
 
 		await Promise.all([
 			storage.setItem("local:Token", trimedToken),
 			storage.setMeta("local:Token", { oauth: false }),
 		]);
-		setTokenStatus("fetched");
-		tokenInputElement.value = "";
 	}
 
-	// トークンがストレージに保存されているか確認
 	onMount(async () => {
-		const token = await storage.getItem<string>("local:Token");
+		const token = await storage.getItem("local:Token");
 		if (token && token !== "") {
 			setTokenStatus("fetched");
 		} else {
@@ -77,14 +74,14 @@ export function TokenInput() {
 	});
 
 	return (
-		<div class="px-2 py-4">
+		<div class="px-2 pb-4">
 			<h2 class="font-semibold text-lg m-0">トークン</h2>
 			<div class="flex items-end justify-between">
 				<Switch>
 					<Match when={tokenStatus() === "idle"}>
 						<button
 							class="btn bg-orange-600 hover:bg-orange-800 active:bg-orange-1000 dark:bg-orange-700 dark:hover:bg-orange-600 dark:active:bg-orange-500 text-white text-[15px] mr-3 h-10 min-h-10 gap-1"
-							onclick={getToken}
+							onclick={fetchToken}
 						>
 							トークンを取得
 							<svg
@@ -180,13 +177,13 @@ export function TokenInput() {
 						/>
 						<div class="flex justify-end mt-1">
 							<a
-								class="flex link text-sm text-blue-1000 dark:text-blue-600 underline-offset-2 hover:decoration-2"
+								class="flex link text-sm text-blue-1000 dark:text-blue-500 underline-offset-2 hover:decoration-2"
 								onClick={openNewTab}
 								href="#"
 							>
 								トークンの取得方法
 								<svg
-									class="w-4 h-4 ml-1"
+									class="w-4 h-4"
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 24 24"
 									fill="currentColor"
@@ -197,7 +194,7 @@ export function TokenInput() {
 						</div>
 						<div class="modal-action flex justify-between mt-6">
 							<form method="dialog">
-								<button class="btn btn-link px-2 underline-offset-2 text-blue-800 dark:text-blue-600 hover:text-blue-1000 dark:hover:text-blue-500 active:text-blue-1200 dark:active:text-blue-400 h-9 min-h-9">
+								<button class="btn btn-link px-2 underline-offset-2 text-blue-800 dark:text-blue-500 hover:text-blue-1000 dark:hover:text-blue-400 active:text-blue-1200 dark:active:text-blue-300 h-9 min-h-9">
 									閉じる
 								</button>
 							</form>

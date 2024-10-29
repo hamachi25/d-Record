@@ -1,19 +1,18 @@
-import { animeData, danimeDocument, setLoading, websiteInfo } from "./anime-data-scraper";
-import { fetchDataFromAnnict } from "./fetch";
-import { settingData, getNotRecordWork } from "./storage";
+import { animeData, danimeDocument, websiteInfo, setLoading } from "./anime-data-scraper";
+import { fetchDataFromAnnict } from "../utils/api/fetch";
+import { settingData, getNotRecordWork } from "../utils/storage";
+import { changeStatusToWatching, changeStatusToWatched } from "../utils/status";
 import {
-	changeStatusToWatching,
-	changeStatusToWatched,
 	episodeNumberExtractor,
 	isCurrentlyAiring,
-	handleUnregisteredNextEpisode,
+	checkNextEpisodeRegistered,
 	updateCurrentEpisode,
-} from "./utils";
+} from "../utils/episode";
 
 /******************************************************************************/
 
 /*
- * UploadToggleButton.tsxから、createIntervalOrEvent()を呼ぶので、グローバル変数にする
+ * アップロードボタンでcreateIntervalOrEvent()を呼ぶので、グローバル変数にする
  */
 let currentEpisodeFromWebSite: number | string | undefined = undefined; // 現在視聴しているのエピソード(websiteのDOMから取得する)
 let sortedEpisodesIndex: number | number[] | undefined = undefined; // sortedEpisodesの中のindex(データ送信用)
@@ -22,13 +21,12 @@ let sortedEpisodesIndex: number | number[] | undefined = undefined; // sortedEpi
  * 視聴データを送信する
  */
 function sendRecord() {
-	const isAiring = isCurrentlyAiring(danimeDocument);
+	const isAiring = isCurrentlyAiring(danimeDocument());
 
 	// 作品ページの最終話のエピソード番号を取得
-	let danimeLastEpisodeNumber;
-	if (websiteInfo.lastEpisode) {
-		danimeLastEpisodeNumber = episodeNumberExtractor(websiteInfo.lastEpisode);
-	}
+	const danimeLastEpisodeNumber = websiteInfo.lastEpisode
+		? episodeNumberExtractor(websiteInfo.lastEpisode)
+		: undefined;
 
 	// annictの最終話のエピソード番号を取得
 	const annictLastEpisodeNumber =
@@ -38,7 +36,7 @@ function sendRecord() {
 
 	// 視聴ステータスが"見てる"以外だった場合、"見てる"に変更(最終回を除く)
 	if (
-		isAiring === true || // アニメが放送中
+		isAiring || // アニメが放送中
 		(animeData.sortedEpisodes.length !== 0 &&
 			danimeLastEpisodeNumber !== currentEpisodeFromWebSite) // 最終話以外
 	) {
@@ -67,7 +65,7 @@ function sendRecord() {
 
 	// 最終話だった場合、"見た"に変更
 	if (
-		isAiring === false && // アニメが放送終了
+		!isAiring && // アニメが放送終了
 		animeData.sortedEpisodes.length !== 0 &&
 		danimeLastEpisodeNumber === currentEpisodeFromWebSite && // 最終話
 		currentEpisodeFromWebSite === annictLastEpisodeNumber && // 最終話
@@ -164,10 +162,9 @@ function getCurrentEpisodeIndex() {
 	if (annictEpisodeData[0].numberText) {
 		for (let i = 0; i < annictEpisodeData.length; i++) {
 			// abemaの場合は21話以降のエピソードが、エピソード一覧に表示されていないため、numberTextNormalizedを作成していない
-			const normalizedEpisodeBefore = annictEpisodeData[i].numberTextNormalized;
-			const normalizedEpisode = normalizedEpisodeBefore
-				? normalizedEpisodeBefore
-				: episodeNumberExtractor(annictEpisodeData[i].numberText);
+			const normalizedEpisode =
+				annictEpisodeData[i].numberTextNormalized ||
+				episodeNumberExtractor(annictEpisodeData[i].numberText);
 
 			if (normalizedEpisode === currentEpisodeFromWebSite) {
 				sortedEpisodesIndex = i;
@@ -192,9 +189,9 @@ function getCurrentEpisodeIndex() {
 	const splitMultiEpisodes = websiteInfo.currentEpisode.split("～");
 	if (splitMultiEpisodes.length === 2) {
 		// "～"で分け、それぞれのindexを取得
-		const episodeIndex = splitMultiEpisodes.map((episode) => {
+		const episodeIndex = splitMultiEpisodes.map((episode: string) => {
 			return annictEpisodeData.findIndex(
-				(episodeData) =>
+				(episodeData: { numberText: string }) =>
 					episodeNumberExtractor(episodeData.numberText) ===
 					episodeNumberExtractor(episode),
 			);
@@ -317,8 +314,8 @@ export async function handleRecordEpisode() {
 	}
 
 	// 次のエピソードがAnnictに登録されていない場合は、最新話まで視聴済みと判断
-	const isNextEpisodeUnregistered = handleUnregisteredNextEpisode(danimeDocument);
-	if (isNextEpisodeUnregistered) {
+	const isNextEpisodeRegistered = checkNextEpisodeRegistered(danimeDocument());
+	if (!isNextEpisodeRegistered) {
 		setLoading({
 			status: "success",
 			message: "",

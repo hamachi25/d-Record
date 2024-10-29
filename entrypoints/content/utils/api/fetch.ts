@@ -1,4 +1,4 @@
-import { setLoading } from "./anime-data-scraper";
+import { setLoading } from "../../core/anime-data-scraper";
 
 async function getToken() {
 	const result = await browser.storage.local.get(["Token"]);
