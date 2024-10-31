@@ -7,11 +7,16 @@ export function AbemaStatusDropMenu(props: {
 	statusArray: { state: string; icon: string[]; label: string }[];
 	updateStatus: (status: string) => Promise<void>;
 	statusAndSvg: Accessor<{ svgPathD: string; svgViewBox: string; statusText: string }>;
-	setAnnictButtonElement: Setter<HTMLButtonElement | undefined>;
 }) {
 	function openDropMenu() {
 		if (animeData.id) {
 			props.setShow((prev) => !prev);
+		}
+	}
+
+	function closeDropMenu() {
+		if (props.show() && animeData.id) {
+			props.setShow(false);
 		}
 	}
 
@@ -21,7 +26,6 @@ export function AbemaStatusDropMenu(props: {
 				class="peer relative flex h-[44px] w-[44px] rounded-full items-center justify-center bg-[#f85b73] 
 					cursor-pointer mb-[4px] transition-transform duration-100 ease-linear hover:scale-110 hover:bg-[#f7687d]"
 				onClick={openDropMenu}
-				ref={props.setAnnictButtonElement}
 			>
 				<Switch
 					fallback={
@@ -91,7 +95,10 @@ export function AbemaStatusDropMenu(props: {
 							<button
 								class="flex items-center w-full py-[8px] px-[15px] cursor-pointer
 									rounded hover:bg-[#ffffff30]"
-								onClick={() => props.updateStatus(status().state)}
+								onClick={() => {
+									props.updateStatus(status().state);
+									closeDropMenu();
+								}}
 							>
 								<svg
 									class="h-[17px] w-[17px] fill-white mr-[15px]"
@@ -112,6 +119,7 @@ export function AbemaStatusDropMenu(props: {
 						rel="noopener noreferrer"
 						class="block w-full pt-[4px] px-[15px] text-[#e6e6e6] text-[0.95rem] font-bold text-center underline underline-offset-2 hover:decoration-2"
 						title={animeData.title}
+						onClick={closeDropMenu}
 					>
 						Annictを開く
 					</a>
