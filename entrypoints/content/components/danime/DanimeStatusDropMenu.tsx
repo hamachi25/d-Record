@@ -7,11 +7,16 @@ export function DanimeStatusDropMenu(props: {
 	statusArray: { state: string; icon: string[]; label: string }[];
 	updateStatus: (status: string) => Promise<void>;
 	statusAndSvg: Accessor<{ svgPathD: string; svgViewBox: string; statusText: string }>;
-	setAnnictButtonElement: Setter<HTMLButtonElement | undefined>;
 }) {
 	function openDropMenu() {
 		if (loading.status === "success") {
 			props.setShow((prev) => !prev);
+		}
+	}
+
+	function closeDropMenu() {
+		if (props.show() && loading.status === "success") {
+			props.setShow(false);
 		}
 	}
 
@@ -21,7 +26,6 @@ export function DanimeStatusDropMenu(props: {
 				class="peer flex relative w-full h-full justify-center items-center bg-[#f75f76] hover:bg-[#ff8799]
                 select-none z-50 transition-transform duration-200 shadow-sm border-0 cursor-pointer active:scale-95"
 				onClick={openDropMenu}
-				ref={props.setAnnictButtonElement}
 			>
 				<Switch>
 					{/* ローディング */}
@@ -71,7 +75,10 @@ export function DanimeStatusDropMenu(props: {
 						<li class="hover:bg-[#e1e3e6]">
 							<button
 								class="flex items-center"
-								onClick={() => props.updateStatus(status().state)}
+								onClick={() => {
+									props.updateStatus(status().state);
+									closeDropMenu();
+								}}
 							>
 								<svg
 									class="w-[16px] h-[16px] mr-[20px] min-[960px]:mr-[13px]"
@@ -92,6 +99,7 @@ export function DanimeStatusDropMenu(props: {
 						rel="noopener noreferrer"
 						class="text-[15px] font-bold leading-none text-center underline underline-offset-2 hover:decoration-2"
 						title={animeData.title}
+						onClick={closeDropMenu}
 					>
 						Annictを開く
 					</a>

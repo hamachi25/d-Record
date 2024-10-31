@@ -68,10 +68,11 @@ export default function StatusDropMenu(webSite: string) {
 	});
 
 	// ドロップメニュー以外をクリックした時に、ドロップメニューを非表示
-	const [annictButtonElement, setAnnictButtonElement] = createSignal<HTMLButtonElement>();
 	function handleClickOutside(e: MouseEvent) {
-		if (annictButtonElement() && !annictButtonElement()!.contains(e.target as Node))
+		const buttonElement = document.querySelector("dr-drop-menu");
+		if (buttonElement && !buttonElement.contains(e.target as Node)) {
 			setShow(false);
+		}
 	}
 
 	// windowにクリックイベントを追加し、ドロップメニューを非表示にする
@@ -96,7 +97,6 @@ export default function StatusDropMenu(webSite: string) {
 					statusArray={statusArray}
 					updateStatus={updateStatus}
 					statusAndSvg={statusAndSvg}
-					setAnnictButtonElement={setAnnictButtonElement}
 				/>
 			</Match>
 
@@ -107,7 +107,6 @@ export default function StatusDropMenu(webSite: string) {
 					statusArray={statusArray}
 					updateStatus={updateStatus}
 					statusAndSvg={statusAndSvg}
-					setAnnictButtonElement={setAnnictButtonElement}
 				/>
 			</Match>
 		</Switch>
