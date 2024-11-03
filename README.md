@@ -16,7 +16,7 @@ dアニメストア・ABEMAで視聴したアニメを[Annict](https://annict.co
 > [!IMPORTANT]
 > 拡張機能を使用するには、Annictのトークンを設定する必要があります。
 >
-> ブラウザ右上のd-Recordアイコンから、「**トークンを取得**」を押して設定します。
+> ブラウザ右上のd-Recordアイコンから、「**トークンを取得**」を押して設定します。  
 > https://hamachi25.github.io/d-Record/install/
 
 ## 機能
@@ -37,7 +37,7 @@ dアニメストア・ABEMAで視聴したアニメを[Annict](https://annict.co
 -   **右下のアップロードアイコンをオフにすることで、送信を停止できる**
     -   オフにした場合その作品は、再度オンにするまで送信されない
 
-[機能一覧](https://hamachi25.github.io/d-Record/guides/feature/)
+[機能一覧](https://hamachi25.github.io/d-Record/feature/)
 
 &nbsp;
 
@@ -64,6 +64,7 @@ https://hamachi25.github.io/d-Record/qa/
 ```
 pnpm install
 pnpm build
+pnpm build:firefox
 ```
 
 ## クレジット
