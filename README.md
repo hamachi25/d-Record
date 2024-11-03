@@ -6,12 +6,14 @@
   <img alt="d-Record" src="https://github.com/hamachi25/d-Record/blob/images/logo-white.png">
 </picture>
 
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/hamachi25/d-Record?style=for-the-badge)](https://github.com/hamachi25/d-Record/releases/latest)
+[![Annict](https://img.shields.io/badge/--FFFFFF?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAWCAYAAADNX8xBAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAU9JREFUeNpiYCAC/IguDiCkhpEIQxSA1H0gVuRY2vsAlzomIhyUAKXr8SkixqB8KB0AdJ0AWQYBNYJcA9MMogPIdVE8AT7hwEYKZHSANdDxuaieFHFGHK4RgLoGFj4f0NggV30gxkUBSBpBIBGJjTXQmQhEOQhsANq+AUhfwOc9JizecgBSBnC/S4tvhDInIilTgCYNvC5CjuIP7F1lC2Aug4YPVlcxYQlkZJtghjBAAxfkqgNQjJIEWHDkKxiY+LOgteH/63cQ29lYGRh+/b4ANWgiPq8hBzJI8QegIQixX78ZoOFXAMTnkcOJEa3MWY8lyufjSbQg7xqCUjoTrkAGSi6AKnRkFOBzBNFAXIgWNgKwQGfEka8mAA0qxJPq9yMnEVBKZ8IVyLj8Ao09dEvqmbAFMr4iFWrYAWi6gmcpJrTCCwQWMhAHkNUJAAQYANqUbNJwhNoXAAAAAElFTkSuQmCC&label=Annict)](https://annict.com/)
+
 dアニメストア・ABEMAで視聴したアニメを[Annict](https://annict.com/)に送信して、見たアニメを記録することができるブラウザ拡張機能です。
 
 ## インストール
 
-<a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" width="191.8" height="58" src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"></a>
-<a href="https://addons.mozilla.org/ja/firefox/addon/d-record/"><img alt="Firefox Browser ADD-ONS" width="172" height="60" src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"></a>
+<a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"><img alt="Chrome WebStore" src="https://github.com/user-attachments/assets/2f068f6a-98d3-48f6-8b70-e9da682c6b25" height="60"></a> <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/"><img alt="Firefox Add-ons" src="https://github.com/user-attachments/assets/f9b238c8-571c-4531-8e3f-c31f203e60ef" height="60"></a>
 
 > [!IMPORTANT]
 > 拡張機能を使用するには、Annictのトークンを設定する必要があります。
@@ -36,8 +38,6 @@ dアニメストア・ABEMAで視聴したアニメを[Annict](https://annict.co
 -   **再生終了後に、自動的にAnnictに記録データを送信する**
 -   **右下のアップロードアイコンをオフにすることで、送信を停止できる**
     -   オフにした場合その作品は、再度オンにするまで送信されない
-
-[機能一覧](https://hamachi25.github.io/d-Record/feature/)
 
 &nbsp;
 
