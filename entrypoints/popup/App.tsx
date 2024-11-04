@@ -18,7 +18,7 @@ const defaultSettings: Settings = {
 		danime: true,
 		abema: true,
 	},
-	activeTab: undefined,
+	activeTab: undefined, // popupが開いた時にアニメーションが発生してしまうため、初期値はundefined
 };
 
 function App() {
@@ -42,10 +42,7 @@ function App() {
 		]);
 
 		// activeTabがない場合は、初期値を入れる
-		// defaultSettingsに入れると、popupが開いた時にアニメーションが発生してしまう
-		if (!data.activeTab) {
-			setSettings({ ...settings, activeTab: 1 });
-		}
+		if (!data.activeTab) setSettings({ ...settings, activeTab: 1 });
 
 		const newSettings = { ...settings, ...data }; // 初期値を上書き
 		setSettings(newSettings);

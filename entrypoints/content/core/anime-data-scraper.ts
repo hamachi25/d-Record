@@ -48,6 +48,8 @@ export const [animeData, setAnimeData] = createStore<AnimeData>({
 	},
 });
 
+export const [showToast, setShowToast] = createStore({ state: false, success: true, message: "" });
+
 /******************************************************************************/
 
 /**

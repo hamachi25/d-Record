@@ -1,4 +1,10 @@
-import { animeData, danimeDocument, websiteInfo, setLoading } from "./anime-data-scraper";
+import {
+	animeData,
+	danimeDocument,
+	websiteInfo,
+	setLoading,
+	setShowToast,
+} from "./anime-data-scraper";
 import { fetchDataFromAnnict } from "../utils/api/fetch";
 import { settingData, getNotRecordWork } from "../utils/storage";
 import { changeStatusToWatching, changeStatusToWatched } from "../utils/status";
@@ -80,9 +86,16 @@ function sendRecord() {
 	mutation += "}";
 
 	const result = fetchDataFromAnnict(JSON.stringify({ query: mutation }));
-	if (!result) return;
+	if (!result) {
+		setShowToast({ state: true, success: false, message: "Annictへの記録に失敗しました" });
+		setTimeout(() => setShowToast("state", false), 1500);
+		return;
+	}
 
 	setLoading("icon", "completeUpload");
+	setShowToast({ state: true, success: true, message: "Annictに記録しました" });
+	setTimeout(() => setShowToast("state", false), 1500);
+
 	cleanupIntervalOrEvent();
 }
 

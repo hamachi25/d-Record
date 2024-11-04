@@ -3,6 +3,7 @@ import { ContentScriptContext } from "wxt/client";
 import { fetchAnimeDataFromAnnict, getAnimeDataFromDanime } from "../../core/anime-data-scraper";
 import { appendDropMenu } from "../../ui/append-drop-menu";
 import { injectRecordButton } from "../../ui/inject-record-button";
+import { injectToast } from "../../ui/inject-toast";
 import { appendUploadButton } from "../../ui/append-upload-button";
 import { handleRecordEpisode } from "../../core/record-watch-episode";
 import { settingData } from "../../utils/storage";
@@ -66,6 +67,7 @@ export async function handleDAnime(ctx: ContentScriptContext) {
 						anchor: ".buttonArea>.time",
 						append: "after",
 					});
+					injectToast(ctx);
 
 					danimeDocument = await getAnimeDataFromDanime();
 
