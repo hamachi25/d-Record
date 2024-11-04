@@ -7,6 +7,7 @@ tableOfContents: false
 import { Steps } from "@astrojs/starlight/components";
 import { Image } from "astro:assets";
 
+import chromeWebstore from "../../assets/chrome-webstore.png";
 import tokenButtonLight from "../../assets/token-button.jpg";
 import tokenButtondark from "../../assets/token-button-dark.jpg";
 import tokenWindowLight from "../../assets/token-window.jpg";
@@ -22,9 +23,8 @@ import tokenWindowdark from "../../assets/token-window-dark.jpg";
         <a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn">
             <Image
                 alt="Chrome WebStore"
-                width="191.8"
-                height="58"
-                src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png"
+                height="60"
+                src={chromeWebstore}
             />
         </a>
         <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/">
@@ -43,7 +43,7 @@ import tokenWindowdark from "../../assets/token-window-dark.jpg";
 
 3. Annictのトークンを取得
 
-    ブラウザ右上から d-Record アイコンをクリックします。  
+    ブラウザ右上から d-Record アイコンを押します。  
     ポップアップが開くので、「**トークンを取得**」を押します。
 
     <Image
