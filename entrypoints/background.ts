@@ -65,14 +65,27 @@ async function revokeToken() {
 	}
 }
 
+function generateState(): string {
+	const array = new Uint8Array(16);
+	crypto.getRandomValues(array);
+	return Array.from(array, (num) => num.toString(36)).join("");
+}
+
+function validateState(originalState: string, returnedState: string | null): boolean {
+	return originalState === returnedState;
+}
+
 async function startOAuth() {
-	const redirectURL = browser.identity.getRedirectURL(); // 拡張機能のリダイレクトURL
+	const state = generateState();
+
+	const redirectURL = browser.identity.getRedirectURL();
 	const authUrl =
 		`https://annict.com/oauth/authorize?` +
 		`client_id=${CLIENT_ID}` +
 		`&response_type=code` +
 		`&redirect_uri=${encodeURIComponent(redirectURL)}` +
-		`&scope=read+write`;
+		`&scope=read+write` +
+		`&state=${state}`;
 
 	try {
 		const responseUrl = await browser.identity.launchWebAuthFlow({
@@ -80,7 +93,14 @@ async function startOAuth() {
 			interactive: true,
 		});
 
-		const code = new URL(responseUrl).searchParams.get("code");
+		const url = new URL(responseUrl);
+		const code = url.searchParams.get("code");
+		const returnedState = url.searchParams.get("state");
+
+		if (!validateState(state, returnedState)) {
+			throw new Error("Stateが一致しません");
+		}
+
 		return await exchangeCodeForToken(code);
 	} catch (error) {
 		console.error("OAuthエラー:", error);
