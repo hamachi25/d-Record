@@ -8,10 +8,7 @@ import { Steps } from "@astrojs/starlight/components";
 import { Image } from "astro:assets";
 
 import chromeWebstore from "../../assets/chrome-webstore.png";
-import tokenButtonLight from "../../assets/token-button.jpg";
-import tokenButtondark from "../../assets/token-button-dark.jpg";
-import tokenWindowLight from "../../assets/token-window.jpg";
-import tokenWindowdark from "../../assets/token-window-dark.jpg";
+import getTheAddon from "../../assets/get-the-addon.webp";
 
 <Steps>
 
@@ -20,20 +17,19 @@ import tokenWindowdark from "../../assets/token-window-dark.jpg";
     以下のボタンから、拡張機能をダウンロードします。
 
     <div style="display:flex; gap:0.5rem">
-        <a href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn">
-            <Image
-                alt="Chrome WebStore"
-                height="60"
-                src={chromeWebstore}
-            />
+        <a
+            href="https://chromewebstore.google.com/detail/d-record/blcncccafadeklhhhimddgbgojalmpgn"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <Image alt="Chrome WebStore" height="60" src={chromeWebstore} loading="eager" />
         </a>
-        <a href="https://addons.mozilla.org/ja/firefox/addon/d-record/">
-            <Image
-                alt="Firefox Browser ADD-ONS"
-                width="172"
-                height="60"
-                src="https://blog.mozilla.org/addons/files/2015/11/get-the-addon.png"
-            />
+        <a
+            href="https://addons.mozilla.org/ja/firefox/addon/d-record/"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <Image alt="Firefox Browser ADD-ONS" src={getTheAddon} loading="eager" />
         </a>
     </div>
 
@@ -41,34 +37,16 @@ import tokenWindowdark from "../../assets/token-window-dark.jpg";
 
     [Annict](https://annict.com/)のアカウントを作成します。
 
-3. Annictのトークンを取得
+3. Annict のトークンを取得
 
-    ブラウザ右上から d-Record アイコンを押します。  
-    ポップアップが開くので、「**トークンを取得**」を押します。
+    ブラウザ右上から d-Record アイコンをクリックします。  
+    ポップアップが開くので、「**トークンを取得**」をクリックします。
 
-    <Image
-        class="dark:sl-hidden"
-        src={tokenButtonLight}
-        alt="d-Recordのポップアップからトークンを取得を押す"
-    />
-    <Image
-        class="light:sl-hidden"
-        src={tokenButtondark}
-        alt="d-Recordのポップアップからトークンを取得を押す"
-    />
+    ![d-Recordのポップアップからトークンを取得を押す](../../assets/token-button.jpg)
 
-    次にアプリケーション認証のウィンドウが開くので、「**承認**」を押します。
+    次にアプリケーション認証のウィンドウが開くので、「**承認**」をクリックします。
 
-    <Image
-        class="dark:sl-hidden"
-        src={tokenWindowdark}
-        alt="Annictの承認ウィンドウで承認を押す"
-    />
-    <Image
-        class="light:sl-hidden"
-        src={tokenWindowLight}
-        alt="Annictの承認ウィンドウで承認を押す"
-    />
+    ![Annictの承認ウィンドウで承認を押す](../../assets/token-window.jpg)
 
     ポップアップの表示が「**トークンを取得**」から「**設定済み**」になっていることを確認します。
 

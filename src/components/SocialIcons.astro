@@ -3,6 +3,7 @@ import type { Props } from "@astrojs/starlight/props";
 import Default from "@astrojs/starlight/components/SocialIcons.astro";
 ---
 
+<Default {...Astro.props}><slot /></Default>
 {
     (
         <a href="https://annict.com/@usotsuki_elf" rel="me" class="sl-flex">
@@ -21,7 +22,6 @@ import Default from "@astrojs/starlight/components/SocialIcons.astro";
         </a>
     )
 }
-<Default {...Astro.props}><slot /></Default>
 
 <style>
     a {

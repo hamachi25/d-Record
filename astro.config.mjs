@@ -21,6 +21,7 @@ export default defineConfig({
                 replacesTitle: true,
             },
             social: {
+                github: "https://github.com/hamachi25/d-Record",
                 twitter: "https://x.com/FisqWclCKB8xtLC",
             },
             sidebar: [

@@ -19,14 +19,14 @@ hero:
           icon: external
           variant: minimal
           attrs:
-            target: me
+              target: me
 ---
 
 import { Card, CardGrid, LinkButton } from "@astrojs/starlight/components";
 
 ## 特徴
 
-<CardGrid>
+<CardGrid stagger>
     <Card title="Annictに自動送信" icon="rocket">
         アニメの視聴記録ができるWebサービス[Annict](https://annict.com/)に、dアニメストア・ABEMAで見たアニメを自動送信します。
     </Card>
@@ -37,7 +37,9 @@ import { Card, CardGrid, LinkButton } from "@astrojs/starlight/components";
         次に見るエピソードを赤枠で囲んでいるので、どこまで見たかを簡単に確認できます。
     </Card>
     <Card title="高い精度でアニメを取得" icon="magnifier">
-        dアニメストア・ABEMAとAnnictのアニメ名の表記揺れをカバーします。<br />2024年夏アニメでは、92%を正確に取得できています。
+        dアニメストア・ABEMAとAnnictのアニメ名の表記揺れをカバーします。
+        <br />
+        2024年夏アニメでは、92%を正確に取得できています。
     </Card>
 </CardGrid>
 
