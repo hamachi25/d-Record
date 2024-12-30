@@ -5,7 +5,6 @@ import starlight from "@astrojs/starlight";
 // https://astro.build/config
 export default defineConfig({
     site: "https://d-record.hamachi25.com",
-    base: "/d-Record",
     integrations: [
         starlight({
             title: "d-Record",
