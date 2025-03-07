@@ -36,6 +36,15 @@ export default defineConfig({
             components: {
                 SocialIcons: "./src/components/SocialIcons.astro",
             },
+            head: [
+                {
+                    tag: "meta",
+                    attrs: {
+                        name: "google-site-verification",
+                        content: "WPN4Q1dyI5yADeQDV7TrP67bvtak8NBQkMVkdRTFX78",
+                    },
+                },
+            ],
         }),
     ],
 });
