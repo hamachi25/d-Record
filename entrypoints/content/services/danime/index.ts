@@ -107,8 +107,8 @@ export async function handleDAnime(ctx: ContentScriptContext) {
 		 */
 		const mainObserver = new MutationObserver(handleMutation);
 		const waitObserver = new MutationObserver(() => {
-			const targetElement = document.getElementById("video");
-			if (targetElement) {
+			const targetElement = document.querySelector(".backInfoTxt2");
+			if (targetElement && targetElement.textContent !== "") {
 				waitObserver.disconnect();
 				handleMutation(); // 初回実行
 				mainObserver.observe(targetElement, { attributes: true });
