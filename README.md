@@ -69,7 +69,7 @@ pnpm build:firefox
 
 ## クレジット
 
--   [Shimba, Koji](https://github.com/shimbaco) - 視聴ステータスのSVGファイル、GraphQL APIを理解する上での手助け
+-   [Shimba, Koji](https://github.com/shimbaco) - GraphQL APIを理解する上での手助け
 -   [TomoTom0](https://github.com/TomoTom0) - dアニ上での作品タイトルの取得方法や検索精度向上のためのコード（[danime-save-annict-2](https://github.com/TomoTom0/danime-save-annict-2)）
 -   [プリン](https://github.com/kazu3jp) - トークンの保存、視聴ステータスのUIに関するコード（[danict](https://github.com/kazu3jp/danict)）
 -   [家守カホウ](https://twitter.com/y_kahou) - URLからページごとに実行するためのコード（[dアニメストア便利化](https://greasyfork.org/ja/scripts/414008)）

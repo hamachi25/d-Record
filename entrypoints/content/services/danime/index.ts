@@ -107,8 +107,10 @@ export async function handleDAnime(ctx: ContentScriptContext) {
 		 */
 		const mainObserver = new MutationObserver(handleMutation);
 		const waitObserver = new MutationObserver(() => {
-			const targetElement = document.querySelector(".backInfoTxt2");
-			if (targetElement && targetElement.textContent !== "") {
+			const targetElement = document.getElementById("video");
+			const episodeInfoElement = document.querySelector(".backInfoTxt2"); // エピソード数
+			if (targetElement && episodeInfoElement?.textContent !== "") {
+				// エピソード数が読み込まれるまで時間がかかるので待機
 				waitObserver.disconnect();
 				handleMutation(); // 初回実行
 				mainObserver.observe(targetElement, { attributes: true });
