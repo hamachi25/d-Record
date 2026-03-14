@@ -52,8 +52,8 @@ export default function StatusDropMenu(webSite: string) {
 		{ state: "WANNA_WATCH", icon: wannaWatch, label: "見たい" },
 		{ state: "WATCHING", icon: watching, label: "見てる" },
 		{ state: "WATCHED", icon: watched, label: "見た" },
-		{ state: "ON_HOLD", icon: stopWatching, label: "一時中断" },
-		{ state: "STOP_WATCHING", icon: hold, label: "視聴中止" },
+		{ state: "ON_HOLD", icon: hold, label: "一時中断" },
+		{ state: "STOP_WATCHING", icon: stopWatching, label: "視聴中止" },
 	];
 	const [show, setShow] = createSignal(false); // ドロップメニューの表示・非表示の状態
 
