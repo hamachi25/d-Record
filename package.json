@@ -2,7 +2,7 @@
 	"name": "d-record",
 	"description": "dアニメストア・ABEMAで見たアニメを自動で記録します。",
 	"private": true,
-	"version": "2.3.4",
+	"version": "2.3.5",
 	"type": "module",
 	"scripts": {
 		"dev": "wxt",

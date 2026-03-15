@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3.5
+
+[compare changes](https://github.com/hamachi25/d-Record/compare/v2.3.4...v2.3.5)
+
+### 🩹 Fixes
+
+- StatusDropMenuのiconが逆になる不具合を修正 #27 ([#27](https://github.com/hamachi25/d-Record/issues/27))
+
+### ❤️ Contributors
+
+- OKD ([@okdwtr](https://github.com/okdwtr))
+
 ## v2.3.4
 
 [compare changes](https://github.com/hamachi25/d-Record/compare/v2.3.3...v2.3.4)
